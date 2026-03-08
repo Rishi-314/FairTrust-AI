@@ -112,7 +112,7 @@
 
     <div class="donebox" id="doneBox">
         <div class="dscore" id="dScore">—</div>
-        <div class="dlabel">Fairness Score — redirecting to dashboard…</div>
+        <div class="dlabel">Fairness Score — redirecting to your report…</div>
     </div>
 
     <div class="actions">
@@ -307,17 +307,23 @@
         document.getElementById('dScore').textContent = scorePct;
         doneBox.style.display = 'block';
 
+        // Update button label to match the chosen report
+        const reportType = sessionStorage.getItem('report_type') || 'developer';
+        const LABEL_MAP = {
+            developer: 'View Developer Report →',
+            regulator: 'View Regulator Report →',
+            enduser:   'View Human Report →',
+            all:       'View Reports →',
+        };
+        document.getElementById('btnView').textContent = LABEL_MAP[reportType] || 'View Report →';
         document.getElementById('btnView').style.display = 'block';
         document.getElementById('cancelLink').textContent = 'Back to upload';
 
+        // Save full result for dashboard
         sessionStorage.setItem('eval_result', JSON.stringify(data));
         sessionStorage.setItem('eval_id', evalId);
 
-        if (data.report_type_original) {
-            sessionStorage.setItem('report_type', data.report_type_original);
-        }
-
-        log(`Complete! Fairness score = ${scorePct}`, 'ok');
+        log(`✅ Complete! Fairness score = ${scorePct}`, 'ok');
         log(`   topFeature=${data.shap?.topFeature}  stability=${data.shap?.featureStability}`, 'ok');
         log(`   indFairness=${data.fairness?.individualFairness}  groupFairness=${data.fairness?.groupFairness}`, 'ok');
 
@@ -327,20 +333,17 @@
 
     function goDash() {
         if (redirectTimer) clearTimeout(redirectTimer);
-        
-        // Read report type from session or from the completed eval data
-        const reportType = sessionStorage.getItem('report_type') 
-                        || 'developer';
-        
-        const pageMap = {
-            developer: 'developerReport',
-            regulator: 'regulatorReport',
-            enduser:   'humanReport',
-            all:       'allReports',  
+
+        // Route to the correct report page based on what the user selected on upload.html
+        const reportType = sessionStorage.getItem('report_type') || 'developer';
+        const PAGE_MAP = {
+            developer: 'developerReport.html',
+            regulator: 'regulatorReport.html',
+            enduser:   'humanReport.html',
+            all:       'developerReport.html',   // "all" → show developer first
         };
-        
-        const page = pageMap[reportType] || 'developerReport';
-        window.location.href = `${page}.html?eval_id=${evalId}`;
+        const page = PAGE_MAP[reportType] || 'developerReport.html';
+        window.location.href = `${page}?eval_id=${evalId}`;
     }
 
     // ── Error ─────────────────────────────────────────────────────────────────

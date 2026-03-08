@@ -6,18 +6,19 @@
     <title>Developer Report — Fairtrust AI</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --primary: #4F46E5; --primary-soft: #EEF2FF;
-            --success: #059669; --success-light: #D1FAE5;
-            --warning: #D97706; --warning-light: #FEF3C7;
-            --danger: #DC2626; --danger-light: #FEE2E2;
-            --bg: #FAFBFC; --surface: #FFFFFF;
-            --text: #1E293B; --text-muted: #64748B; --border: #E2E8F0;
+            --primary: #1A2D4E; --primary-soft: rgba(235,178,85,0.10);
+            --gold: #EBB255; --gold-2: #D99A2B; --gold-border: rgba(235,178,85,0.25);
+            --success: #00C896; --success-light: rgba(0,200,150,0.12);
+            --warning: #FFB020; --warning-light: rgba(255,176,32,0.12);
+            --danger: #FF5C38; --danger-light: rgba(255,92,56,0.12);
+            --bg: #F4F6F8; --surface: #FFFFFF;
+            --text: #1A2D4E; --text-muted: #5A6169; --border: #E2E8F0;
         }
-        body { font-family: 'DM Sans', -apple-system, sans-serif; background: var(--bg); color: var(--text); }
+        body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); }
 
         header { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; }
         nav { max-width: 1100px; margin: 0 auto; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
@@ -121,7 +122,12 @@
 <body>
     <header>
         <nav>
-            <a href="index.html" class="logo">Fairtrust AI Framework</a>
+            <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+                <div style="width:34px;height:34px;background:linear-gradient(135deg,#1A2D4E,#253d66);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <div><div style="font-size:0.9375rem;font-weight:800;color:#1A2D4E;">FairTrust AI</div><div style="font-size:0.6rem;font-weight:600;letter-spacing:0.1em;color:#EBB255;text-transform:uppercase;">Ethical AI Framework</div></div>
+            </a>
             <div class="nav-links">
                 <a href="index.html">Home</a>
                 <a href="upload.html">Upload</a>
@@ -311,7 +317,7 @@
                             <span>${dim.icon} ${dim.title}</span>
                             ${dimBadge(dim.score)}
                         </div>
-                        <span class="accordion-arrow" id="arrow-${i}">▼</span>
+                        <span class="accordion-arrow" id="arrow-${i}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
                     </div>
                     <div class="accordion-content" id="content-${i}">
                         ${renderDimensionDetail(dim)}
@@ -366,7 +372,7 @@
 
         // ── Full render ───────────────────────────────────────────────────────
         function renderReport(data, evalId) {
-            const backLink = `index.html`;
+            const backLink = `upload.html`;
             document.getElementById('app').innerHTML = `
                 <div class="report-header">
                     <div>
@@ -375,7 +381,7 @@
                             Eval ID: <code>${evalId || '—'}</code> &nbsp;|&nbsp;
                             Ethical Score: <strong>${fmt(data.ethical_score, 2)}</strong> &nbsp;|&nbsp;
                             ${data.records ? data.records.toLocaleString() + ' records' : ''}
-                            &nbsp;<a href="${backLink}" style="color:var(--primary);font-weight:600">← Home</a>
+                            &nbsp;<a href="${backLink}" style="color:var(--primary);font-weight:600">← New Analysis</a>
                         </div>
                     </div>
                     <div class="export-buttons">
