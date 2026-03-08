@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processing – Fairtrust AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #4F46E5; --primary-soft: #EEF2FF;
+            --success: #059669; --success-soft: #ECFDF5;
+            --danger: #DC2626; --danger-soft: #FEF2F2;
+            --warning: #D97706;
+            --text: #1E293B; --muted: #64748B;
+            --bg: #F8F9FC; --surface: #FFFFFF; --border: #E2E8F0;
+        }
+        body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:2rem 1rem; }
+        .card { max-width:560px; width:100%; background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:2.5rem; box-shadow:0 4px 24px rgba(0,0,0,0.06); }
+        .head { text-align:center; margin-bottom:1.75rem; }
+        .ring { width:56px; height:56px; border:4px solid var(--primary-soft); border-top-color:var(--primary); border-radius:50%; animation:spin 0.85s linear infinite; margin:0 auto 1.25rem; transition:border-color 0.4s; }
+        .ring.done  { border-color:var(--success); border-top-color:var(--success); animation:none; }
+        .ring.error { border-color:#FECACA;         border-top-color:var(--danger);  animation:none; }
+        @keyframes spin { to{transform:rotate(360deg);} }
+        .head h1 { font-size:1.5rem; font-weight:700; letter-spacing:-0.02em; margin-bottom:0.3rem; }
+        .head p  { color:var(--muted); font-size:0.9375rem; }
+        .eval-id { display:inline-block; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:0.25rem 0.625rem; font-size:0.73rem; font-family:monospace; color:var(--muted); margin-top:0.5rem; word-break:break-all; cursor:pointer; }
+        .eval-id:hover { border-color:var(--primary); color:var(--primary); }
+        .prog-track { height:5px; background:var(--border); border-radius:999px; margin-bottom:1.75rem; overflow:hidden; }
+        .prog-fill  { height:100%; background:linear-gradient(90deg,var(--primary),#8B5CF6); border-radius:999px; width:0%; transition:width 0.8s ease; }
+        .steps { margin-bottom:1.5rem; }
+        .step { display:flex; align-items:center; gap:0.875rem; padding:0.75rem 0.875rem; border-radius:9px; margin-bottom:0.4rem; opacity:0.35; transition:opacity 0.35s, background 0.35s; }
+        .step.active { opacity:1; background:var(--primary-soft); }
+        .step.done   { opacity:1; }
+        .step.fail   { opacity:1; background:var(--danger-soft); }
+        .sdot { width:30px; height:30px; border-radius:50%; background:var(--border); color:var(--muted); display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:700; flex-shrink:0; transition:background 0.3s; }
+        .step.active .sdot { background:var(--primary); color:white; animation:pulse 1.4s ease-in-out infinite; }
+        .step.done   .sdot { background:var(--success); color:white; }
+        .step.fail   .sdot { background:var(--danger);  color:white; }
+        @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.08);} }
+        .sbody { flex:1; }
+        .stitle { font-size:0.9375rem; font-weight:600; }
+        .ssub   { font-size:0.8rem; color:var(--muted); margin-top:0.1rem; }
+        .sbadge { font-size:0.75rem; font-weight:600; padding:0.2rem 0.55rem; border-radius:999px; white-space:nowrap; }
+        .step.active .sbadge { background:var(--primary-soft); color:var(--primary); }
+        .step.done   .sbadge { background:var(--success-soft);  color:var(--success); }
+        .step.fail   .sbadge { background:var(--danger-soft);   color:var(--danger); }
+        .metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:0.75rem; margin-bottom:1.5rem; }
+        @media(max-width:480px){ .metrics{grid-template-columns:repeat(2,1fr);} }
+        .metric { background:var(--bg); border:1px solid var(--border); border-radius:9px; padding:0.75rem 0.5rem; text-align:center; }
+        .mlabel { font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); margin-bottom:0.3rem; }
+        .mval   { font-size:1.25rem; font-weight:700; color:var(--primary); }
+        .quote { background:var(--bg); border:1px solid var(--border); border-radius:9px; padding:1rem 1.25rem; text-align:center; margin-bottom:1.5rem; }
+        .qtext { font-size:0.875rem; color:var(--muted); font-style:italic; transition:opacity 0.4s; }
+        .errbox { display:none; background:var(--danger-soft); border:1px solid #FCA5A5; border-radius:9px; padding:1rem 1.25rem; margin-bottom:1.25rem; font-size:0.875rem; color:var(--danger); }
+        .donebox { display:none; background:var(--success-soft); border:1px solid #A7F3D0; border-radius:9px; padding:1rem 1.25rem; margin-bottom:1.25rem; text-align:center; }
+        .dscore { font-size:2.5rem; font-weight:800; color:var(--success); letter-spacing:-0.03em; }
+        .dlabel { font-size:0.875rem; color:var(--muted); margin-top:0.25rem; }
+        .actions { text-align:center; }
+        .btn-view { display:none; width:100%; padding:0.9rem; background:var(--primary); color:white; border:none; border-radius:9px; font-size:1rem; font-weight:700; font-family:inherit; cursor:pointer; margin-bottom:0.875rem; transition:background 0.2s; }
+        .btn-view:hover { background:#4338CA; }
+        .cancel { font-size:0.875rem; color:var(--muted); text-decoration:none; }
+        .cancel:hover { color:var(--danger); }
+
+        /* Debug log */
+        .debug-wrap { max-width:560px; width:100%; margin-top:1rem; }
+        .debug-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem; }
+        .debug-title { font-size:0.75rem; font-weight:600; color:var(--muted); }
+        .debug-clear { font-size:0.72rem; color:var(--muted); background:none; border:1px solid var(--border); border-radius:5px; padding:0.15rem 0.45rem; cursor:pointer; }
+        #debugPanel { background:#0F172A; border-radius:10px; padding:0.875rem 1rem; font-family:monospace; font-size:0.72rem; max-height:220px; overflow-y:auto; }
+        .dlog { padding:0.15rem 0; border-bottom:1px solid rgba(255,255,255,0.04); line-height:1.5; }
+        .dlog.ok  { color:#34D399; } .dlog.err { color:#F87171; }
+        .dlog.inf { color:#93C5FD; } .dlog.wrn { color:#FCD34D; }
+    </style>
+</head>
+<body>
+<div style="display:flex;flex-direction:column;align-items:center;width:100%;max-width:580px;">
+
+<div class="card">
+    <div class="head">
+        <div class="ring" id="ring"></div>
+        <h1 id="hTitle">Analyzing your model</h1>
+        <p id="hSub">Evaluating fairness across all dimensions…</p>
+        <div class="eval-id" id="evalBadge" title="Click to copy" onclick="copyEvalId()">Loading…</div>
+    </div>
+
+    <div class="prog-track"><div class="prog-fill" id="prog"></div></div>
+
+    <div class="steps" id="steps">
+        <div class="step" id="s1"><div class="sdot">1</div><div class="sbody"><div class="stitle">Data validation</div><div class="ssub">Checking formats &amp; structure</div></div><span class="sbadge">Pending</span></div>
+        <div class="step" id="s2"><div class="sdot">2</div><div class="sbody"><div class="stitle">EDA &amp; bias detection</div><div class="ssub">Analysing distributions</div></div><span class="sbadge">Pending</span></div>
+        <div class="step" id="s3"><div class="sdot">3</div><div class="sbody"><div class="stitle">Feature engineering</div><div class="ssub">Preparing features</div></div><span class="sbadge">Pending</span></div>
+        <div class="step" id="s4"><div class="sdot">4</div><div class="sbody"><div class="stitle">Fairness analysis</div><div class="ssub">Demographic parity, equalized odds…</div></div><span class="sbadge">Pending</span></div>
+        <div class="step" id="s5"><div class="sdot">5</div><div class="sbody"><div class="stitle">Model evaluation</div><div class="ssub">Accuracy, F1, ROC-AUC</div></div><span class="sbadge">Pending</span></div>
+        <div class="step" id="s6"><div class="sdot">6</div><div class="sbody"><div class="stitle">SHAP explanation</div><div class="ssub">Feature importance scores</div></div><span class="sbadge">Pending</span></div>
+        <div class="step" id="s7"><div class="sdot">7</div><div class="sbody"><div class="stitle">Report generation</div><div class="ssub">Building fairness certificate</div></div><span class="sbadge">Pending</span></div>
+    </div>
+
+    <div class="metrics">
+        <div class="metric"><div class="mlabel">Records</div><div class="mval" id="mRec">—</div></div>
+        <div class="metric"><div class="mlabel">Dimensions</div><div class="mval">7</div></div>
+        <div class="metric"><div class="mlabel">Fairness</div><div class="mval" id="mScore">—</div></div>
+        <div class="metric"><div class="mlabel">Status</div><div class="mval" id="mStatus" style="font-size:0.85rem">Queued</div></div>
+    </div>
+
+    <div class="quote"><div class="qtext" id="quote">"Fairness cannot be assumed — it must be proven."</div></div>
+
+    <div class="errbox" id="errBox">
+        <strong>⚠️ Evaluation failed:</strong> <span id="errMsg"></span><br><br>
+        <a href="upload.html" style="color:var(--danger);font-weight:600">← Try again</a>
+    </div>
+
+    <div class="donebox" id="doneBox">
+        <div class="dscore" id="dScore">—</div>
+        <div class="dlabel">Fairness Score — redirecting to dashboard…</div>
+    </div>
+
+    <div class="actions">
+        <button class="btn-view" id="btnView" onclick="goDash()">View Results →</button>
+        <a href="upload.html" class="cancel" id="cancelLink">Cancel analysis</a>
+    </div>
+</div>
+
+<!-- Debug panel -->
+<div class="debug-wrap">
+    <div class="debug-header">
+        <span class="debug-title">🐛 Debug log</span>
+        <button type="button" class="debug-clear" onclick="clearLog()">Clear</button>
+    </div>
+    <div id="debugPanel"></div>
+</div>
+
+</div>
+
+<script>
+    // ── Config ────────────────────────────────────────────────────────────────
+    const API_BASE    = 'http://127.0.0.1:5000';
+    const POLL_MS     = 2500;   // poll every 2.5 seconds
+    const MAX_POLLS   = 240;    // ~10 min timeout
+
+    // ── State ─────────────────────────────────────────────────────────────────
+    let evalId        = null;
+    let pollTimer     = null;
+    let pollCount     = 0;
+    let completedSteps = new Set();
+    let redirectTimer = null;
+
+    // Progress % per step (cumulative)
+    const STEP_PROGRESS = { 1: 10, 2: 25, 3: 38, 4: 60, 5: 75, 6: 88, 7: 100 };
+
+    // Quotes carousel
+    const QUOTES = [
+        '"Fairness cannot be assumed — it must be proven."',
+        '"Bias in, bias out — the model reflects the data."',
+        '"Equitable AI starts with honest measurement."',
+        '"Transparency is the foundation of trustworthy AI."',
+        '"Disparate impact is a choice, not an inevitability."',
+        '"Fair models serve everyone — not just the majority."',
+    ];
+    let quoteIdx = 0;
+
+    // ── Debug logger ──────────────────────────────────────────────────────────
+    function log(msg, type = 'inf') {
+        const panel = document.getElementById('debugPanel');
+        const ts    = new Date().toLocaleTimeString();
+        const div   = document.createElement('div');
+        div.className = `dlog ${type}`;
+        div.textContent = `[${ts}] ${msg}`;
+        panel.appendChild(div);
+        panel.scrollTop = panel.scrollHeight;
+    }
+
+    function clearLog() {
+        document.getElementById('debugPanel').innerHTML = '';
+    }
+
+    // ── Eval ID ───────────────────────────────────────────────────────────────
+    function getEvalId() {
+        // Try URL param first, then sessionStorage
+        const params = new URLSearchParams(window.location.search);
+        return params.get('eval_id') || sessionStorage.getItem('eval_id');
+    }
+
+    function copyEvalId() {
+        if (!evalId) return;
+        navigator.clipboard.writeText(evalId).then(() => {
+            document.getElementById('evalBadge').textContent = 'Copied!';
+            setTimeout(() => { document.getElementById('evalBadge').textContent = evalId; }, 1500);
+        });
+    }
+
+    // ── Step rendering ────────────────────────────────────────────────────────
+    function setStep(n, state) {
+        const el = document.getElementById(`s${n}`);
+        if (!el) return;
+        el.className = `step ${state}`;
+        const badge = el.querySelector('.sbadge');
+        if (state === 'active') badge.textContent = 'Running…';
+        else if (state === 'done') badge.textContent = 'Done ✓';
+        else if (state === 'fail') badge.textContent = 'Error ✗';
+        else badge.textContent = 'Pending';
+    }
+
+    function renderSteps(currentStep, isFailed) {
+        for (let i = 1; i <= 7; i++) {
+            if (isFailed && i === currentStep) {
+                setStep(i, 'fail');
+            } else if (i < currentStep) {
+                setStep(i, 'done');
+                completedSteps.add(i);
+            } else if (i === currentStep) {
+                setStep(i, 'active');
+            } else {
+                setStep(i, '');
+            }
+        }
+    }
+
+    // ── Poll ──────────────────────────────────────────────────────────────────
+    async function poll() {
+        if (!evalId) return;
+        pollCount++;
+
+        if (pollCount > MAX_POLLS) {
+            clearInterval(pollTimer);
+            showError('Analysis timed out. Please try again.');
+            log('Polling timed out after ' + MAX_POLLS + ' attempts', 'err');
+            return;
+        }
+
+        try {
+            const res  = await fetch(`${API_BASE}/evaluate/${evalId}`);
+            const data = await res.json();
+
+            if (!res.ok) {
+                log(`API error ${res.status}: ${data.error || 'unknown'}`, 'err');
+                if (res.status === 404) {
+                    clearInterval(pollTimer);
+                    showError(`Evaluation '${evalId}' not found on server.`);
+                }
+                return;
+            }
+
+            log(`Poll #${pollCount} → status=${data.status} step=${data.current_step ?? '?'} records=${data.records ?? '?'}`, 'inf');
+
+            const status  = data.status;
+            const step    = data.current_step || 0;
+            const records = data.records || 0;
+
+            // Update metrics bar
+            if (records > 0) document.getElementById('mRec').textContent = records.toLocaleString();
+            document.getElementById('mStatus').textContent = status.charAt(0).toUpperCase() + status.slice(1);
+
+            // Rotate quote
+            quoteIdx = (quoteIdx + 1) % QUOTES.length;
+            const qel = document.getElementById('quote');
+            qel.style.opacity = '0';
+            setTimeout(() => { qel.textContent = QUOTES[quoteIdx]; qel.style.opacity = '1'; }, 200);
+
+            // Progress bar
+            const pct = step > 0 ? (STEP_PROGRESS[step] || Math.min(step * 14, 95)) : 5;
+            document.getElementById('prog').style.width = pct + '%';
+
+            // Render steps
+            renderSteps(step, status === 'error');
+
+            // ── Terminal states ───────────────────────────────────────────────
+            if (status === 'complete') {
+                clearInterval(pollTimer);
+                onComplete(data);
+                return;
+            }
+
+            if (status === 'error') {
+                clearInterval(pollTimer);
+                onError(data.error || 'Unknown error during evaluation');
+                return;
+            }
+
+        } catch (err) {
+            log(`Fetch error: ${err.message}`, 'err');
+            // Don't stop polling on network glitch — retry
+        }
+    }
+
+    // ── Completion ────────────────────────────────────────────────────────────
+    function onComplete(data) {
+        // Mark all steps done
+        renderSteps(8, false);
+        document.getElementById('prog').style.width = '100%';
+
+        const ring = document.getElementById('ring');
+        ring.classList.add('done');
+        ring.textContent = '✓';
+        ring.style.cssText = 'width:56px;height:56px;border-radius:50%;background:var(--success-soft);color:var(--success);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;margin:0 auto 1.25rem;';
+
+        document.getElementById('hTitle').textContent = 'Analysis complete!';
+        document.getElementById('hSub').textContent   = 'Your fairness report is ready.';
+
+        const score = data.ethical_score ?? data.fairness?.fairness_score;
+        const scorePct = score != null ? Math.round(score * 100) + '%' : '—';
+
+        document.getElementById('mScore').textContent  = scorePct;
+        document.getElementById('mStatus').textContent = 'Done ✓';
+
+        const doneBox = document.getElementById('doneBox');
+        document.getElementById('dScore').textContent = scorePct;
+        doneBox.style.display = 'block';
+
+        document.getElementById('btnView').style.display = 'block';
+        document.getElementById('cancelLink').textContent = 'Back to upload';
+
+        // Save full result for dashboard
+        sessionStorage.setItem('eval_result', JSON.stringify(data));
+        sessionStorage.setItem('eval_id', evalId);
+
+        log(`✅ Complete! Fairness score = ${scorePct}`, 'ok');
+        log(`   topFeature=${data.shap?.topFeature}  stability=${data.shap?.featureStability}`, 'ok');
+        log(`   indFairness=${data.fairness?.individualFairness}  groupFairness=${data.fairness?.groupFairness}`, 'ok');
+
+        // Auto-redirect after 3 seconds
+        redirectTimer = setTimeout(goDash, 3000);
+    }
+
+    function goDash() {
+        if (redirectTimer) clearTimeout(redirectTimer);
+        window.location.href = `dashboard.html?eval_id=${evalId}`;
+    }
+
+    // ── Error ─────────────────────────────────────────────────────────────────
+    function onError(msg) {
+        const ring = document.getElementById('ring');
+        ring.classList.add('error');
+        ring.style.cssText = 'width:56px;height:56px;border-radius:50%;background:#FEF2F2;color:var(--danger);display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 1.25rem;';
+        ring.textContent = '✗';
+
+        document.getElementById('hTitle').textContent = 'Analysis failed';
+        document.getElementById('hSub').textContent   = 'Something went wrong during evaluation.';
+        document.getElementById('mStatus').textContent = 'Error';
+
+        showError(msg);
+        log(`❌ Error: ${msg}`, 'err');
+    }
+
+    function showError(msg) {
+        document.getElementById('errMsg').textContent = msg;
+        document.getElementById('errBox').style.display = 'block';
+    }
+
+    // ── Init ─────────────────────────────────────────────────────────────────
+    window.addEventListener('DOMContentLoaded', () => {
+        evalId = getEvalId();
+
+        if (!evalId) {
+            log('No eval_id found in URL or sessionStorage', 'wrn');
+            document.getElementById('hTitle').textContent = 'No evaluation found';
+            document.getElementById('hSub').textContent   = 'Please start from the upload page.';
+            document.getElementById('evalBadge').textContent = 'missing';
+            document.getElementById('errBox').style.display = 'block';
+            document.getElementById('errMsg').textContent = 'No evaluation ID provided. Please go back and submit a new analysis.';
+            return;
+        }
+
+        document.getElementById('evalBadge').textContent = evalId;
+        log(`Starting poll for eval_id=${evalId}`, 'inf');
+
+        // Poll immediately, then on interval
+        poll();
+        pollTimer = setInterval(poll, POLL_MS);
+
+        // Rotate quotes every 8s
+        setInterval(() => {
+            quoteIdx = (quoteIdx + 1) % QUOTES.length;
+            const qel = document.getElementById('quote');
+            qel.style.opacity = '0';
+            setTimeout(() => { qel.textContent = QUOTES[quoteIdx]; qel.style.opacity = '1'; }, 200);
+        }, 8000);
+    });
+</script>
+</body>
+</html>
