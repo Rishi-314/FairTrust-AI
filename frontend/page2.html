@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload - Fairtrust AI Framework</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --accent: #1A56FF;
+            --accent-dim: #EDF1FF;
+            --accent-hover: #1444DD;
+            --warning: #FFB020;
+            --danger: #FF5C38;
+            --success: #00C896;
+            --success-soft: #E9FBF4;
+            --bg: #F5F6FA;
+            --bg-2: #ECEEF5;
+            --surface: #FFFFFF;
+            --ink: #0D0F14;
+            --ink-2: #1E2433;
+            --ink-3: #3D4560;
+            --muted: #6B7594;
+            --rule: #E4E7F0;
+        }
+
+        body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); line-height: 1.6; }
+
+        /* ── NAV ── */
+        header { background: rgba(255,255,255,0.92); backdrop-filter: blur(16px); border-bottom: 1px solid var(--rule); position: sticky; top: 0; z-index: 1000; }
+        nav { max-width: 1160px; margin: 0 auto; padding: 0 2rem; height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 2rem; }
+        .logo-mark { display: flex; align-items: center; gap: 0.625rem; text-decoration: none; }
+        .logo-text { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.0625rem; color: var(--ink); }
+        .logo-text span { color: var(--accent); }
+        .nav-links { display: flex; align-items: center; gap: 0.25rem; }
+        .nav-links a { text-decoration: none; color: var(--muted); font-size: 0.9rem; font-weight: 500; padding: 0.4rem 0.75rem; border-radius: 6px; transition: color 0.15s, background 0.15s; }
+        .nav-links a:hover { color: var(--ink); background: var(--bg-2); }
+        .nav-links a.active { color: var(--accent); }
+        .nav-actions { display: flex; align-items: center; gap: 0.75rem; }
+
+        /* ── BREADCRUMB ── */
+        .breadcrumbs { max-width: 1160px; margin: 0 auto; padding: 0.875rem 2rem; font-size: 0.8125rem; color: var(--muted); display: flex; align-items: center; gap: 0.5rem; }
+        .breadcrumbs a { color: var(--accent); text-decoration: none; font-weight: 500; }
+        .breadcrumbs a:hover { text-decoration: underline; }
+        .breadcrumb-sep { color: var(--rule); }
+
+        /* ── GLOBAL ERROR ── */
+        .global-error { display: none; max-width: 1160px; margin: 0 auto 1rem; padding: 0 2rem; }
+        .global-error-inner { background: #FFF1EE; border: 1px solid #FFCFC4; border-radius: 10px; padding: 0.875rem 1rem; color: #C0391B; font-size: 0.875rem; display: flex; align-items: flex-start; gap: 0.625rem; }
+
+        /* ── PAGE LAYOUT ── */
+        .upload-page { max-width: 1160px; margin: 0 auto; padding: 2rem 2rem 4rem; }
+        .page-header { margin-bottom: 2rem; }
+        .page-header h1 { font-family: 'Syne', sans-serif; font-size: 1.875rem; font-weight: 800; letter-spacing: -0.025em; color: var(--ink); margin-bottom: 0.375rem; }
+        .page-header p { color: var(--muted); font-size: 0.9375rem; }
+
+        /* ── STEP PILLS ── */
+        .step-pills { display: flex; gap: 0; margin-bottom: 2rem; }
+        .step-pill { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem 0.5rem 0.75rem; font-size: 0.8125rem; font-weight: 600; color: var(--muted); background: var(--surface); border: 1px solid var(--rule); border-right: none; }
+        .step-pill:first-child { border-radius: 8px 0 0 8px; }
+        .step-pill:last-child { border-right: 1px solid var(--rule); border-radius: 0 8px 8px 0; }
+        .step-pill.active { color: var(--accent); background: var(--accent-dim); border-color: rgba(26,86,255,0.2); }
+        .step-pill.done { color: var(--success); background: var(--success-soft); border-color: rgba(0,200,150,0.2); }
+        .step-dot { width: 20px; height: 20px; border-radius: 50%; background: var(--rule); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: var(--muted); flex-shrink: 0; }
+        .step-pill.active .step-dot { background: var(--accent); color: white; }
+        .step-pill.done .step-dot { background: var(--success); color: white; }
+
+        /* ── UPLOAD GRID ── */
+        .upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem; }
+
+        /* ── CARDS ── */
+        .upload-card, .section-block {
+            background: var(--surface);
+            border: 1px solid var(--rule);
+            border-radius: 14px;
+            padding: 1.5rem;
+        }
+
+        .card-header { display: flex; align-items: center; gap: 0.625rem; margin-bottom: 1.25rem; }
+        .card-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .card-icon.blue { background: var(--accent-dim); }
+        .card-icon.green { background: var(--success-soft); }
+        .card-icon.amber { background: #FFF8E6; }
+        .card-icon.purple { background: #F5F0FF; }
+        .card-title { font-family: 'Syne', sans-serif; font-size: 0.9375rem; font-weight: 700; color: var(--ink); }
+
+        /* ── DROP ZONE ── */
+        .upload-area {
+            border: 2px dashed var(--rule);
+            border-radius: 10px;
+            padding: 2rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            margin-bottom: 0.75rem;
+            user-select: none;
+            background: var(--bg);
+        }
+        .upload-area:hover, .upload-area.dragover { border-color: var(--accent); background: var(--accent-dim); }
+        .upload-area.uploaded { border-color: var(--success); background: var(--success-soft); border-style: solid; }
+        .upload-icon { display: flex; justify-content: center; margin-bottom: 0.75rem; }
+        .upload-main-text { font-weight: 600; font-size: 0.9rem; color: var(--ink-2); }
+        .upload-hint { color: var(--muted); font-size: 0.8rem; margin-top: 0.25rem; }
+        .file-limit { color: var(--muted); font-size: 0.75rem; margin-bottom: 0.75rem; }
+
+        /* Status pill */
+        .file-status { display: none; align-items: center; gap: 0.5rem; margin-top: 0.5rem; padding: 0.55rem 0.875rem; border-radius: 8px; font-size: 0.8125rem; font-weight: 500; }
+        .file-status.success  { display: flex; background: var(--success-soft); color: #059669; border: 1px solid #A7F3D0; }
+        .file-status.error    { display: flex; background: #FFF1EE; color: var(--danger); border: 1px solid #FFCFC4; }
+        .file-status.uploading{ display: flex; background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(26,86,255,0.2); }
+        .upload-spinner { width:14px; height:14px; border:2px solid currentColor; border-top-color:transparent; border-radius:50%; animation:spin 0.7s linear infinite; flex-shrink:0; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── FORM FIELDS ── */
+        .field-group { margin-top: 1rem; }
+        .field-group label { display: block; margin-bottom: 0.4rem; font-size: 0.8125rem; font-weight: 600; color: var(--ink-3); }
+        .field-group select,
+        .field-group input[type="text"] {
+            width: 100%; padding: 0.5625rem 0.875rem;
+            border: 1.5px solid var(--rule); border-radius: 8px;
+            background: var(--surface); font-size: 0.875rem; font-family: inherit; color: var(--ink);
+            transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+        }
+        .field-group select:focus,
+        .field-group input[type="text"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,86,255,0.08); }
+        .field-hint { font-size: 0.75rem; color: var(--muted); margin-top: 0.3rem; }
+        .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.875rem; margin-top: 1rem; }
+
+        /* ── BUTTONS ── */
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.375rem; padding: 0.5625rem 1rem; border-radius: 8px; font-size: 0.8125rem; font-family: inherit; font-weight: 600; cursor: pointer; transition: all 0.2s; border: 1.5px solid transparent; }
+        .btn-block { width: 100%; }
+        .btn-ghost { background: var(--bg); border-color: var(--rule); color: var(--ink-3); }
+        .btn-ghost:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+        .btn-primary-filled { background: var(--accent); color: white; border-color: var(--accent); }
+        .btn-primary-filled:hover { background: var(--accent-hover); }
+        .btn-danger-outline { border-color: rgba(255,92,56,0.35); color: var(--danger); background: #FFF1EE; }
+        .btn-danger-outline:hover { background: var(--danger); color: white; border-color: var(--danger); }
+
+        /* ── CHECKBOX ── */
+        .checkbox-wrapper { margin-top: 0.875rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; color: var(--ink-3); }
+        .checkbox-wrapper input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent); }
+
+        /* ── SECTION BLOCKS ── */
+        .section-block { margin-bottom: 1.25rem; }
+        .section-block .card-header { margin-bottom: 0.5rem; }
+        .section-desc { font-size: 0.875rem; color: var(--muted); margin-bottom: 1.25rem; }
+
+        /* ── ATTRIBUTE CHECKBOXES ── */
+        .attribute-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.625rem; margin-bottom: 1rem; }
+        .attribute-checkbox { display: flex; align-items: center; gap: 0.625rem; background: var(--bg); padding: 0.75rem 0.875rem; border-radius: 8px; border: 1.5px solid var(--rule); cursor: pointer; transition: all 0.2s; font-size: 0.875rem; font-weight: 500; color: var(--ink-3); }
+        .attribute-checkbox:hover { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
+        .attribute-checkbox input[type="checkbox"] { display: none; }
+        .checkbox-custom { width: 16px; height: 16px; border: 2px solid var(--rule); border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
+        .attribute-checkbox input[type="checkbox"]:checked ~ .checkbox-custom,
+        .attribute-checkbox input[type="checkbox"]:checked + .checkbox-custom { background: var(--accent); border-color: var(--accent); }
+        .attribute-checkbox input[type="checkbox"]:checked + .checkbox-custom::after { content:''; display:block; width:4px; height:7px; border:2px solid white; border-top:none; border-left:none; transform:rotate(45deg) translateY(-1px); }
+        .attribute-checkbox:has(input:checked) { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
+
+        .attr-icon { width: 20px; height: 20px; flex-shrink: 0; }
+
+        .other-input-wrap { display: none; margin-top: 0.75rem; }
+        .other-input-wrap.visible { display: block; }
+
+        .selected-attrs-display { display: none; margin-bottom: 1rem; padding: 0.875rem; background: var(--accent-dim); border-radius: 8px; border: 1px solid rgba(26,86,255,0.15); }
+        .attrs-label { font-size: 0.8rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.5rem; }
+        .attr-tag { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.25rem 0.75rem; background: white; border: 1px solid rgba(26,86,255,0.2); border-radius: 999px; font-size: 0.8125rem; font-weight: 500; color: var(--accent); }
+        .warning-banner { background: #FFFBEB; border-left: 3px solid var(--warning); padding: 0.875rem; border-radius: 0 8px 8px 0; margin-top: 0.875rem; font-size: 0.8rem; color: #92400E; display: flex; gap: 0.5rem; align-items: flex-start; }
+
+        /* ── RANKING ── */
+        .ranking-list { margin: 0.875rem 0; }
+        .ranking-item { display: grid; grid-template-columns: 30px 155px 1fr 54px 100px; align-items: center; gap: 1rem; padding: 0.875rem 1rem; background: var(--bg); border: 1.5px solid var(--rule); border-radius: 10px; margin-bottom: 0.5rem; cursor: grab; transition: all 0.2s; font-size: 0.875rem; }
+        .ranking-item:hover { background: #F0F3FF; border-color: var(--accent); box-shadow: 0 2px 8px rgba(26,86,255,0.08); }
+        .ranking-item.dragging { opacity: 0.5; background: var(--accent-dim); cursor: grabbing; }
+        .rank-number { width: 28px; height: 28px; background: var(--accent); color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; font-family: 'Syne', sans-serif; flex-shrink: 0; }
+        .dimension-name { font-weight: 600; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .weight-bar { height: 6px; background: var(--rule); border-radius: 100px; overflow: hidden; }
+        .weight-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #7B61FF); border-radius: 100px; transition: width 0.25s; }
+        .weight-value { font-weight: 700; color: var(--accent); min-width: 44px; text-align: right; font-size: 0.8125rem; }
+        .weight-slider { width: 100px; height: 4px; border-radius: 100px; background: var(--rule); outline: none; -webkit-appearance: none; appearance: none; cursor: pointer; }
+        .weight-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 0 3px rgba(26,86,255,0.2); }
+        .weight-slider::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); cursor: pointer; border: none; }
+
+        .weight-summary { background: var(--bg); padding: 1rem; border-radius: 10px; margin: 1rem 0; border: 1px solid var(--rule); }
+        .weight-summary-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; font-size: 0.875rem; font-weight: 600; color: var(--ink-2); }
+        .weight-summary-total { color: var(--accent); font-family: 'Syne', sans-serif; font-size: 1rem; }
+        .weight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.625rem; }
+        .weight-stat { text-align: center; padding: 0.625rem; background: var(--surface); border-radius: 8px; border: 1px solid var(--rule); }
+        .weight-stat-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+        .weight-stat-name { font-size: 0.8125rem; font-weight: 700; color: var(--accent); margin-top: 0.15rem; }
+        .weight-stat.low .weight-stat-name { color: var(--danger); }
+        .weight-stat-val { font-size: 0.75rem; color: var(--muted); }
+
+        /* ── REPORT CARDS ── */
+        .report-toggle { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+        .report-card { border: 2px solid var(--rule); border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.2s; position: relative; background: var(--bg); }
+        .report-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26,86,255,0.1); background: var(--surface); }
+        .report-card.selected { border-color: var(--accent); background: var(--accent-dim); }
+        .report-icon { width: 44px; height: 44px; border-radius: 10px; background: var(--surface); border: 1px solid var(--rule); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; }
+        .report-card.selected .report-icon { background: rgba(26,86,255,0.15); border-color: rgba(26,86,255,0.2); }
+        .report-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: var(--ink); margin-bottom: 0.25rem; }
+        .report-desc { font-size: 0.875rem; color: var(--muted); margin-bottom: 1rem; min-height: 38px; }
+        .report-features { display: flex; flex-wrap: wrap; gap: 0.375rem; }
+        .feature-tag { background: var(--surface); border: 1px solid var(--rule); padding: 0.2rem 0.625rem; border-radius: 100px; font-size: 0.75rem; font-weight: 500; color: var(--ink-3); }
+        .report-card.selected .feature-tag { background: rgba(255,255,255,0.7); border-color: rgba(26,86,255,0.2); }
+        .selection-indicator { position: absolute; top: 0.875rem; right: 0.875rem; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; transform: scale(0); transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1); }
+        .report-card.selected .selection-indicator { transform: scale(1); }
+
+        /* ── SUBMIT ── */
+        .submit-section { margin-top: 2rem; text-align: center; padding-bottom: 3rem; }
+        .submit-btn { width: 100%; max-width: 480px; padding: 1.0625rem; background: var(--accent); color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s; margin-bottom: 0.875rem; font-family: 'Syne', sans-serif; letter-spacing: 0.02em; box-shadow: 0 4px 20px rgba(26,86,255,0.3); }
+        .submit-btn:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(26,86,255,0.38); }
+        .submit-btn:disabled { background: #B4BAD0; cursor: not-allowed; transform: none; box-shadow: none; }
+        .eta-text { font-size: 0.8125rem; color: var(--muted); }
+
+        /* ── TOAST ── */
+        .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; padding: 0.875rem 1.25rem; border-radius: 10px; font-size: 0.875rem; font-weight: 500; display: flex; align-items: center; gap: 0.625rem; box-shadow: 0 8px 32px rgba(13,15,20,0.15); z-index: 9999; transform: translateY(120px); opacity: 0; transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1); max-width: 380px; }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.success { background: var(--success-soft); color: #059669; border: 1px solid #A7F3D0; }
+        .toast.error   { background: #FFF1EE; color: var(--danger); border: 1px solid #FFCFC4; }
+        .toast.info    { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(26,86,255,0.2); }
+
+        /* ── MODAL ── */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(13,15,20,0.5); z-index: 2000; align-items: center; justify-content: center; }
+        .modal-overlay.open { display: flex; }
+        .modal { background: var(--surface); border-radius: 16px; padding: 1.75rem; max-width: 500px; width: 92%; box-shadow: 0 24px 64px rgba(13,15,20,0.2); border: 1px solid var(--rule); }
+        .modal-header { display: flex; align-items: center; gap: 0.625rem; margin-bottom: 1rem; }
+        .modal-header h3 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
+        .modal pre { background: var(--bg); border: 1px solid var(--rule); border-radius: 8px; padding: 1rem; font-size: 0.8rem; overflow-x: auto; margin-bottom: 1rem; line-height: 1.7; }
+        .modal-close { width: 100%; padding: 0.625rem; border: 1.5px solid var(--rule); border-radius: 8px; background: var(--surface); cursor: pointer; font-family: inherit; font-size: 0.875rem; font-weight: 500; color: var(--ink-3); transition: all 0.15s; }
+        .modal-close:hover { background: var(--bg); border-color: var(--accent); color: var(--accent); }
+
+        @media (max-width: 768px) {
+            .upload-grid { grid-template-columns: 1fr; }
+            .ranking-item { grid-template-columns: 28px 1fr 44px; }
+            .ranking-item .weight-bar, .ranking-item .weight-slider { display: none; }
+            nav { padding: 0 1rem; }
+            .upload-page { padding: 1.5rem 1rem 3rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <nav>
+        <a href="page1.html" class="logo-mark">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="32" height="32" rx="8" fill="#1A56FF"/>
+                <path d="M16 6L7 11V17C7 21.97 10.93 26.6 16 28C21.07 26.6 25 21.97 25 17V11L16 6Z" fill="white" fill-opacity="0.2"/>
+                <path d="M13 16L15.5 18.5L20 14" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="logo-text">Fair<span>Trust</span></span>
+        </a>
+        <div class="nav-links">
+            <a href="page1.html">Home</a>
+            <a href="page2.html" class="active">Upload</a>
+            <a href="page4.html">Dashboard</a>
+            <a href="page9.html">Docs</a>
+            <a href="page10.html">Admin</a>
+        </div>
+        <div class="nav-actions">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="cursor:pointer">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+        </div>
+    </nav>
+</header>
+
+<div class="breadcrumbs">
+    <a href="page1.html">Home</a>
+    <span class="breadcrumb-sep">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </span>
+    Upload Dataset
+</div>
+
+<div class="global-error" id="globalError">
+    <div class="global-error-inner">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span id="globalErrorMsg"></span>
+    </div>
+</div>
+
+<main class="upload-page">
+    <div class="page-header">
+        <h1>Upload your model</h1>
+        <p>Evaluate fairness &amp; bias across seven dimensions</p>
+    </div>
+
+    <div class="upload-grid">
+
+        <div class="upload-card">
+            <div class="card-header">
+                <div class="card-icon blue">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1A56FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </div>
+                <span class="card-title">Upload Dataset</span>
+            </div>
+
+            <!-- Drop zone: NO <input> inside — click wired in JS to prevent page reload -->
+            <div class="upload-area" id="datasetDropZone" role="button" tabindex="0" aria-label="Click or drag to upload dataset">
+                <div class="upload-icon">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#9AA3BE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+                </div>
+                <div class="upload-main-text" id="datasetUploadText">Drag &amp; drop or click to upload</div>
+                <div class="upload-hint">CSV, JSON, or Excel files</div>
+            </div>
+            <div class="file-limit">Max file size: 100MB</div>
+
+            <!-- Hidden real file input — off-screen so .click() never scrolls the page -->
+            <input type="file" id="datasetFileInput" accept=".csv,.json,.xlsx,.xls"
+                   style="position:fixed;top:-200px;left:-200px;width:1px;height:1px;opacity:0;pointer-events:none;">
+
+            <div class="file-status" id="datasetStatus">
+                <span id="datasetStatusIcon"></span>
+                <span id="datasetStatusText"></span>
+            </div>
+
+            <!-- Target variable — always visible text box -->
+            <div class="field-group">
+                <label for="targetVariableText">Target Variable</label>
+                <input type="text" id="targetVariableText" placeholder="e.g. approved, outcome, label">
+                <div class="field-hint">Type the column name, or pick from dropdown after upload.</div>
+            </div>
+
+            <!-- Dropdown appears after upload to let user confirm / change -->
+            <div class="field-group" id="targetDropdownSection" style="display:none;">
+                <label for="targetVariableSelect">Or select from detected columns</label>
+                <select id="targetVariableSelect" onchange="onTargetSelect()">
+                    <option value="">— select a column —</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- ── Predictions card ────────────────────────── -->
+        <div class="upload-card">
+            <div class="card-header">
+                <div class="card-icon green">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#00A87A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                </div>
+                <span class="card-title">Model Predictions</span>
+            </div>
+
+            <div class="upload-area" id="predictionsDropZone" role="button" tabindex="0" aria-label="Click or drag to upload predictions">
+                <div class="upload-icon">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#9AA3BE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                </div>
+                <div class="upload-main-text" id="predictionsUploadText">Drag &amp; drop or click to upload</div>
+                <div class="upload-hint">CSV or JSON files</div>
+            </div>
+            <div class="file-limit">Format: model_id, prediction_score, confidence</div>
+
+            <input type="file" id="predictionsFileInput" accept=".csv,.json,.xlsx,.xls"
+                   style="position:fixed;top:-200px;left:-200px;width:1px;height:1px;opacity:0;pointer-events:none;">
+
+            <div class="file-status" id="predictionsStatus">
+                <span id="predictionsStatusIcon"></span>
+                <span id="predictionsStatusText"></span>
+            </div>
+
+            <!-- Model name + version -->
+            <div class="field-row">
+                <div class="field-group" style="margin-top:0;">
+                    <label for="modelName">Model Name</label>
+                    <input type="text" id="modelName" placeholder="e.g. LoanApprovalV2" value="My Model">
+                </div>
+                <div class="field-group" style="margin-top:0;">
+                    <label for="modelVersion">Version</label>
+                    <input type="text" id="modelVersion" placeholder="e.g. 1.0.0" value="1.0.0">
+                </div>
+            </div>
+
+            <button class="btn btn-ghost btn-block" type="button" onclick="showSampleFormat()" style="margin-top:0.875rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                View Sample Format
+            </button>
+
+            <div class="checkbox-wrapper">
+                <input type="checkbox" id="useSampleData" onchange="toggleSampleData()">
+                <label for="useSampleData" style="cursor:pointer;">Use sample data (for testing)</label>
+            </div>
+        </div>
+
+    </div><!-- /upload-grid -->
+
+    <!-- ── Sensitive Attributes ─────────────────────── -->
+    <section class="section-block">
+        <div class="card-header">
+            <div class="card-icon blue">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1A56FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <span class="card-title">Select Sensitive Attributes</span>
+        </div>
+        <p class="section-desc">Select the attributes to test for bias in your model's predictions.</p>
+
+        <div class="attribute-grid">
+            <label class="attribute-checkbox">
+                <input type="checkbox" name="sensitive-attr" value="gender" onchange="updateAttrDisplay()">
+                <span class="checkbox-custom"></span>
+                <svg class="attr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a8.38 8.38 0 0 1 13 0"/></svg>
+                Gender
+            </label>
+            <label class="attribute-checkbox">
+                <input type="checkbox" name="sensitive-attr" value="race" onchange="updateAttrDisplay()">
+                <span class="checkbox-custom"></span>
+                <svg class="attr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                Race / Ethnicity
+            </label>
+            <label class="attribute-checkbox">
+                <input type="checkbox" name="sensitive-attr" value="age" onchange="updateAttrDisplay()">
+                <span class="checkbox-custom"></span>
+                <svg class="attr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Age
+            </label>
+            <label class="attribute-checkbox">
+                <input type="checkbox" name="sensitive-attr" value="socioeconomic" onchange="updateAttrDisplay()">
+                <span class="checkbox-custom"></span>
+                <svg class="attr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                Socioeconomic
+            </label>
+            <label class="attribute-checkbox">
+                <input type="checkbox" name="sensitive-attr" value="disability" onchange="updateAttrDisplay()">
+                <span class="checkbox-custom"></span>
+                <svg class="attr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><path d="M8 21l2-8 2 2 2-4 2 10"/><path d="M6 15a6 6 0 0 0 12 0"/></svg>
+                Disability
+            </label>
+            <label class="attribute-checkbox">
+                <input type="checkbox" name="sensitive-attr" value="religion" onchange="updateAttrDisplay()">
+                <span class="checkbox-custom"></span>
+                <svg class="attr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                Religion
+            </label>
+            <label class="attribute-checkbox">
+                <input type="checkbox" name="sensitive-attr" value="caste" onchange="updateAttrDisplay()">
+                <span class="checkbox-custom"></span>
+                <svg class="attr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Caste
+            </label>
+            <label class="attribute-checkbox">
+                <input type="checkbox" name="sensitive-attr" value="marital" onchange="updateAttrDisplay()">
+                <span class="checkbox-custom"></span>
+                <svg class="attr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                Marital Status
+            </label>
+            <!-- OTHER -->
+            <label class="attribute-checkbox">
+                <input type="checkbox" name="sensitive-attr" value="__other__" id="attrOtherCb" onchange="toggleOtherAttr()">
+                <span class="checkbox-custom"></span>
+                <svg class="attr-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                Other…
+            </label>
+        </div>
+
+        <!-- Other text box -->
+        <div class="other-input-wrap" id="otherAttrWrap">
+            <div class="field-group" style="margin-top:0;">
+                <label for="otherAttrInput">Custom attribute(s)</label>
+                <input type="text" id="otherAttrInput" placeholder="e.g. nationality, zipcode, language  (comma-separated)" oninput="updateAttrDisplay()">
+                <div class="field-hint">Separate multiple values with commas.</div>
+            </div>
+        </div>
+
+        <!-- Selected tags -->
+        <div class="selected-attrs-display" id="selectedAttrsDisplay">
+            <div class="attrs-label">Selected attributes</div>
+            <div id="attributeTags" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.375rem;"></div>
+        </div>
+
+        <div style="display:flex;gap:0.75rem;margin-bottom:1rem;">
+            <button class="btn btn-primary-filled btn-block" type="button" onclick="autoDetect()" style="flex:1;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                Auto-detect from dataset
+            </button>
+            <button class="btn btn-danger-outline btn-block" type="button" onclick="resetAttrs()" style="flex:1;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Clear All
+            </button>
+        </div>
+
+        <div class="warning-banner" id="proxyWarning" style="display:none;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span><strong>Proxy variables may be present.</strong> Some attributes can correlate with others — review before submitting.</span>
+        </div>
+    </section>
+
+    <!-- ── Fairness Priorities ──────────────────────── -->
+    <section class="section-block">
+        <div class="card-header">
+            <div class="card-icon amber">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+            </div>
+            <span class="card-title">Rank Fairness Dimensions</span>
+        </div>
+        <p class="section-desc">Drag to reorder · Adjust sliders to set weights (min 5%)</p>
+
+        <div class="ranking-list" id="rankingList">
+            <div class="ranking-item" draggable="true" data-value="individualFairness">
+                <span class="rank-number">1</span>
+                <span class="dimension-name">Individual Fairness</span>
+                <div class="weight-bar"><div class="weight-fill" style="width:25%"></div></div>
+                <span class="weight-value">25%</span>
+                <input type="range" class="weight-slider" min="5" max="100" value="25" oninput="updateWeights()">
+            </div>
+            <div class="ranking-item" draggable="true" data-value="groupFairness">
+                <span class="rank-number">2</span>
+                <span class="dimension-name">Group Fairness</span>
+                <div class="weight-bar"><div class="weight-fill" style="width:20%"></div></div>
+                <span class="weight-value">20%</span>
+                <input type="range" class="weight-slider" min="5" max="100" value="20" oninput="updateWeights()">
+            </div>
+            <div class="ranking-item" draggable="true" data-value="demographicParity">
+                <span class="rank-number">3</span>
+                <span class="dimension-name">Demographic Parity</span>
+                <div class="weight-bar"><div class="weight-fill" style="width:15%"></div></div>
+                <span class="weight-value">15%</span>
+                <input type="range" class="weight-slider" min="5" max="100" value="15" oninput="updateWeights()">
+            </div>
+            <div class="ranking-item" draggable="true" data-value="calibrationError">
+                <span class="rank-number">4</span>
+                <span class="dimension-name">Calibration</span>
+                <div class="weight-bar"><div class="weight-fill" style="width:12%"></div></div>
+                <span class="weight-value">12%</span>
+                <input type="range" class="weight-slider" min="5" max="100" value="12" oninput="updateWeights()">
+            </div>
+            <div class="ranking-item" draggable="true" data-value="disparateImpact">
+                <span class="rank-number">5</span>
+                <span class="dimension-name">Disparate Impact</span>
+                <div class="weight-bar"><div class="weight-fill" style="width:10%"></div></div>
+                <span class="weight-value">10%</span>
+                <input type="range" class="weight-slider" min="5" max="100" value="10" oninput="updateWeights()">
+            </div>
+            <div class="ranking-item" draggable="true" data-value="counterfactual">
+                <span class="rank-number">6</span>
+                <span class="dimension-name">Counterfactual</span>
+                <div class="weight-bar"><div class="weight-fill" style="width:10%"></div></div>
+                <span class="weight-value">10%</span>
+                <input type="range" class="weight-slider" min="5" max="100" value="10" oninput="updateWeights()">
+            </div>
+            <div class="ranking-item" draggable="true" data-value="intersectional">
+                <span class="rank-number">7</span>
+                <span class="dimension-name">Intersectional</span>
+                <div class="weight-bar"><div class="weight-fill" style="width:8%"></div></div>
+                <span class="weight-value">8%</span>
+                <input type="range" class="weight-slider" min="5" max="100" value="8" oninput="updateWeights()">
+            </div>
+        </div>
+
+        <div class="weight-summary">
+            <div class="weight-summary-header">
+                <span>Total Weight:</span>
+                <span class="weight-summary-total" id="totalWeight">100%</span>
+            </div>
+            <div class="weight-grid">
+                <div class="weight-stat">
+                    <div class="weight-stat-label">Highest</div>
+                    <div class="weight-stat-name" id="highestDim">Individual Fairness</div>
+                    <div class="weight-stat-val"  id="highestVal">25%</div>
+                </div>
+                <div class="weight-stat low">
+                    <div class="weight-stat-label">Lowest</div>
+                    <div class="weight-stat-name" id="lowestDim">Intersectional</div>
+                    <div class="weight-stat-val"  id="lowestVal">8%</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="display:flex;gap:0.75rem;">
+            <button class="btn btn-danger-outline" type="button" onclick="resetRanking()" style="flex:1;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+                Reset to Default
+            </button>
+            <button class="btn btn-primary-filled" type="button" onclick="normalizeWeights()" style="flex:1;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                Normalize Weights
+            </button>
+        </div>
+        <div style="margin-top:0.875rem;font-size:0.8125rem;color:var(--muted);display:flex;align-items:center;gap:0.375rem;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            Each dimension gets at least 5%. Click Normalize to distribute proportionally.
+        </div>
+    </section>
+
+    <!-- ── Report Type ──────────────────────────────── -->
+    <section class="section-block">
+        <div class="card-header">
+            <div class="card-icon purple">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            </div>
+            <span class="card-title">Report Type</span>
+        </div>
+        <p class="section-desc">Choose the format for your fairness report</p>
+
+        <div class="report-toggle">
+            <div class="report-card" id="reportDev" onclick="selectReport('developer')">
+                <div class="report-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1A56FF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                </div>
+                <h3 class="report-title">Developer</h3>
+                <p class="report-desc">Technical metrics &amp; detailed analysis</p>
+                <div class="report-features">
+                    <span class="feature-tag">ML Metrics</span>
+                    <span class="feature-tag">SHAP Analysis</span>
+                    <span class="feature-tag">JSON Output</span>
+                </div>
+                <div class="selection-indicator">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+            </div>
+            <div class="report-card" id="reportReg" onclick="selectReport('regulator')">
+                <div class="report-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <h3 class="report-title">Regulator</h3>
+                <p class="report-desc">Compliance &amp; audit documentation</p>
+                <div class="report-features">
+                    <span class="feature-tag">Legal Docs</span>
+                    <span class="feature-tag">Compliance</span>
+                    <span class="feature-tag">Evidence</span>
+                </div>
+                <div class="selection-indicator">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+            </div>
+            <div class="report-card" id="reportUser" onclick="selectReport('enduser')">
+                <div class="report-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <h3 class="report-title">End-user</h3>
+                <p class="report-desc">Plain language explanations</p>
+                <div class="report-features">
+                    <span class="feature-tag">Simple Text</span>
+                    <span class="feature-tag">FAQ</span>
+                    <span class="feature-tag">Visual</span>
+                </div>
+                <div class="selection-indicator">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+            </div>
+        </div>
+
+        <div id="selectedReportDisplay" style="display:none;margin-top:1rem;padding:1rem 1.125rem;background:var(--accent-dim);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;">
+            <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent);margin-bottom:0.2rem;">Selected</div>
+            <div id="selectedReportName" style="font-size:0.9375rem;font-weight:600;color:var(--ink);"></div>
+        </div>
+
+        <div class="checkbox-wrapper" style="margin-top:1.5rem;">
+            <input type="checkbox" id="generateAllReports" onchange="toggleGenerateAll()">
+            <label for="generateAllReports" style="cursor:pointer;">
+                <strong>Generate all report types</strong> — gives you all 3 formats (~5–7 min)
+            </label>
+        </div>
+
+        <div id="allReportsWarning" style="display:none;margin-top:0.875rem;padding:0.875rem;background:#FFFBEB;border-left:3px solid var(--warning);border-radius:0 8px 8px 0;font-size:0.875rem;color:#92400E;display:flex;gap:0.5rem;align-items:flex-start;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Generating all reports takes approximately 5–7 minutes.
+        </div>
+    </section>
+
+    <!-- ── Submit ───────────────────────────────────── -->
+    <div class="submit-section">
+        <button class="submit-btn" id="submitBtn" type="button" onclick="analyzeFairness()" disabled>
+            ANALYZE FAIRNESS →
+        </button>
+        <p class="eta-text" id="etaText">Upload both files to continue</p>
+    </div>
+</main>
+
+<!-- Sample format modal -->
+<div class="modal-overlay" id="sampleModal">
+    <div class="modal">
+        <div class="modal-header">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <h3>Predictions File Format</h3>
+        </div>
+        <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:0.75rem;">Your predictions file should contain at least one of these column names:</p>
+        <pre>model_id,prediction_score,confidence
+model_001,0.82,0.91
+model_002,0.41,0.78
+model_003,0.95,0.99</pre>
+        <p style="font-size:0.8125rem;color:var(--text-muted);margin-bottom:1rem;">
+            Accepted column names: <code>prediction</code>, <code>prediction_score</code>, <code>score</code>, <code>label</code>, <code>output</code>, <code>pred</code>
+        </p>
+        <button class="modal-close" type="button" onclick="document.getElementById('sampleModal').classList.remove('open')">Close</button>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><span id="toastIcon"></span><span id="toastMsg"></span></div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+const API_BASE = 'http://127.0.0.1:5000';
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+// Single source of truth. Never derive ready-state from the DOM.
+const S = {
+    datasetId:    null,   // set after POST /datasets succeeds
+    predictionId: null,   // set after POST /predictions succeeds
+    modelId:      null,   // set after POST /models succeeds
+    columns:      [],     // columns from dataset response
+    selectedReport: null,
+};
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+let _toastTimer = null;
+function toast(msg, type = 'info') {
+    const el = document.getElementById('toast');
+    const icons = {
+        success: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+        error:   '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+        info:    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+    };
+    document.getElementById('toastIcon').innerHTML = icons[type] || icons.info;
+    document.getElementById('toastMsg').textContent  = msg;
+    el.className = `toast ${type} show`;
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => el.classList.remove('show'), 4500);
+}
+
+// ─── FILE STATUS ──────────────────────────────────────────────────────────────
+function setStatus(which, type, msg) {
+    const el  = document.getElementById(`${which}Status`);
+    const ico = document.getElementById(`${which}StatusIcon`);
+    const txt = document.getElementById(`${which}StatusText`);
+    el.className = `file-status ${type}`;
+    ico.innerHTML = type === 'uploading' ? '<div class="upload-spinner"></div>'
+                  : type === 'success'   ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+                  : type === 'error'     ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' : '';
+    txt.textContent = msg;
+}
+
+// ─── DROP ZONE WIRING ─────────────────────────────────────────────────────────
+// IMPORTANT: input.click() is deferred via setTimeout(0) so it fires AFTER the
+// current click event fully finishes. Without this, browsers associate the
+// programmatic click with the original click chain and scroll/reload the page.
+function wireDropZone(zoneId, inputId, handlerFn) {
+    const zone  = document.getElementById(zoneId);
+    const input = document.getElementById(inputId);
+
+    // Click on zone → open file picker (deferred to break event chain)
+    zone.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        setTimeout(() => {
+            input.value = '';   // allow re-selecting same file
+            input.click();
+        }, 0);
+    });
+
+    zone.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setTimeout(() => { input.value = ''; input.click(); }, 0);
+        }
+    });
+
+    // Drag events
+    zone.addEventListener('dragenter', e  => { e.preventDefault(); zone.classList.add('dragover'); });
+    zone.addEventListener('dragover',  e  => { e.preventDefault(); });
+    zone.addEventListener('dragleave', e  => { if (!zone.contains(e.relatedTarget)) zone.classList.remove('dragover'); });
+    zone.addEventListener('drop', e => {
+        e.preventDefault();
+        zone.classList.remove('dragover');
+        const file = e.dataTransfer?.files?.[0];
+        if (!file) return;
+        handlerFn(file);
+    });
+
+    // File selected via picker
+    input.addEventListener('change', (e) => {
+        e.stopPropagation();
+        if (input.files[0]) handlerFn(input.files[0]);
+    });
+}
+
+// ─── DATASET UPLOAD ───────────────────────────────────────────────────────────
+async function uploadDataset(file) {
+    const zone = document.getElementById('datasetDropZone');
+    document.getElementById('datasetUploadText').textContent = file.name;
+    zone.classList.remove('uploaded');
+    setStatus('dataset', 'uploading', `Uploading ${file.name}…`);
+
+    const fd = new FormData();
+    fd.append('file', file);
+
+    try {
+        const res  = await fetch(`${API_BASE}/datasets`, { method: 'POST', body: fd });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || `Server error ${res.status}`);
+
+        //  State update — this is what enables the button
+        S.datasetId = data.dataset_id;
+        S.columns   = Array.isArray(data.columns) ? data.columns : [];
+
+        zone.classList.add('uploaded');
+        setStatus('dataset', 'success',
+            `${(data.records || 0).toLocaleString()} records · ${S.columns.length} columns`);
+
+        // Populate dropdown
+        const sel = document.getElementById('targetVariableSelect');
+        sel.innerHTML = '<option value="">— select a column —</option>';
+        S.columns.forEach(col => {
+            const o = document.createElement('option');
+            o.value = col; o.textContent = col;
+            sel.appendChild(o);
+        });
+        document.getElementById('targetDropdownSection').style.display = 'block';
+
+        toast(`Dataset ready — ${(data.records||0).toLocaleString()} rows`, 'success');
+    } catch (err) {
+        zone.classList.remove('uploaded');
+        S.datasetId = null;
+        setStatus('dataset', 'error', err.message);
+        toast(`Dataset: ${err.message}`, 'error');
+    }
+
+    refreshSubmitState();  // always call regardless of success/error
+}
+
+// When user picks from dropdown, sync to text field
+function onTargetSelect() {
+    const sel = document.getElementById('targetVariableSelect');
+    if (sel.value) document.getElementById('targetVariableText').value = sel.value;
+}
+
+// Returns whatever the user wants as target variable
+function getTargetVariable() {
+    return (document.getElementById('targetVariableText').value || '').trim();
+}
+
+// ─── PREDICTIONS UPLOAD ───────────────────────────────────────────────────────
+async function uploadPredictions(file) {
+    const zone = document.getElementById('predictionsDropZone');
+    document.getElementById('predictionsUploadText').textContent = file.name;
+    zone.classList.remove('uploaded');
+    setStatus('predictions', 'uploading', `Uploading ${file.name}…`);
+
+    const fd = new FormData();
+    fd.append('file', file);
+
+    try {
+        const res  = await fetch(`${API_BASE}/predictions`, { method: 'POST', body: fd });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || `Server error ${res.status}`);
+
+        //  State update
+        S.predictionId = data.prediction_id;
+
+        zone.classList.add('uploaded');
+        const cols = Array.isArray(data.columns) ? data.columns.join(', ') : '';
+        setStatus('predictions', 'success',
+            `${(data.rows || 0).toLocaleString()} rows · ${cols}`);
+
+        toast('Predictions uploaded', 'success');
+    } catch (err) {
+        zone.classList.remove('uploaded');
+        S.predictionId = null;
+        setStatus('predictions', 'error', err.message);
+        toast(`Predictions: ${err.message}`, 'error');
+    }
+
+    refreshSubmitState();
+}
+
+// ─── SAMPLE DATA ──────────────────────────────────────────────────────────────
+function toggleSampleData() {
+    const on   = document.getElementById('useSampleData').checked;
+    const zone = document.getElementById('predictionsDropZone');
+    if (on) {
+        S.predictionId = 'SAMPLE';
+        document.getElementById('predictionsUploadText').textContent = 'Using sample data';
+        zone.classList.add('uploaded');
+        setStatus('predictions', 'success', 'Sample predictions loaded');
+        toast('Sample data loaded', 'info');
+    } else {
+        S.predictionId = null;
+        document.getElementById('predictionsUploadText').textContent = 'Drag & drop or click to upload';
+        zone.classList.remove('uploaded');
+        document.getElementById('predictionsStatus').className = 'file-status';
+    }
+    refreshSubmitState();
+}
+
+// ─── SUBMIT STATE ─────────────────────────────────────────────────────────────
+function refreshSubmitState() {
+    const btn  = document.getElementById('submitBtn');
+    const eta  = document.getElementById('etaText');
+    const ok   = !!(S.datasetId && S.predictionId);
+
+    btn.disabled = !ok;
+
+    if (!S.datasetId && !S.predictionId) {
+        eta.textContent = 'Upload both files to continue';
+    } else if (!S.datasetId) {
+        eta.textContent = 'Upload a dataset file to continue';
+    } else if (!S.predictionId) {
+        eta.textContent = 'Upload a predictions file to continue';
+    } else {
+        const all = document.getElementById('generateAllReports').checked;
+        eta.textContent = all ? 'Estimated time: ~5–7 minutes' : 'Estimated time: ~2–3 minutes';
+    }
+}
+
+// ─── SENSITIVE ATTRIBUTES ─────────────────────────────────────────────────────
+function toggleOtherAttr() {
+    const cb   = document.getElementById('attrOtherCb');
+    const wrap = document.getElementById('otherAttrWrap');
+    wrap.classList.toggle('visible', cb.checked);
+    updateAttrDisplay();
+}
+
+function getSensitiveAttrs() {
+    const standard = [...document.querySelectorAll('input[name="sensitive-attr"]:checked')]
+        .map(cb => cb.value).filter(v => v !== '__other__');
+    if (document.getElementById('attrOtherCb').checked) {
+        const extras = (document.getElementById('otherAttrInput').value || '')
+            .split(',').map(s => s.trim()).filter(Boolean);
+        return [...standard, ...extras];
+    }
+    return standard;
+}
+
+function updateAttrDisplay() {
+    const attrs   = getSensitiveAttrs();
+    const display = document.getElementById('selectedAttrsDisplay');
+    const tags    = document.getElementById('attributeTags');
+    if (attrs.length === 0) {
+        display.style.display = 'none';
+    } else {
+        display.style.display = 'block';
+        tags.innerHTML = attrs.map(v => `<span class="attr-tag">${v}</span>`).join('');
+    }
+}
+
+function autoDetect() {
+    if (!S.columns.length) { toast('Upload a dataset first', 'info'); return; }
+    const map = {
+        gender: ['gender','sex'], race: ['race','ethnicity'],
+        age: ['age'], disability: ['disability'], religion: ['religion'],
+        caste: ['caste'], marital: ['marital','marriage'],
+        socioeconomic: ['income','salary','socioeconomic','wealth'],
+    };
+    let n = 0;
+    document.querySelectorAll('input[name="sensitive-attr"]:not(#attrOtherCb)').forEach(cb => {
+        const kws = map[cb.value] || [cb.value];
+        if (S.columns.some(c => kws.some(k => c.toLowerCase().includes(k)))) {
+            cb.checked = true; n++;
+        }
+    });
+    updateAttrDisplay();
+    if (n) {
+        document.getElementById('proxyWarning').style.display = 'block';
+        toast(`Auto-detected ${n} attribute(s)`, 'success');
+    } else {
+        toast('No matching attributes in dataset columns', 'info');
+    }
+}
+
+function resetAttrs() {
+    document.querySelectorAll('input[name="sensitive-attr"]').forEach(cb => cb.checked = false);
+    document.getElementById('otherAttrInput').value = '';
+    document.getElementById('otherAttrWrap').classList.remove('visible');
+    document.getElementById('proxyWarning').style.display = 'none';
+    updateAttrDisplay();
+}
+
+// ─── FAIRNESS WEIGHTS ─────────────────────────────────────────────────────────
+function updateWeights() {
+    let hi = { name:'', val: -Infinity };
+    let lo = { name:'', val:  Infinity };
+    let total = 0;
+    document.querySelectorAll('.ranking-item').forEach(item => {
+        const v    = parseInt(item.querySelector('.weight-slider').value);
+        const name = item.querySelector('.dimension-name').textContent;
+        total += v;
+        item.querySelector('.weight-value').textContent = v + '%';
+        item.querySelector('.weight-fill').style.width  = Math.min(v, 100) + '%';
+        if (v > hi.val) hi = { name, val: v };
+        if (v < lo.val) lo = { name, val: v };
+    });
+    document.getElementById('totalWeight').textContent = total + '%';
+    document.getElementById('highestDim').textContent  = hi.name;
+    document.getElementById('highestVal').textContent  = hi.val + '%';
+    document.getElementById('lowestDim').textContent   = lo.name;
+    document.getElementById('lowestVal').textContent   = lo.val + '%';
+}
+
+function getWeights() {
+    const w = {};
+    document.querySelectorAll('.ranking-item').forEach(item => {
+        w[item.dataset.value] = parseInt(item.querySelector('.weight-slider').value);
+    });
+    return w;
+}
+
+function normalizeWeights() {
+    const sls   = [...document.querySelectorAll('.weight-slider')];
+    const total = sls.reduce((s, sl) => s + parseInt(sl.value), 0);
+    if (!total) return;
+    sls.forEach(sl => { sl.value = Math.max(5, Math.round(parseInt(sl.value) / total * 100)); });
+    updateWeights();
+    toast('Weights normalized', 'info');
+}
+
+const DEFAULTS = [25, 20, 15, 12, 10, 10, 8];
+function resetRanking() {
+    document.querySelectorAll('.weight-slider').forEach((sl, i) => sl.value = DEFAULTS[i]);
+    updateWeights();
+    toast('Weights reset', 'info');
+}
+
+// Drag-to-reorder
+(function() {
+    let drag = null;
+    const list = document.getElementById('rankingList');
+    list.addEventListener('dragstart', e => { drag = e.target.closest('.ranking-item'); drag?.classList.add('dragging'); });
+    list.addEventListener('dragend',   () => { drag?.classList.remove('dragging'); drag = null; renum(); });
+    list.addEventListener('dragover',  e => {
+        e.preventDefault();
+        const tgt = e.target.closest('.ranking-item');
+        if (!tgt || tgt === drag) return;
+        const mid = tgt.getBoundingClientRect().top + tgt.getBoundingClientRect().height / 2;
+        list.insertBefore(drag, e.clientY < mid ? tgt : tgt.nextSibling);
+    });
+    function renum() {
+        document.querySelectorAll('.ranking-item .rank-number').forEach((el, i) => el.textContent = i + 1);
+    }
+})();
+
+// ─── REPORT SELECTION ─────────────────────────────────────────────────────────
+function selectReport(type) {
+    S.selectedReport = type;
+    document.querySelectorAll('.report-card').forEach(c => c.classList.remove('selected'));
+    ({ developer:'reportDev', regulator:'reportReg', enduser:'reportUser' })[type]
+        && document.getElementById(({ developer:'reportDev', regulator:'reportReg', enduser:'reportUser' })[type]).classList.add('selected');
+    document.getElementById('selectedReportName').textContent =
+        ({ developer:'Developer Report', regulator:'Regulator Report', enduser:'End-user Report' })[type] || type;
+    document.getElementById('selectedReportDisplay').style.display = 'block';
+    document.getElementById('generateAllReports').checked = false;
+    document.getElementById('allReportsWarning').style.display = 'none';
+    refreshSubmitState();
+}
+
+function toggleGenerateAll() {
+    const on = document.getElementById('generateAllReports').checked;
+    document.getElementById('allReportsWarning').style.display = on ? 'block' : 'none';
+    if (on) {
+        S.selectedReport = 'all';
+        document.querySelectorAll('.report-card').forEach(c => c.classList.add('selected'));
+        document.getElementById('selectedReportName').textContent = 'All Report Types';
+        document.getElementById('selectedReportDisplay').style.display = 'block';
+    } else {
+        S.selectedReport = null;
+        document.querySelectorAll('.report-card').forEach(c => c.classList.remove('selected'));
+        document.getElementById('selectedReportDisplay').style.display = 'none';
+    }
+    refreshSubmitState();
+}
+
+// ─── MODAL ────────────────────────────────────────────────────────────────────
+function showSampleFormat() { document.getElementById('sampleModal').classList.add('open'); }
+document.getElementById('sampleModal').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+});
+
+// ─── GLOBAL ERROR ─────────────────────────────────────────────────────────────
+function showGlobalError(msg) {
+    document.getElementById('globalErrorMsg').textContent = msg;
+    const el = document.getElementById('globalError');
+    el.style.display = 'block';
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// ─── ANALYZE (main submit) ────────────────────────────────────────────────────
+// ── REPLACE your analyzeFairness() in page2.html with this debug version ──
+async function analyzeFairness() {
+    console.log(' analyzeFairness() called');
+    console.log('  S.datasetId:', S.datasetId);
+    console.log('  S.predictionId:', S.predictionId);
+
+    if (!S.datasetId || !S.predictionId) {
+        toast('Please upload both files first', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Starting analysis…';
+    document.getElementById('globalError').style.display = 'none';
+
+    try {
+        // ── Step 1: Register model ────────────────────────────────────────
+        console.log(' Step 1: POST /models');
+        const modelName    = (document.getElementById('modelName').value.trim()    || 'Uploaded Model');
+        const modelVersion = (document.getElementById('modelVersion').value.trim() || '1.0.0');
+
+        const modelRes = await fetch(`${API_BASE}/models`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: modelName, version: modelVersion }),
+        });
+        const modelData = await modelRes.json();
+        console.log(' /models response:', modelRes.status, modelData);
+        if (!modelRes.ok) throw new Error(modelData.error || 'Model registration failed');
+        S.modelId = modelData.model_id;
+        console.log('model_id:', S.modelId);
+
+        // ── Step 2: Build evaluate payload ───────────────────────────────
+        const generateAll = document.getElementById('generateAllReports').checked;
+        const payload = {
+            dataset_id:           S.datasetId,
+            prediction_id:        S.predictionId,
+            model_id:             S.modelId,
+            target_variable:      getTargetVariable(),
+            sensitive_attributes: getSensitiveAttrs(),
+            fairness_weights:     getWeights(),
+            report_type:          generateAll ? 'all' : (S.selectedReport || 'developer'),
+        };
+        console.log('Step 2: POST /evaluate with payload:', JSON.stringify(payload, null, 2));
+
+        // ── Step 3: Start evaluation ──────────────────────────────────────
+        const evalRes = await fetch(`${API_BASE}/evaluate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+        const evalData = await evalRes.json();
+        console.log('/evaluate response:', evalRes.status, evalData);
+
+        if (!evalRes.ok) throw new Error(evalData.error || 'Evaluation failed to start');
+
+        const evalId = evalData.evaluation_id;
+        console.log('eval_id:', evalId);
+
+        sessionStorage.setItem('eval_id', evalId);
+        sessionStorage.setItem('eval_meta', JSON.stringify({
+            ...payload,
+            modelId: S.modelId,
+            modelName,
+            modelVersion,
+        }));
+
+        toast('Analysis started! Redirecting…', 'success');
+        console.log('Redirecting to page3.html?eval_id=' + evalId);
+        setTimeout(() => {
+            window.location.href = `page3.html?eval_id=${evalId}`;
+        }, 700);
+
+    } catch (err) {
+        console.error('analyzeFairness error:', err);
+        btn.disabled = false;
+        btn.textContent = 'ANALYZE FAIRNESS →';
+        document.getElementById('globalErrorMsg').textContent = err.message;
+        document.getElementById('globalError').style.display = 'block';
+        toast(err.message, 'error');
+    }
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    wireDropZone('datasetDropZone',     'datasetFileInput',     uploadDataset);
+    wireDropZone('predictionsDropZone', 'predictionsFileInput', uploadPredictions);
+    refreshSubmitState();
+});
+</script>
+</body>
+</html>
