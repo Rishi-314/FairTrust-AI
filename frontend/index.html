@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FairTrust AI — Ethical AI Evaluation Framework</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            margin: 0; padding: 0; box-sizing: border-box;
+        }
+
+        :root {
+            --ink: #0D0F14;
+            --ink-2: #1E2433;
+            --ink-3: #3D4560;
+            --muted: #6B7594;
+            --muted-2: #9AA3BE;
+            --rule: #E4E7F0;
+            --surface: #FFFFFF;
+            --bg: #F5F6FA;
+            --bg-2: #ECEEF5;
+            --accent: #1A56FF;
+            --accent-dim: #EDF1FF;
+            --accent-2: #00C896;
+            --accent-3: #FF5C38;
+            --warn: #FFB020;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            line-height: 1.65;
+            overflow-x: hidden;
+        }
+
+        /* ─── NAV ─────────────────────────────────────────────── */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255,255,255,0.88);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--rule);
+        }
+
+        nav {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+
+        .logo-mark {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            flex-shrink: 0;
+        }
+
+        .logo-text {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 1.0625rem;
+            color: var(--ink);
+            letter-spacing: -0.01em;
+        }
+
+        .logo-text span {
+            color: var(--accent);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 0.4rem 0.75rem;
+            border-radius: 6px;
+            transition: color 0.15s, background 0.15s;
+        }
+
+        .nav-links a:hover { color: var(--ink); background: var(--bg-2); }
+        .nav-links a.active { color: var(--accent); }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .btn-nav {
+            padding: 0.45rem 1.1rem;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: opacity 0.15s, transform 0.15s;
+        }
+
+        .btn-nav:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .theme-btn {
+            width: 36px; height: 36px;
+            border-radius: 8px;
+            background: var(--bg);
+            border: 1px solid var(--rule);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s;
+        }
+
+        .theme-btn:hover { background: var(--bg-2); }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--ink);
+        }
+
+        /* ─── HERO ────────────────────────────────────────────── */
+        .hero {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 6rem 2rem 4rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0.875rem;
+            background: var(--accent-dim);
+            border: 1px solid rgba(26,86,255,0.18);
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--accent);
+            letter-spacing: 0.02em;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(2.25rem, 4vw, 3.25rem);
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -0.03em;
+            color: var(--ink);
+            margin-bottom: 1.25rem;
+        }
+
+        .hero h1 em {
+            font-style: normal;
+            color: var(--accent);
+        }
+
+        .hero p {
+            font-size: 1.0625rem;
+            color: var(--muted);
+            font-weight: 400;
+            max-width: 460px;
+            margin-bottom: 2.25rem;
+            line-height: 1.75;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.6rem;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 20px rgba(26,86,255,0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(26,86,255,0.38);
+        }
+
+        .btn-ghost {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.4rem;
+            background: transparent;
+            color: var(--ink-3);
+            border: 1.5px solid var(--rule);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--ink-3);
+            color: var(--ink);
+        }
+
+        /* ─── HERO VISUAL ─────────────────────────────────────── */
+        .hero-visual {
+            position: relative;
+        }
+
+        .score-card {
+            background: var(--surface);
+            border: 1px solid var(--rule);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 16px 64px rgba(13,15,20,0.08);
+            position: relative;
+        }
+
+        .score-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .score-card-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--muted);
+        }
+
+        .score-card-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.25rem 0.625rem;
+            background: #E9FBF4;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #059669;
+        }
+
+        .score-ring-wrap {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .score-ring {
+            position: relative;
+            width: 120px;
+            height: 120px;
+        }
+
+        .score-ring svg {
+            transform: rotate(-90deg);
+        }
+
+        .score-ring-label {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .score-ring-num {
+            font-family: 'Syne', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--ink);
+            line-height: 1;
+        }
+
+        .score-ring-sub {
+            font-size: 0.7rem;
+            color: var(--muted);
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        .score-dims {
+            display: flex;
+            flex-direction: column;
+            gap: 0.625rem;
+        }
+
+        .score-dim {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .score-dim-label {
+            font-size: 0.8rem;
+            color: var(--ink-3);
+            font-weight: 500;
+            width: 130px;
+            flex-shrink: 0;
+        }
+
+        .score-bar-track {
+            flex: 1;
+            height: 6px;
+            background: var(--bg-2);
+            border-radius: 100px;
+            overflow: hidden;
+        }
+
+        .score-bar-fill {
+            height: 100%;
+            border-radius: 100px;
+            background: var(--accent);
+            transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .score-bar-fill.warn { background: var(--warn); }
+        .score-bar-fill.ok { background: var(--accent-2); }
+        .score-bar-fill.risk { background: var(--accent-3); }
+
+        .score-dim-val {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--ink-3);
+            width: 32px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .floating-tag {
+            position: absolute;
+            background: var(--surface);
+            border: 1px solid var(--rule);
+            border-radius: 10px;
+            padding: 0.5rem 0.875rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--ink);
+            box-shadow: 0 4px 16px rgba(13,15,20,0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .floating-tag.tl { top: -14px; left: -20px; }
+        .floating-tag.br { bottom: -14px; right: -20px; }
+
+        /* ─── METRICS STRIP ───────────────────────────────────── */
+        .metrics-strip {
+            background: var(--ink);
+            padding: 2.5rem 2rem;
+        }
+
+        .metrics-inner {
+            max-width: 1160px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            flex-wrap: wrap;
+        }
+
+        .metric-item {
+            flex: 1;
+            min-width: 140px;
+            text-align: center;
+            padding: 0 2rem;
+            position: relative;
+        }
+
+        .metric-item + .metric-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 20%;
+            height: 60%;
+            width: 1px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .metric-num {
+            font-family: 'Syne', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+            margin-bottom: 0.35rem;
+        }
+
+        .metric-num span {
+            color: #6B9FFF;
+        }
+
+        .metric-lbl {
+            font-size: 0.8125rem;
+            color: rgba(255,255,255,0.45);
+            font-weight: 400;
+        }
+
+        /* ─── PROBLEM SECTION ─────────────────────────────────── */
+        .section {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 6rem 2rem;
+        }
+
+        .section-eyebrow {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--accent);
+            margin-bottom: 0.75rem;
+        }
+
+        .section-heading {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(1.75rem, 3vw, 2.5rem);
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: -0.025em;
+            color: var(--ink);
+            max-width: 640px;
+            margin-bottom: 1rem;
+        }
+
+        .section-sub {
+            font-size: 1rem;
+            color: var(--muted);
+            max-width: 520px;
+            margin-bottom: 3rem;
+            line-height: 1.75;
+        }
+
+        /* Problem stats */
+        .problem-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .problem-card {
+            background: var(--surface);
+            border: 1px solid var(--rule);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+
+        .problem-card:hover {
+            box-shadow: 0 8px 32px rgba(13,15,20,0.08);
+            transform: translateY(-2px);
+        }
+
+        .problem-card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .problem-card-icon.red { background: #FFF1EE; }
+        .problem-card-icon.amber { background: #FFF8E6; }
+        .problem-card-icon.blue { background: var(--accent-dim); }
+        .problem-card-icon.green { background: #E9FBF4; }
+
+        .problem-card h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+
+        .problem-card p {
+            font-size: 0.9rem;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .stat-highlight {
+            display: block;
+            font-family: 'Syne', sans-serif;
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: var(--ink);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-highlight.red { color: var(--accent-3); }
+        .stat-highlight.amber { color: var(--warn); }
+
+        /* ─── HOW IT WORKS ────────────────────────────────────── */
+        .how-section {
+            background: var(--ink);
+            padding: 6rem 2rem;
+        }
+
+        .how-inner {
+            max-width: 1160px;
+            margin: 0 auto;
+        }
+
+        .how-section .section-eyebrow { color: #6B9FFF; }
+        .how-section .section-heading { color: #fff; }
+        .how-section .section-sub { color: rgba(255,255,255,0.5); }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .step {
+            padding: 2.5rem 2rem;
+            background: rgba(255,255,255,0.03);
+            transition: background 0.2s;
+        }
+
+        .step:hover { background: rgba(255,255,255,0.07); }
+
+        .step-num {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            color: rgba(107, 159, 255, 0.6);
+            margin-bottom: 1.25rem;
+        }
+
+        .step-icon-wrap {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            background: rgba(26,86,255,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .step h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.625rem;
+        }
+
+        .step p {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.45);
+            line-height: 1.7;
+        }
+
+        /* ─── DIMENSIONS SECTION ──────────────────────────────── */
+        .dims-section {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 6rem 2rem;
+        }
+
+        .dims-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 2rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .dims-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 900px) {
+            .dims-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .dim-card {
+            background: var(--surface);
+            border: 1px solid var(--rule);
+            border-radius: 14px;
+            padding: 1.5rem;
+            cursor: default;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dim-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--accent);
+            transform: scaleX(0);
+            transition: transform 0.2s;
+            transform-origin: left;
+        }
+
+        .dim-card:hover::after { transform: scaleX(1); }
+
+        .dim-card:hover {
+            box-shadow: 0 6px 24px rgba(13,15,20,0.08);
+            transform: translateY(-2px);
+        }
+
+        .dim-num {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .dim-icon {
+            width: 36px;
+            height: 36px;
+            margin-bottom: 0.875rem;
+        }
+
+        .dim-card h4 {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.9375rem;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 0.375rem;
+            line-height: 1.3;
+        }
+
+        .dim-card p {
+            font-size: 0.8125rem;
+            color: var(--muted);
+            line-height: 1.65;
+        }
+
+        /* ─── CERT SECTION ────────────────────────────────────── */
+        .cert-section {
+            background: linear-gradient(135deg, #0D1B4B 0%, #0D0F14 100%);
+            padding: 6rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cert-section::before {
+            content: '';
+            position: absolute;
+            top: -200px; right: -100px;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(26,86,255,0.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .cert-inner {
+            max-width: 1160px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5rem;
+            align-items: center;
+        }
+
+        .cert-section .section-eyebrow { color: #6B9FFF; }
+        .cert-section .section-heading { color: #fff; }
+        .cert-section .section-sub { color: rgba(255,255,255,0.5); }
+
+        .cert-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 2.5rem;
+            text-align: center;
+        }
+
+        .cert-seal {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .cert-level-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.875rem;
+            margin-top: 1.5rem;
+        }
+
+        .cert-level {
+            border-radius: 10px;
+            padding: 1rem 0.75rem;
+            text-align: center;
+        }
+
+        .cert-level.pass { background: rgba(0,200,150,0.12); border: 1px solid rgba(0,200,150,0.2); }
+        .cert-level.cond { background: rgba(255,176,32,0.12); border: 1px solid rgba(255,176,32,0.2); }
+        .cert-level.risk { background: rgba(255,92,56,0.12); border: 1px solid rgba(255,92,56,0.2); }
+        .cert-level.fail { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
+
+        .cert-level-range {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.125rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 0.25rem;
+        }
+
+        .cert-level.pass .cert-level-range { color: #00C896; }
+        .cert-level.cond .cert-level-range { color: #FFB020; }
+        .cert-level.risk .cert-level-range { color: #FF5C38; }
+        .cert-level.fail .cert-level-range { color: rgba(255,255,255,0.4); }
+
+        .cert-level-name {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .cert-level.pass .cert-level-name { color: rgba(0,200,150,0.8); }
+        .cert-level.cond .cert-level-name { color: rgba(255,176,32,0.8); }
+        .cert-level.risk .cert-level-name { color: rgba(255,92,56,0.8); }
+        .cert-level.fail .cert-level-name { color: rgba(255,255,255,0.3); }
+
+        /* ─── FOOTER ──────────────────────────────────────────── */
+        footer {
+            background: var(--surface);
+            border-top: 1px solid var(--rule);
+            padding: 3.5rem 2rem 2rem;
+        }
+
+        .footer-inner {
+            max-width: 1160px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-brand p {
+            font-size: 0.875rem;
+            color: var(--muted);
+            line-height: 1.75;
+            max-width: 300px;
+            margin-top: 0.75rem;
+        }
+
+        .footer-col h5 {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--muted-2);
+            margin-bottom: 1rem;
+        }
+
+        .footer-col ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .footer-col a {
+            font-size: 0.9rem;
+            color: var(--ink-3);
+            text-decoration: none;
+            transition: color 0.15s;
+        }
+
+        .footer-col a:hover { color: var(--accent); }
+
+        .footer-bottom {
+            border-top: 1px solid var(--rule);
+            padding-top: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-bottom p {
+            font-size: 0.8125rem;
+            color: var(--muted);
+        }
+
+        .version-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.2rem 0.6rem;
+            background: var(--accent-dim);
+            color: var(--accent);
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* ─── DARK MODE ───────────────────────────────────────── */
+        body.dark {
+            --ink: #F0F2FA;
+            --ink-2: #CBD2EA;
+            --ink-3: #99A3C4;
+            --muted: #6B7594;
+            --muted-2: #4A5270;
+            --rule: #252A3E;
+            --surface: #14172B;
+            --bg: #0D0F1A;
+            --bg-2: #191D31;
+            --accent-dim: rgba(26,86,255,0.15);
+        }
+
+        body.dark header { background: rgba(13,15,26,0.9); }
+        body.dark .score-card { background: #191D31; }
+        body.dark .problem-card { background: #191D31; }
+        body.dark .dim-card { background: #191D31; }
+        body.dark footer { background: #14172B; }
+
+        /* ─── ANIMATIONS ──────────────────────────────────────── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-content > * {
+            animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        .hero-content .hero-badge { animation-delay: 0s; }
+        .hero-content h1         { animation-delay: 0.08s; }
+        .hero-content p          { animation-delay: 0.16s; }
+        .hero-content .cta-group { animation-delay: 0.24s; }
+
+        .hero-visual {
+            animation: fadeUp 0.6s 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        /* ─── RESPONSIVE ──────────────────────────────────────── */
+        @media (max-width: 900px) {
+            .hero {
+                grid-template-columns: 1fr;
+                padding-bottom: 2rem;
+            }
+            .hero-visual { display: none; }
+            .cert-inner { grid-template-columns: 1fr; }
+            .problem-grid { grid-template-columns: 1fr; }
+            .steps-grid { grid-template-columns: 1fr; }
+            .footer-inner { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 640px) {
+            .nav-links { display: none; }
+            .nav-links.open {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 64px; left: 0; right: 0;
+                background: var(--surface);
+                padding: 1rem 1.5rem 1.5rem;
+                border-bottom: 1px solid var(--rule);
+                box-shadow: 0 8px 24px rgba(13,15,20,0.08);
+            }
+            .mobile-menu-btn { display: flex; }
+            .footer-inner { grid-template-columns: 1fr; }
+            .metric-item { min-width: 100px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══════════════════════════════════════════════════ -->
+<header>
+    <nav>
+        <a href="index.html" class="logo-mark">
+            <svg class="logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="32" height="32" rx="8" fill="#1A56FF"/>
+                <path d="M16 6L7 11V17C7 21.97 10.93 26.6 16 28C21.07 26.6 25 21.97 25 17V11L16 6Z" fill="white" fill-opacity="0.2"/>
+                <path d="M16 8L9 12.5V17C9 21.1 12.4 24.9 16 26.2C19.6 24.9 23 21.1 23 17V12.5L16 8Z" fill="white" fill-opacity="0.15"/>
+                <path d="M13 16L15.5 18.5L20 14" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="logo-text">Fair<span>Trust</span></span>
+        </a>
+
+        <div class="nav-links" id="navLinks">
+            <a href="index.html" class="active">Home</a>
+            <a href="upload.html">Upload</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="docs.html">Docs</a>
+            <a href="admin.html">Admin</a>
+        </div>
+
+        <div class="nav-actions">
+            <button class="theme-btn" id="themeBtn" aria-label="Toggle theme">
+                <svg id="themeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+            </button>
+            <a href="upload.html" class="btn-nav">Try Demo</a>
+        </div>
+
+        <button class="mobile-menu-btn" id="mobileBtn" aria-label="Menu">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <line x1="3" y1="12" x2="21" y2="12"/>
+                <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+        </button>
+    </nav>
+</header>
+
+<!-- ═══ HERO ══════════════════════════════════════════════════════ -->
+<section style="background: var(--surface); border-bottom: 1px solid var(--rule);">
+    <div class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                JEDI Ethical AI Framework
+            </div>
+            <h1>AI fairness you<br>can <em>prove.</em></h1>
+            <p>FairTrust evaluates, explains, and certifies your AI models across seven bias dimensions — with compliance reports your regulators, developers, and users can all understand.</p>
+            <div class="cta-group">
+                <a href="upload.html" class="btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>
+                    Run an Audit
+                </a>
+                <a href="docs.html" class="btn-ghost">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    Read the Docs
+                </a>
+            </div>
+        </div>
+
+        <div class="hero-visual">
+            <div class="floating-tag tl">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Bias Detected & Fixed
+            </div>
+            <div class="score-card">
+                <div class="score-card-header">
+                    <div>
+                        <div class="score-card-title">Ethical Audit Report</div>
+                        <div style="font-size:0.8125rem; color: var(--muted); margin-top:2px;">Home Credit Default Dataset</div>
+                    </div>
+                    <div class="score-card-badge">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        Conditional Pass
+                    </div>
+                </div>
+
+                <div class="score-ring-wrap">
+                    <div class="score-ring">
+                        <svg width="120" height="120" viewBox="0 0 120 120">
+                            <circle cx="60" cy="60" r="50" fill="none" stroke="var(--rule)" stroke-width="10"/>
+                            <circle cx="60" cy="60" r="50" fill="none" stroke="#1A56FF" stroke-width="10"
+                                stroke-dasharray="314" stroke-dashoffset="88" stroke-linecap="round"/>
+                        </svg>
+                        <div class="score-ring-label">
+                            <span class="score-ring-num">72</span>
+                            <span class="score-ring-sub">/ 100</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="score-dims">
+                    <div class="score-dim">
+                        <span class="score-dim-label">Demographic Parity</span>
+                        <div class="score-bar-track"><div class="score-bar-fill ok" style="width:82%"></div></div>
+                        <span class="score-dim-val">82</span>
+                    </div>
+                    <div class="score-dim">
+                        <span class="score-dim-label">Equal Opportunity</span>
+                        <div class="score-bar-track"><div class="score-bar-fill ok" style="width:78%"></div></div>
+                        <span class="score-dim-val">78</span>
+                    </div>
+                    <div class="score-dim">
+                        <span class="score-dim-label">Disparate Impact</span>
+                        <div class="score-bar-track"><div class="score-bar-fill warn" style="width:64%"></div></div>
+                        <span class="score-dim-val">64</span>
+                    </div>
+                    <div class="score-dim">
+                        <span class="score-dim-label">Calibration</span>
+                        <div class="score-bar-track"><div class="score-bar-fill risk" style="width:55%"></div></div>
+                        <span class="score-dim-val">55</span>
+                    </div>
+                    <div class="score-dim">
+                        <span class="score-dim-label">Individual Fairness</span>
+                        <div class="score-bar-track"><div class="score-bar-fill ok" style="width:76%"></div></div>
+                        <span class="score-dim-val">76</span>
+                    </div>
+                </div>
+            </div>
+            <div class="floating-tag br">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFB020" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Proxy Risk: Zip Code
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ METRICS STRIP ════════════════════════════════════════════ -->
+<div class="metrics-strip">
+    <div class="metrics-inner">
+        <div class="metric-item">
+            <div class="metric-num">7<span></span></div>
+            <div class="metric-lbl">Fairness Dimensions</div>
+        </div>
+        <div class="metric-item">
+            <div class="metric-num">4<span></span></div>
+            <div class="metric-lbl">Evaluation Layers</div>
+        </div>
+        <div class="metric-item">
+            <div class="metric-num">70<span>%</span></div>
+            <div class="metric-lbl">AI systems show bias</div>
+        </div>
+        <div class="metric-item">
+            <div class="metric-num">0<span></span></div>
+            <div class="metric-lbl">Universal standards (pre-JEDI)</div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ PROBLEM ═══════════════════════════════════════════════════ -->
+<div class="section">
+    <div class="section-eyebrow">The Problem</div>
+    <h2 class="section-heading">AI is making life-changing decisions. Is yours fair?</h2>
+    <p class="section-sub">Hiring, lending, healthcare, criminal justice — hidden bias in AI systems is causing real harm, today. There's no universal standard to prove otherwise.</p>
+
+    <div class="problem-grid">
+        <div class="problem-card">
+            <div class="problem-card-icon red">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF5C38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                    <line x1="23" y1="11" x2="17" y2="11"/>
+                </svg>
+            </div>
+            <span class="stat-highlight red">Amazon</span>
+            <h3>Scrapped a hiring AI that penalised women</h3>
+            <p>Resumes containing the word "women's" (e.g. women's chess club) were systematically downranked — learned entirely from historical data, no explicit programming required.</p>
+        </div>
+
+        <div class="problem-card">
+            <div class="problem-card-icon amber">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFB020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="2"/>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                </svg>
+            </div>
+            <span class="stat-highlight amber">Banks</span>
+            <h3>Charging minorities higher rates for identical applications</h3>
+            <p>Loan approval AIs have been found to charge higher interest rates or outright reject minority applicants — even when their financial profiles were identical to approved candidates.</p>
+        </div>
+
+        <div class="problem-card">
+            <div class="problem-card-icon blue">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1A56FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+            </div>
+            <span class="stat-highlight" style="color: var(--accent);">Hidden</span>
+            <h3>Bias buried deep in model mathematics</h3>
+            <p>The bias is never programmed in — it's learned from historical data. Removing a sensitive column doesn't remove the information; it just hides it in proxy features like zip code or college name.</p>
+        </div>
+
+        <div class="problem-card">
+            <div class="problem-card-icon green">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+            </div>
+            <span class="stat-highlight" style="color: #059669;">India</span>
+            <h3>No AI Act. No enforcement. No standard.</h3>
+            <p>Unlike the EU (which has the AI Act), India has no law yet requiring companies to prove their AI is fair. There's both a technical gap and a legal policy gap — FairTrust fills both.</p>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ HOW IT WORKS ══════════════════════════════════════════════ -->
+<section class="how-section">
+    <div class="how-inner">
+        <div class="section-eyebrow">How It Works</div>
+        <h2 class="section-heading">Six-layer pipeline.<br>One ethical score.</h2>
+        <p class="section-sub" style="margin-bottom:3rem;">Upload your model predictions and dataset. FairTrust handles the rest — from bias detection to compliance certification.</p>
+
+        <div class="steps-grid">
+            <div class="step">
+                <div class="step-num">STEP 01</div>
+                <div class="step-icon-wrap">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6B9FFF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                </div>
+                <h3>Model Ingestion</h3>
+                <p>Upload your dataset (CSV/JSON) and model predictions. Define sensitive attributes, target variable, and fairness priorities — no .pkl or .pth files needed.</p>
+            </div>
+
+            <div class="step">
+                <div class="step-num">STEP 02</div>
+                <div class="step-icon-wrap">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6B9FFF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+                    </svg>
+                </div>
+                <h3>Bias Detection</h3>
+                <p>Seven fairness dimensions evaluated across four Swiss-cheese layers — from systemic disparate impact down to individual prediction fairness.</p>
+            </div>
+
+            <div class="step">
+                <div class="step-num">STEP 03</div>
+                <div class="step-icon-wrap">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6B9FFF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    </svg>
+                </div>
+                <h3>SHAP / LIME Explainability</h3>
+                <p>Individual and group-level feature attribution. Proxy bias detection by combining SHAP importance with correlation to sensitive attributes. Makes invisible decisions visible.</p>
+            </div>
+
+            <div class="step">
+                <div class="step-num">STEP 04</div>
+                <div class="step-icon-wrap">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6B9FFF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 11l3 3L22 4"/>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                    </svg>
+                </div>
+                <h3>Remediation Engine</h3>
+                <p>Doesn't just find problems — prescribes fixes. Rebalancing suggestions for group disparities, proxy feature removal, recalibration steps, and fairness-aware thresholds.</p>
+            </div>
+
+            <div class="step">
+                <div class="step-num">STEP 05</div>
+                <div class="step-icon-wrap">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6B9FFF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                </div>
+                <h3>Three Audience Reports</h3>
+                <p>Developer gets technical SHAP analysis and risk flags. Regulator gets compliance checklist and ethical score. End-user gets plain-language explanation of what influenced their outcome.</p>
+            </div>
+
+            <div class="step">
+                <div class="step-num">STEP 06</div>
+                <div class="step-icon-wrap">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6B9FFF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="8" r="6"/>
+                        <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+                    </svg>
+                </div>
+                <h3>JEDI Certification</h3>
+                <p>Generates a machine-readable certificate — Fully Compliant, Conditional, High Risk, or Non-Compliant — that can be presented to regulators and clients as proof of ethical compliance.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ 7 DIMENSIONS ══════════════════════════════════════════════ -->
+<div class="dims-section">
+    <div class="dims-header">
+        <div>
+            <div class="section-eyebrow">Evaluation Dimensions</div>
+            <h2 class="section-heading" style="margin-bottom:0">Seven angles of fairness</h2>
+        </div>
+        <p style="font-size:0.9rem; color:var(--muted); max-width:320px; line-height:1.75;">Each dimension is independently scored and weighted by user priority, then combined into a single ethical score from 0–100.</p>
+    </div>
+
+    <div class="dims-grid">
+        <div class="dim-card">
+            <div class="dim-num">DIM 01</div>
+            <svg class="dim-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="18" cy="18" r="17" fill="#EDF1FF"/>
+                <path d="M10 22c0-4.4 3.6-8 8-8s8 3.6 8 8" stroke="#1A56FF" stroke-width="1.75" stroke-linecap="round"/>
+                <circle cx="18" cy="12" r="3" stroke="#1A56FF" stroke-width="1.75"/>
+            </svg>
+            <h4>Individual Fairness</h4>
+            <p>Similar individuals are treated similarly by the model, regardless of demographic group.</p>
+        </div>
+
+        <div class="dim-card">
+            <div class="dim-num">DIM 02</div>
+            <svg class="dim-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="18" cy="18" r="17" fill="#EDF1FF"/>
+                <rect x="10" y="20" width="5" height="6" rx="1" stroke="#1A56FF" stroke-width="1.75"/>
+                <rect x="21" y="14" width="5" height="12" rx="1" stroke="#1A56FF" stroke-width="1.75"/>
+                <line x1="12.5" y1="20" x2="12.5" y2="12" stroke="#1A56FF" stroke-width="1.5" stroke-dasharray="2 2"/>
+                <line x1="23.5" y1="14" x2="23.5" y2="12" stroke="#1A56FF" stroke-width="1.5" stroke-dasharray="2 2"/>
+            </svg>
+            <h4>Group Fairness</h4>
+            <p>Defined demographic groups receive equitable outcomes across the model's predictions.</p>
+        </div>
+
+        <div class="dim-card">
+            <div class="dim-num">DIM 03</div>
+            <svg class="dim-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="18" cy="18" r="17" fill="#FFF1EE"/>
+                <circle cx="14" cy="16" r="3" stroke="#FF5C38" stroke-width="1.75"/>
+                <circle cx="22" cy="16" r="3" stroke="#FF5C38" stroke-width="1.75"/>
+                <path d="M10 24c0-2.2 1.8-4 4-4M18 20c2.2 0 4 1.8 4 4" stroke="#FF5C38" stroke-width="1.75" stroke-linecap="round"/>
+            </svg>
+            <h4>Demographic Bias</h4>
+            <p>Covers gender, age, race, disability, and socioeconomic bias across all protected attributes.</p>
+        </div>
+
+        <div class="dim-card">
+            <div class="dim-num">DIM 04</div>
+            <svg class="dim-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="18" cy="18" r="17" fill="#FFF8E6"/>
+                <path d="M10 24 Q14 10 18 20 Q22 30 26 14" stroke="#FFB020" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <circle cx="18" cy="20" r="2" fill="#FFB020"/>
+            </svg>
+            <h4>Calibration Bias</h4>
+            <p>Model confidence is equally reliable across all demographic subgroups — 80% means 80%.</p>
+        </div>
+
+        <div class="dim-card">
+            <div class="dim-num">DIM 05</div>
+            <svg class="dim-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="18" cy="18" r="17" fill="#E9FBF4"/>
+                <path d="M18 10v16M10 18h16" stroke="#00C896" stroke-width="1.75" stroke-linecap="round"/>
+                <circle cx="18" cy="18" r="4" stroke="#00C896" stroke-width="1.75"/>
+            </svg>
+            <h4>Disparate Impact</h4>
+            <p>The 80% rule — approval rate of the minority group must be at least 80% of the majority rate.</p>
+        </div>
+
+        <div class="dim-card">
+            <div class="dim-num">DIM 06</div>
+            <svg class="dim-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="18" cy="18" r="17" fill="#EDF1FF"/>
+                <path d="M13 18c0 0 2-4 5-4s5 4 5 4" stroke="#1A56FF" stroke-width="1.75" stroke-linecap="round"/>
+                <path d="M13 18c0 0 2 4 5 4s5-4 5-4" stroke="#1A56FF" stroke-width="1.75" stroke-linecap="round" stroke-dasharray="2 2"/>
+                <circle cx="18" cy="14" r="1.5" fill="#1A56FF"/>
+            </svg>
+            <h4>Counterfactual Bias</h4>
+            <p>Outcomes should not change if only a sensitive attribute is flipped — same person, different outcome is a red flag.</p>
+        </div>
+
+        <div class="dim-card" style="grid-column: span 2;">
+            <div class="dim-num">DIM 07</div>
+            <svg class="dim-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="18" cy="18" r="17" fill="#F5F0FF"/>
+                <circle cx="18" cy="18" r="8" stroke="#7C3AED" stroke-width="1.75"/>
+                <circle cx="18" cy="18" r="4" stroke="#7C3AED" stroke-width="1.75"/>
+                <circle cx="18" cy="18" r="1.5" fill="#7C3AED"/>
+            </svg>
+            <h4>Intersectional Bias</h4>
+            <p>Overlapping disadvantages across multiple identities (e.g. elderly + female + low-income) that compound and only appear at the intersection — invisible to single-dimension analysis.</p>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ CERTIFICATION ════════════════════════════════════════════ -->
+<section class="cert-section">
+    <div class="cert-inner">
+        <div>
+            <div class="section-eyebrow">Certification</div>
+            <h2 class="section-heading">A certificate your regulators will accept</h2>
+            <p class="section-sub">Not just a score — a machine-readable compliance artifact. Pass it to a regulator, embed it in a model card, or display it in a client-facing dashboard. Built for India's emerging AI governance landscape.</p>
+            <a href="upload.html" class="btn-primary" style="margin-top:1rem">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+                Generate Certificate
+            </a>
+        </div>
+
+        <div class="cert-card">
+            <div class="cert-seal">
+                <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="40" cy="40" r="36" fill="rgba(26,86,255,0.1)" stroke="rgba(26,86,255,0.3)" stroke-width="1.5"/>
+                    <circle cx="40" cy="40" r="28" fill="rgba(26,86,255,0.08)" stroke="rgba(26,86,255,0.2)" stroke-width="1"/>
+                    <path d="M40 20L44.78 31.43L57.02 32.36L48 40.52L50.97 52.47L40 46.12L29.03 52.47L31.99 40.52L23 32.36L35.22 31.43L40 20Z" fill="#1A56FF" fill-opacity="0.8"/>
+                    <circle cx="40" cy="40" r="10" fill="none" stroke="rgba(26,86,255,0.4)" stroke-width="1"/>
+                </svg>
+            </div>
+            <div style="font-family:'Syne',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:rgba(255,255,255,0.4); margin-bottom:0.5rem;">JEDI Certification Levels</div>
+            <div class="cert-level-grid">
+                <div class="cert-level pass">
+                    <div class="cert-level-range">80–100</div>
+                    <div class="cert-level-name">Fully Compliant</div>
+                </div>
+                <div class="cert-level cond">
+                    <div class="cert-level-range">60–79</div>
+                    <div class="cert-level-name">Conditional</div>
+                </div>
+                <div class="cert-level risk">
+                    <div class="cert-level-range">40–59</div>
+                    <div class="cert-level-name">High Risk</div>
+                </div>
+                <div class="cert-level fail">
+                    <div class="cert-level-range">&lt;40</div>
+                    <div class="cert-level-name">Non-Compliant</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ FOOTER ════════════════════════════════════════════════════ -->
+<footer>
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <a href="index.html" class="logo-mark">
+                <svg class="logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="32" height="32" rx="8" fill="#1A56FF"/>
+                    <path d="M16 6L7 11V17C7 21.97 10.93 26.6 16 28C21.07 26.6 25 21.97 25 17V11L16 6Z" fill="white" fill-opacity="0.2"/>
+                    <path d="M13 16L15.5 18.5L20 14" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="logo-text">Fair<span>Trust</span> AI</span>
+            </a>
+            <p>JEDI Ethical AI Evaluation Framework — test, explain, and certify your AI models for fairness across seven bias dimensions.</p>
+        </div>
+
+        <div class="footer-col">
+            <h5>Product</h5>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="upload.html">Upload & Demo</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="docs.html">Documentation</a></li>
+                <li><a href="admin.html">Admin Panel</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-col">
+            <h5>Resources</h5>
+            <ul>
+                <li><a href="#">GitHub</a></li>
+                <li><a href="#">Contact</a></li>
+                <li><a href="#">Privacy Policy</a></li>
+                <li><a href="#">Terms of Use</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>© 2024 FairTrust AI Evaluation Framework</p>
+        <div style="display:flex;align-items:center;gap:0.75rem">
+            <span class="version-pill">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                v1.0
+            </span>
+            <span style="font-size:0.8125rem; color:var(--muted)">Built for India's AI governance future</span>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // Mobile nav toggle
+    document.getElementById('mobileBtn').addEventListener('click', () => {
+        document.getElementById('navLinks').classList.toggle('open');
+    });
+
+    // Theme toggle
+    const themeBtn = document.getElementById('themeBtn');
+    const themeIcon = document.getElementById('themeIcon');
+    const sunPath = `<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`;
+    const moonPath = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+
+    let dark = false;
+    themeBtn.addEventListener('click', () => {
+        dark = !dark;
+        document.body.classList.toggle('dark', dark);
+        themeIcon.innerHTML = dark ? sunPath : moonPath;
+    });
+
+    // Animate bars on load
+    window.addEventListener('load', () => {
+        document.querySelectorAll('.score-bar-fill').forEach(bar => {
+            const w = bar.style.width;
+            bar.style.width = '0';
+            setTimeout(() => { bar.style.width = w; }, 400);
+        });
+    });
+</script>
+</body>
+</html>
