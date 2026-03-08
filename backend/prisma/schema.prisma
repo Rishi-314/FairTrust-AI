@@ -65,8 +65,8 @@ model Dataset {
   userId String
   user   User   @relation(fields: [userId], references: [id])
 
-  evaluations     Evaluation[]
-  predictionFiles PredictionFile[]
+  evaluations Evaluation[]
+  // predictionFiles PredictionFile[]
 }
 
 model PredictionFile {
@@ -74,10 +74,10 @@ model PredictionFile {
   filePath   String
   uploadedAt DateTime @default(now())
 
-  datasetId String
-  dataset   Dataset @relation(fields: [datasetId], references: [id])
+  // datasetId String
+  // dataset   Dataset @relation(fields: [datasetId], references: [id])
 
-  evaluations Evaluation[]
+  // evaluations Evaluation[]
 }
 
 model Model {
@@ -118,7 +118,7 @@ model Evaluation {
   status       String
   createdAt    DateTime @default(now())
 
-  reportType ReportType // NEW
+  reportType ReportType
 
   datasetId String
   dataset   Dataset @relation(fields: [datasetId], references: [id])
@@ -126,8 +126,9 @@ model Evaluation {
   modelId String
   model   Model  @relation(fields: [modelId], references: [id])
 
-  predictionId String
-  prediction   PredictionFile @relation(fields: [predictionId], references: [id])
+  // REMOVE prediction:
+  // predictionId String
+  // prediction   PredictionFile @relation(fields: [predictionId], references: [id])
 
   fairnessMetrics FairnessMetrics?
   shapExplanation SHAPExplanation?

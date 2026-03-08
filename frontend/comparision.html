@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Comparison — Fairtrust AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #4F46E5; --primary-soft: #EEF2FF;
+            --success: #059669; --success-light: #D1FAE5;
+            --warning: #D97706; --warning-light: #FEF3C7;
+            --danger: #DC2626; --danger-light: #FEE2E2;
+            --bg: #FAFBFC; --surface: #FFFFFF;
+            --text: #1E293B; --text-muted: #64748B; --border: #E2E8F0;
+        }
+        body { font-family: 'DM Sans', -apple-system, sans-serif; background: var(--bg); color: var(--text); }
+
+        header { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; }
+        nav { max-width: 1100px; margin: 0 auto; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.25rem; font-weight: 700; color: var(--primary); text-decoration: none; }
+        .nav-links { display: flex; gap: 2rem; align-items: center; }
+        .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: 500; font-size: 0.9375rem; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--text); }
+
+        .comparison-page { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+        .page-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem; }
+
+        .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .section-title { font-size: 1.125rem; font-weight: 600; margin-bottom: 1.25rem; }
+
+        /* Empty / loading states */
+        .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+        .empty-state h3 { font-size: 1rem; margin-bottom: 0.5rem; color: var(--text); }
+
+        /* Version selector */
+        .version-selector { display: flex; gap: 2rem; align-items: flex-end; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .select-group { flex: 1; min-width: 200px; }
+        .select-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9375rem; }
+        .version-select { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); font-size: 0.9375rem; font-family: inherit; }
+        .version-select:focus { outline: none; border-color: var(--primary); }
+        .vs-badge { font-size: 1.375rem; font-weight: 700; color: var(--primary); padding-bottom: 0.5rem; }
+        .compare-btn { padding: 0.6rem 1.25rem; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 0.875rem; cursor: pointer; font-family: inherit; transition: background 0.2s; white-space: nowrap; }
+        .compare-btn:hover { background: #4338CA; }
+
+        /* Model cards */
+        .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .model-card { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
+        .model-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .model-id { font-size: 0.9375rem; font-weight: 700; font-family: monospace; color: var(--primary); }
+        .model-records { color: var(--text-muted); font-size: 0.8125rem; }
+        .model-score { text-align: center; padding: 1.25rem 0; }
+        .model-score-val { font-size: 2.25rem; font-weight: 800; }
+        .model-score-label { font-size: 0.8125rem; color: var(--text-muted); margin-top: 0.25rem; }
+        .dim-bars { margin-top: 1rem; }
+        .dim-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+        .dim-label { font-size: 0.75rem; color: var(--text-muted); width: 110px; flex-shrink: 0; }
+        .dim-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+        .dim-bar-fill { height: 100%; background: var(--primary); border-radius: 3px; width: 0; transition: width 0.6s ease; }
+        .dim-val { font-size: 0.75rem; font-weight: 600; width: 36px; text-align: right; }
+
+        /* Delta table */
+        .comparison-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin-bottom: 1.25rem; }
+        .comparison-table th { background: var(--bg); padding: 0.6rem 0.75rem; text-align: left; font-weight: 600; font-size: 0.8125rem; color: var(--text-muted); }
+        .comparison-table td { padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--border); }
+        .comparison-table tr:last-child td { border-bottom: none; }
+        .improvement { color: var(--success); font-weight: 700; }
+        .regression  { color: var(--danger);  font-weight: 700; }
+        .neutral     { color: var(--text-muted); font-weight: 600; }
+
+        /* Verdict */
+        .verdict { text-align: center; padding: 1.5rem; background: var(--bg); border-radius: 10px; border: 1px solid var(--border); }
+        .verdict h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.4rem; }
+        .verdict p { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.75rem; }
+        .verdict-badge { display: inline-block; padding: 0.5rem 1.75rem; background: var(--success); color: white; border-radius: 30px; font-weight: 700; font-size: 0.9375rem; }
+        .verdict-badge.neutral-badge { background: var(--text-muted); }
+
+        /* Timeline */
+        .timeline { margin-top: 0.5rem; }
+        .timeline-item { display: flex; gap: 1.5rem; padding: 1rem 1.25rem; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 0.75rem; cursor: pointer; transition: all 0.2s; }
+        .timeline-item:hover { transform: translateX(6px); border-color: var(--primary); }
+        .timeline-left { min-width: 90px; }
+        .timeline-index { font-size: 0.75rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; }
+        .timeline-score { font-size: 1.25rem; font-weight: 800; margin-top: 0.25rem; }
+        .timeline-content { flex: 1; }
+        .timeline-title { font-weight: 600; font-size: 0.9375rem; margin-bottom: 0.2rem; }
+        .timeline-trigger { display: inline-block; padding: 0.2rem 0.6rem; background: var(--primary-soft); color: var(--primary); border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.4rem; }
+        .timeline-meta { font-size: 0.8125rem; color: var(--text-muted); }
+        .improvement-badge { color: var(--success); font-weight: 700; }
+        .regression-badge  { color: var(--danger);  font-weight: 700; }
+
+        /* Sparkline / trend chart */
+        .trend-chart { display: flex; align-items: flex-end; gap: 3px; height: 80px; margin-top: 1rem; padding: 0.5rem; background: var(--bg); border-radius: 8px; border: 1px solid var(--border); }
+        .trend-bar { flex: 1; border-radius: 3px 3px 0 0; background: linear-gradient(180deg, var(--primary), #8B5CF6); min-width: 8px; transition: height 0.4s ease; }
+        .trend-labels { display: flex; gap: 3px; }
+        .trend-label { flex: 1; font-size: 0.65rem; color: var(--text-muted); text-align: center; min-width: 8px; padding-top: 2px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+        /* Alerts */
+        .alerts-summary { display: flex; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+        .alert-chip { padding: 0.35rem 0.85rem; border-radius: 999px; font-size: 0.8125rem; font-weight: 600; }
+        .alert-chip.critical { background: var(--danger-light);  color: var(--danger); }
+        .alert-chip.warning  { background: var(--warning-light); color: var(--warning); }
+        .alert-chip.resolved { background: var(--success-light); color: var(--success); }
+        .alert-chip.neutral  { background: var(--bg); border: 1px solid var(--border); color: var(--text-muted); }
+
+        .alert-item { display: flex; justify-content: space-between; align-items: center; padding: 0.875rem 1rem; background: var(--bg); border-radius: 8px; margin-bottom: 0.5rem; border-left: 4px solid var(--border); }
+        .alert-item.critical { border-left-color: var(--danger); }
+        .alert-item.warning  { border-left-color: var(--warning); }
+        .alert-item.info     { border-left-color: var(--primary); }
+        .alert-item.resolved { border-left-color: var(--success); opacity: 0.75; }
+        .alert-message { font-size: 0.875rem; font-weight: 600; margin-bottom: 0.15rem; }
+        .alert-meta { font-size: 0.75rem; color: var(--text-muted); }
+        .severity-badge { padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; color: white; white-space: nowrap; }
+        .severity-badge.critical { background: var(--danger); }
+        .severity-badge.warning  { background: var(--warning); }
+        .severity-badge.info     { background: var(--primary); }
+        .severity-badge.resolved { background: var(--success); }
+
+        /* Export */
+        .export-options { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 0.5rem; flex-wrap: wrap; }
+        .btn { padding: 0.65rem 1.25rem; border-radius: 8px; font-weight: 600; font-size: 0.875rem; cursor: pointer; transition: all 0.2s; border: none; font-family: inherit; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .btn-primary   { background: var(--primary); color: white; }
+        .btn-primary:hover { background: #4338CA; }
+        .btn-secondary { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+        .btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+
+        @media (max-width: 768px) {
+            .comparison-grid { grid-template-columns: 1fr; }
+            .version-selector { flex-direction: column; }
+            .vs-badge { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html" class="logo">Fairtrust AI Framework</a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="upload.html">Upload</a>
+                <a href="docs.html">Docs</a>
+                <a href="admin.html">Admin</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="comparison-page">
+        <h1 class="page-title">Model Comparison &amp; History</h1>
+
+        <!-- ── Comparison section ── -->
+        <section class="section-card" id="comparisonSection">
+            <h2 class="section-title">Model Version Comparison</h2>
+
+            <div class="version-selector">
+                <div class="select-group">
+                    <label>Evaluation A</label>
+                    <select class="version-select" id="selectA"></select>
+                </div>
+                <div class="vs-badge">VS</div>
+                <div class="select-group">
+                    <label>Evaluation B</label>
+                    <select class="version-select" id="selectB"></select>
+                </div>
+                <button class="compare-btn" onclick="runComparison()">Compare →</button>
+            </div>
+
+            <div id="comparisonResult">
+                <div class="empty-state">
+                    <h3>Select two evaluations above and click Compare</h3>
+                    <p>Side-by-side fairness dimension breakdown will appear here.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── History section ── -->
+        <section class="section-card">
+            <h2 class="section-title">Retraining History</h2>
+            <div id="historySection">
+                <div class="empty-state"><p>Loading history…</p></div>
+            </div>
+        </section>
+
+        <!-- ── Alerts section ── -->
+        <section class="section-card">
+            <h2 class="section-title">Monitoring Alerts</h2>
+            <div id="alertsSection">
+                <div class="empty-state"><p>Loading alerts…</p></div>
+            </div>
+        </section>
+
+        <div class="export-options">
+            <button class="btn btn-secondary" onclick="exportPDF()">📑 Export PDF Summary</button>
+            <button class="btn btn-secondary" onclick="exportCSV()">📊 Export CSV</button>
+            <button class="btn btn-primary"   onclick="exportJSON()">📁 Export JSON</button>
+        </div>
+    </main>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:5000';
+
+        const DIMENSIONS = [
+            "Individual Fairness", "Group Fairness", "Demographic Bias",
+            "Calibration", "Disparate Impact", "Counterfactual", "Intersectional"
+        ];
+
+        function scoreColor(score) {
+            if (score >= 0.80) return 'var(--success)';
+            if (score >= 0.65) return 'var(--warning)';
+            return 'var(--danger)';
+        }
+
+        function shortId(id) {
+            return id ? id.slice(0, 8) + '…' : '—';
+        }
+
+        // ── Populate selectors ────────────────────────────────────────────────
+        async function loadSelectors() {
+            try {
+                const res  = await fetch(`${API_BASE}/compare/list`);
+                const data = await res.json();
+                const evals = data.evaluations || [];
+
+                const selectA = document.getElementById('selectA');
+                const selectB = document.getElementById('selectB');
+
+                if (!evals.length) {
+                    selectA.innerHTML = '<option>No evaluations yet</option>';
+                    selectB.innerHTML = '<option>No evaluations yet</option>';
+                    return;
+                }
+
+                const options = evals.map((e, i) =>
+                    `<option value="${e.evaluation_id}">${shortId(e.evaluation_id)} — Score: ${e.ethical_score?.toFixed(2) ?? '—'} (${e.records?.toLocaleString() ?? '?'} records)</option>`
+                ).join('');
+
+                selectA.innerHTML = options;
+                selectB.innerHTML = options;
+
+                // Default: A = first, B = second (or last if only one)
+                if (evals.length > 1) selectB.selectedIndex = 1;
+
+                // Auto-run if there are at least 2
+                if (evals.length >= 2) runComparison();
+            } catch (e) {
+                document.getElementById('selectA').innerHTML = '<option>API unavailable</option>';
+                document.getElementById('selectB').innerHTML = '<option>API unavailable</option>';
+            }
+        }
+
+        // ── Run comparison ────────────────────────────────────────────────────
+        async function runComparison() {
+            const idA = document.getElementById('selectA').value;
+            const idB = document.getElementById('selectB').value;
+
+            if (!idA || !idB || idA === idB) {
+                document.getElementById('comparisonResult').innerHTML =
+                    `<div class="empty-state"><h3>Please select two different evaluations.</h3></div>`;
+                return;
+            }
+
+            document.getElementById('comparisonResult').innerHTML =
+                `<div class="empty-state"><p>Loading comparison…</p></div>`;
+
+            try {
+                const res  = await fetch(`${API_BASE}/compare?eval_a=${idA}&eval_b=${idB}`);
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'failed');
+                renderComparison(data);
+            } catch (e) {
+                document.getElementById('comparisonResult').innerHTML =
+                    `<div class="empty-state"><h3>Could not load comparison</h3><p>${e.message}</p></div>`;
+            }
+        }
+
+        function renderComparison(data) {
+            const a = data.eval_a;
+            const b = data.eval_b;
+            const verdict = data.verdict;
+
+            const modelCard = (ev, label) => {
+                const dims = ev.dimensions || {};
+                const dimBars = DIMENSIONS.map(d => {
+                    const v = dims[d] ?? 0;
+                    return `
+                    <div class="dim-row">
+                        <span class="dim-label">${d}</span>
+                        <div class="dim-bar-track">
+                            <div class="dim-bar-fill" data-pct="${Math.round(v * 100)}"></div>
+                        </div>
+                        <span class="dim-val" style="color:${scoreColor(v)}">${v.toFixed(2)}</span>
+                    </div>`;
+                }).join('');
+
+                return `
+                <div class="model-card">
+                    <div class="model-header">
+                        <span class="model-id">${shortId(ev.evaluation_id)}</span>
+                        <span class="model-records">${ev.records?.toLocaleString() ?? '—'} records</span>
+                    </div>
+                    <div class="model-score">
+                        <div class="model-score-val" style="color:${scoreColor(ev.ethical_score)}">${ev.ethical_score?.toFixed(2) ?? '—'}</div>
+                        <div class="model-score-label">Ethical Score (${label})</div>
+                    </div>
+                    <div class="dim-bars">${dimBars}</div>
+                </div>`;
+            };
+
+            const deltaRows = (data.delta || []).map(row => `
+                <tr>
+                    <td>${row.dimension}</td>
+                    <td>${row.score_a?.toFixed(4)}</td>
+                    <td>${row.score_b?.toFixed(4)}</td>
+                    <td class="${row.delta_class}">${row.delta_label}</td>
+                </tr>`).join('');
+
+            const verdictBadgeClass = verdict.winner ? '' : 'neutral-badge';
+
+            document.getElementById('comparisonResult').innerHTML = `
+                <div class="comparison-grid">
+                    ${modelCard(a, 'Eval A')}
+                    ${modelCard(b, 'Eval B')}
+                </div>
+                <table class="comparison-table">
+                    <thead>
+                        <tr><th>Dimension</th><th>Eval A</th><th>Eval B</th><th>Δ</th></tr>
+                    </thead>
+                    <tbody>${deltaRows}</tbody>
+                </table>
+                <div class="verdict">
+                    <h3>${verdict.icon} ${verdict.title}</h3>
+                    <p>${verdict.detail}</p>
+                    <span class="verdict-badge ${verdictBadgeClass}">${verdict.badge}</span>
+                </div>`;
+
+            // Animate bars
+            requestAnimationFrame(() => {
+                document.querySelectorAll('.dim-bar-fill[data-pct]').forEach(el => {
+                    el.style.width = el.dataset.pct + '%';
+                });
+            });
+        }
+
+        // ── History ───────────────────────────────────────────────────────────
+        async function loadHistory() {
+            try {
+                const res  = await fetch(`${API_BASE}/compare/history`);
+                const data = await res.json();
+                renderHistory(data.history || [], data.trend || []);
+            } catch (_) {
+                document.getElementById('historySection').innerHTML =
+                    `<div class="empty-state"><p>Could not load history.</p></div>`;
+            }
+        }
+
+        function renderHistory(history, trend) {
+            if (!history.length) {
+                document.getElementById('historySection').innerHTML =
+                    `<div class="empty-state"><h3>No history yet</h3><p>Complete multiple evaluations to see the retraining timeline.</p></div>`;
+                return;
+            }
+
+            // Sparkline
+            const maxScore = Math.max(...trend, 0.01);
+            const sparkBars = trend.map(v => {
+                const pct = Math.round((v / maxScore) * 100);
+                return `<div class="trend-bar" style="height:${pct}%" title="${v}"></div>`;
+            }).join('');
+            const sparkLabels = trend.map((v, i) =>
+                `<div class="trend-label">${v.toFixed(2)}</div>`
+            ).join('');
+
+            const items = history.map((h, i) => {
+                const impHtml = h.improvement != null
+                    ? `<span class="${h.improvement >= 0 ? 'improvement-badge' : 'regression-badge'}">${h.improvement >= 0 ? '+' : ''}${h.improvement_pct}%</span> overall fairness`
+                    : `Baseline score: <strong>${h.ethical_score.toFixed(2)}</strong>`;
+
+                return `
+                <div class="timeline-item" onclick="viewEval('${h.evaluation_id}')">
+                    <div class="timeline-left">
+                        <div class="timeline-index">Eval ${history.length - i}</div>
+                        <div class="timeline-score" style="color:${scoreColor(h.ethical_score)}">${h.ethical_score.toFixed(2)}</div>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">Evaluation ${shortId(h.evaluation_id)}</div>
+                        <span class="timeline-trigger">${h.trigger}</span>
+                        <div class="timeline-meta">
+                            Improvement: ${impHtml}<br>
+                            ${h.records ? h.records.toLocaleString() + ' records' : ''}
+                            ${h.model_id ? '&nbsp;·&nbsp; Model: ' + h.model_id.slice(0, 8) : ''}
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            document.getElementById('historySection').innerHTML = `
+                <div class="trend-chart">${sparkBars}</div>
+                <div class="trend-labels">${sparkLabels}</div>
+                <div class="timeline" style="margin-top:1rem">${items}</div>`;
+        }
+
+        // ── Alerts ────────────────────────────────────────────────────────────
+        async function loadAlerts() {
+            try {
+                const res  = await fetch(`${API_BASE}/compare/alerts`);
+                const data = await res.json();
+                renderAlerts(data.alerts || [], data.summary || {});
+            } catch (_) {
+                document.getElementById('alertsSection').innerHTML =
+                    `<div class="empty-state"><p>Could not load alerts.</p></div>`;
+            }
+        }
+
+        function renderAlerts(alerts, summary) {
+            const chips = `
+                <div class="alerts-summary">
+                    ${summary.critical ? `<span class="alert-chip critical">🔴 ${summary.critical} Critical</span>` : ''}
+                    ${summary.warning  ? `<span class="alert-chip warning">⚠️ ${summary.warning} Warning</span>`  : ''}
+                    ${summary.resolved ? `<span class="alert-chip resolved">✓ ${summary.resolved} Resolved</span>` : ''}
+                    <span class="alert-chip neutral">Total: ${summary.total || 0}</span>
+                </div>`;
+
+            if (!alerts.length) {
+                document.getElementById('alertsSection').innerHTML =
+                    chips + `<div class="empty-state"><h3>No alerts</h3><p>All evaluations are within acceptable thresholds.</p></div>`;
+                return;
+            }
+
+            const items = alerts.map(a => {
+                const sev  = a.severity.toLowerCase();
+                const cls  = a.resolved ? 'resolved' : sev;
+                const icon = { critical: '🔴', warning: '⚠️', info: 'ℹ️' }[sev] || '•';
+                const label = a.resolved ? 'Resolved' : a.severity;
+                return `
+                <div class="alert-item ${cls}">
+                    <div>
+                        <div class="alert-message">${icon} ${a.message}</div>
+                        <div class="alert-meta">Eval: ${shortId(a.eval_id)}</div>
+                    </div>
+                    <span class="severity-badge ${cls}">${label}</span>
+                </div>`;
+            }).join('');
+
+            document.getElementById('alertsSection').innerHTML = chips + items;
+        }
+
+        // ── Actions ───────────────────────────────────────────────────────────
+        function viewEval(evalId) {
+            window.location.href = `dashboard.html?eval_id=${evalId}`;
+        }
+
+        function exportPDF()  { alert('Exporting comparison summary as PDF…'); }
+        function exportCSV()  { alert('Exporting historical metrics as CSV…'); }
+        function exportJSON() {
+            const data = { message: 'Export from comparison page' };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+            a.download = 'comparison_export.json'; a.click();
+        }
+
+        // ── Init ──────────────────────────────────────────────────────────────
+        (async function init() {
+            await Promise.all([loadSelectors(), loadHistory(), loadAlerts()]);
+        })();
+    </script>
+</body>
+</html>

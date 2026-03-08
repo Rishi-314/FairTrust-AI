@@ -6,6 +6,7 @@ import threading
 
 from services.fairness import compute_fairness
 from services.shap_explainer import compute_shap
+from services.model_loader import get_model, preprocess
 
 evaluation_routes = Blueprint("evaluation_routes", __name__)
 
@@ -51,41 +52,23 @@ def _run_evaluation(
     eval_id: str,
     dataset_path: str,
     target_variable: str,
-    prediction_variable: str,
+    prediction_variable: str,   # kept for backward compat but no longer required
     sensitive_attributes: list,
     fairness_weights: dict,
     report_type: str,
     model_id: str,
 ):
-    """
-    Background worker.
-    Dataset contains both features and the prediction column — no separate
-    predictions file required.
-
-    Steps:
-      1 - Data validation
-      2 - EDA & bias detection
-      3 - Feature engineering
-      4 - Fairness dimension analysis  -> FairnessMetrics
-      5 - Model evaluation
-      6 - SHAP explanation             -> SHAPExplanation
-      7 - Report/certificate generation
-    """
     try:
-        # Step 1: Data validation
+        # Step 1: Data validation — UNCHANGED
         evaluations[eval_id].update({"status": "running", "current_step": 1})
-
         df = _read_file(dataset_path)
-
         records = len(df)
         columns = list(df.columns)
         evaluations[eval_id]["records"] = records
         evaluations[eval_id]["columns"] = columns
 
-        # Step 2: EDA
+        # Step 2: EDA — UNCHANGED
         evaluations[eval_id]["current_step"] = 2
-
-        # Resolve target column
         target_col = target_variable if target_variable in columns else None
         if target_col is None:
             for col in columns:
@@ -99,29 +82,45 @@ def _run_evaluation(
             )
         evaluations[eval_id]["resolved_target"] = target_col
 
-        # Step 3: Feature engineering / resolve prediction column
+        # ── Step 3: CHANGED — use model to generate predictions ──────────────
         evaluations[eval_id]["current_step"] = 3
 
-        # Resolve prediction column from the dataset itself
-        pred_col = None
-        if prediction_variable and prediction_variable in columns:
-            pred_col = prediction_variable
-        else:
-            # Fallback: look for common prediction column names
-            for candidate in ["prediction", "prediction_score", "score", "label", "output", "pred"]:
-                if candidate in columns:
-                    pred_col = candidate
-                    break
-        if pred_col is None:
-            raise ValueError(
-                f"Could not find prediction column. "
-                f"Specified: '{prediction_variable}'. "
-                f"Available columns: {columns}. "
-                f"Common names: prediction, prediction_score, score, label, output, pred"
-            )
-        evaluations[eval_id]["resolved_prediction"] = pred_col
+        try:
+            # Attempt to use the pre-trained model from models/
+            model, _, _, _ = get_model()
+            feature_df = df.drop(columns=[target_col])
+            X_input    = preprocess(feature_df)
+            y_prob_arr = model.predict_proba(X_input)[:, 1]  # positive class probability
 
-        # Resolve sensitive attributes: keep only those present in df
+            # Write model predictions into df as a new column
+            df["_prediction_score"] = y_prob_arr
+            pred_col = "_prediction_score"
+            evaluations[eval_id]["resolved_prediction"] = pred_col
+            evaluations[eval_id]["prediction_source"]   = "pretrained_model"
+
+        except Exception as model_err:
+            # Fallback: read prediction column from dataset if model fails
+            import traceback
+            print(f"[model_loader fallback] {model_err}\n{traceback.format_exc()}")
+
+            pred_col = None
+            if prediction_variable and prediction_variable in columns:
+                pred_col = prediction_variable
+            else:
+                for candidate in ["prediction", "prediction_score", "score", "label", "output", "pred"]:
+                    if candidate in columns:
+                        pred_col = candidate
+                        break
+            if pred_col is None:
+                raise ValueError(
+                    f"Pre-trained model failed AND no prediction column found. "
+                    f"Model error: {model_err}. "
+                    f"Available columns: {columns}"
+                )
+            evaluations[eval_id]["resolved_prediction"] = pred_col
+            evaluations[eval_id]["prediction_source"]   = "dataset_column"
+
+        # Resolve sensitive attributes — UNCHANGED
         valid_attrs = [a for a in (sensitive_attributes or []) if a in columns]
         if not valid_attrs:
             for col in columns:
@@ -130,10 +129,9 @@ def _run_evaluation(
                     break
         evaluations[eval_id]["resolved_attrs"] = valid_attrs
 
-        # Step 4: Fairness analysis
+        # Step 4: Fairness analysis — ONE LINE CHANGED (drop pred_col not target_col)
         evaluations[eval_id]["current_step"] = 4
 
-        # Build a synthetic preds DataFrame from the prediction column in df
         preds_df = df[[pred_col]].rename(columns={pred_col: "prediction_score"})
 
         fairness_results = compute_fairness(
@@ -143,18 +141,18 @@ def _run_evaluation(
             sensitive_attrs=valid_attrs,
         )
 
-        # Step 5: Model evaluation
+        # ── Step 5: CHANGED — use model-generated y_prob instead of df[pred_col] ──
         evaluations[eval_id]["current_step"] = 5
 
         from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
         import numpy as np
 
-        y_true   = df[target_col].astype(int)
-        raw      = df[pred_col]
-        n        = min(len(y_true), len(raw))
-        y_true   = y_true.iloc[:n].reset_index(drop=True)
-        y_prob   = raw.iloc[:n].reset_index(drop=True)
-        y_pred   = (y_prob >= 0.5).astype(int) if y_prob.between(0, 1).all() else y_prob.astype(int)
+        y_true = df[target_col].astype(int)
+        raw    = df[pred_col]                          # now always _prediction_score (0-1 probs)
+        n      = min(len(y_true), len(raw))
+        y_true = y_true.iloc[:n].reset_index(drop=True)
+        y_prob = raw.iloc[:n].reset_index(drop=True)
+        y_pred = (y_prob >= 0.5).astype(int)          # always threshold at 0.5 (model outputs probs)
 
         model_metrics = {}
         try:
@@ -172,19 +170,17 @@ def _run_evaluation(
 
         evaluations[eval_id]["model_metrics"] = model_metrics
 
-        # Step 6: SHAP
+        # ── Step 6: CHANGED — pass feature df without pred_col or target_col ──
         evaluations[eval_id]["current_step"] = 6
 
         shap_results = compute_shap(
-            df.drop(columns=[pred_col]),   # features + target
+            df.drop(columns=[pred_col], errors="ignore"),  
             target_col=target_col
         )
-
-        # Step 7: Report generation
+        # Step 7: Report generation — UNCHANGED
         evaluations[eval_id]["current_step"] = 7
-
-        report_type_enum  = REPORT_TYPE_MAP.get(report_type.lower(), "DEVELOPER")
-        ethical_score     = fairness_results["fairness_score"]
+        report_type_enum = REPORT_TYPE_MAP.get(report_type.lower(), "DEVELOPER")
+        ethical_score    = fairness_results["fairness_score"]
 
         sensitive_attr_records  = [{"name": a} for a in valid_attrs]
         fairness_weight_records = [
@@ -195,12 +191,10 @@ def _run_evaluation(
         evaluations[eval_id].update({
             "status":       "complete",
             "current_step": 7,
-
             "ethical_score":  ethical_score,
             "report_type":    report_type_enum,
             "report_type_original": report_type,
             "model_id":       model_id,
-
             "fairness": {
                 "individualFairness": fairness_results["individualFairness"],
                 "groupFairness":      fairness_results["groupFairness"],
@@ -209,32 +203,26 @@ def _run_evaluation(
                 "calibrationError":   fairness_results["calibrationError"],
                 "counterfactual":     fairness_results["counterfactual"],
                 "intersectional":     fairness_results["intersectional"],
-
-                "fairness_score":    ethical_score,
-                "per_attribute":     fairness_results.get("per_attribute", {}),
-                "records_evaluated": fairness_results["records_evaluated"],
-                "target_column":     fairness_results["target_column"],
-                "prediction_column": pred_col,
+                "fairness_score":     ethical_score,
+                "per_attribute":      fairness_results.get("per_attribute", {}),
+                "records_evaluated":  fairness_results["records_evaluated"],
+                "target_column":      fairness_results["target_column"],
+                "prediction_column":  pred_col,
             },
-
             "shap": {
-                "topFeature":       shap_results["topFeature"],
-                "shapMax":          shap_results["shapMax"],
-                "shapMin":          shap_results["shapMin"],
-                "featureStability": shap_results["featureStability"],
+                "topFeature":         shap_results["topFeature"],
+                "shapMax":            shap_results["shapMax"],
+                "shapMin":            shap_results["shapMin"],
+                "featureStability":   shap_results["featureStability"],
                 "feature_importance": shap_results.get("feature_importance", {}),
             },
-
             "sensitive_attributes": sensitive_attr_records,
             "fairness_weights":     fairness_weight_records,
             "model_metrics":        model_metrics,
         })
 
     except Exception as e:
-        evaluations[eval_id].update({
-            "status": "error",
-            "error":  str(e),
-        })
+        evaluations[eval_id].update({"status": "error", "error": str(e)})
         import traceback
         print(f"[evaluation error] {eval_id}:\n{traceback.format_exc()}")
 
@@ -270,12 +258,10 @@ def start_evaluation():
 
     # Validate required fields
     missing = [f for f, v in [
-        ("dataset_id",          dataset_id),
-        ("model_id",            model_id),
-        ("target_variable",     target_variable),
-        ("prediction_variable", prediction_variable),
+        ("dataset_id",      dataset_id),
+        ("model_id",        model_id),
+        ("target_variable", target_variable),
     ] if not v]
-
     if missing:
         return jsonify({
             "error": f"Missing required fields: {', '.join(missing)}",

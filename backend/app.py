@@ -7,10 +7,18 @@ from routes.developer_report import developer_report_routes
 from routes.regulator_report import regulator_report_routes
 from routes.comparison import comparison_routes
 from routes.admin import admin_routes
+from services.model_loader import load_artifacts
 
 import os
 
+
 app = Flask(__name__)
+
+try:
+    load_artifacts()
+    print("✅ Pre-trained model loaded successfully")
+except FileNotFoundError as e:
+    print(f"⚠️  {e} — will fall back to on-the-fly training")
 
 # ── CORS — allow everything from any origin ───────────────────────────────────
 CORS(app,

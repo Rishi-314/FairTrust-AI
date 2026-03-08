@@ -234,9 +234,8 @@
 
       <!-- Prediction variable -->
       <div class="field-group" style="margin-top:0;">
-        <label for="predictionVariableText">Prediction Variable <span style="color:var(--danger)">*</span></label>
-        <input type="text" id="predictionVariableText" placeholder="e.g. prediction_score, score, pred">
-        <div class="field-hint">The column in your dataset containing model predictions or scores.</div>
+        <label for="predictionVariableText">Prediction Variable <span style="color:var(--muted)">(optional)</span></label>
+        <div class="field-hint">Leave blank — predictions are generated automatically by the AI model. Or specify a column name to override.</div>
       </div>
       <div class="field-group" id="predictionDropdownSection" style="display:none;">
         <label for="predictionVariableSelect">Or select from detected columns</label>
@@ -530,7 +529,6 @@ function onPredictionSelect() {
 }
 
 function getTargetVariable()     { return (document.getElementById('targetVariableText').value     || '').trim(); }
-function getPredictionVariable() { return (document.getElementById('predictionVariableText').value || '').trim(); }
 
 // Sample data
 function toggleSampleData() {
@@ -706,11 +704,9 @@ async function analyzeFairness() {
     if (!S.datasetId) { toast('Please upload a dataset file first', 'error'); return; }
 
     const targetVariable     = getTargetVariable();
-    const predictionVariable = getPredictionVariable();
 
     if (!targetVariable)     { toast('Please specify a target variable', 'error');     document.getElementById('targetVariableText').focus();     return; }
-    if (!predictionVariable) { toast('Please specify a prediction variable', 'error'); document.getElementById('predictionVariableText').focus(); return; }
-
+   
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
     btn.textContent = 'Starting analysis…';
@@ -732,7 +728,6 @@ async function analyzeFairness() {
             dataset_id:           S.datasetId,
             model_id:             S.modelId,
             target_variable:      targetVariable,
-            prediction_variable:  predictionVariable,
             sensitive_attributes: getSensitiveAttrs(),
             fairness_weights:     getWeights(),
             report_type:          generateAll ? 'all' : (S.selectedReport || 'developer'),
