@@ -125,7 +125,6 @@
             <div class="nav-links">
                 <a href="index.html">Home</a>
                 <a href="upload.html">Upload</a>
-                <a href="dashboard.html">Dashboard</a>
                 <a href="docs.html">Docs</a>
                 <a href="admin.html">Admin</a>
             </div>
@@ -367,7 +366,7 @@
 
         // ── Full render ───────────────────────────────────────────────────────
         function renderReport(data, evalId) {
-            const backLink = `dashboard.html${evalId ? '?eval_id=' + evalId : ''}`;
+            const backLink = `index.html`;
             document.getElementById('app').innerHTML = `
                 <div class="report-header">
                     <div>
@@ -376,7 +375,7 @@
                             Eval ID: <code>${evalId || '—'}</code> &nbsp;|&nbsp;
                             Ethical Score: <strong>${fmt(data.ethical_score, 2)}</strong> &nbsp;|&nbsp;
                             ${data.records ? data.records.toLocaleString() + ' records' : ''}
-                            &nbsp;<a href="${backLink}" style="color:var(--primary);font-weight:600">← Dashboard</a>
+                            &nbsp;<a href="${backLink}" style="color:var(--primary);font-weight:600">← Home</a>
                         </div>
                     </div>
                     <div class="export-buttons">
