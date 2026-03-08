@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — Fairtrust AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #4F46E5; --primary-soft: #EEF2FF;
+            --success: #059669; --warning: #D97706; --danger: #DC2626;
+            --bg: #FAFBFC; --surface: #FFFFFF;
+            --text: #1E293B; --text-muted: #64748B; --border: #E2E8F0;
+        }
+        body { font-family: 'DM Sans', -apple-system, sans-serif; background: var(--bg); color: var(--text); }
+
+        header { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; }
+        nav { max-width: 1100px; margin: 0 auto; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.25rem; font-weight: 700; color: var(--primary); text-decoration: none; }
+        .nav-links { display: flex; gap: 2rem; align-items: center; }
+        .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: 500; font-size: 0.9375rem; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--text); }
+        .nav-links a.active { color: var(--primary); }
+        .user-profile { display: flex; align-items: center; gap: 0.75rem; }
+        .dark-mode-toggle { cursor: pointer; font-size: 1.1rem; opacity: 0.8; }
+
+        .dashboard { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+        /* No-data state */
+        .state-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 3rem 2rem; text-align: center; }
+        .state-card .state-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+        .state-card h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .state-card p { color: var(--text-muted); font-size: 0.9375rem; margin-bottom: 1.5rem; }
+
+        /* Score header */
+        .score-header { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem; }
+        .score-gauge { display: flex; align-items: center; gap: 1.5rem; }
+        .gauge { width: 88px; height: 88px; position: relative; flex-shrink: 0; }
+        .gauge-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+        .gauge-circle-bg { stroke: var(--border); stroke-width: 6; fill: none; }
+        .gauge-circle-fill { stroke-width: 6; fill: none; stroke-dasharray: 314; stroke-dashoffset: 314; transition: stroke-dashoffset 0.8s ease; }
+        .gauge-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.25rem; font-weight: 700; color: var(--text); }
+        .score-info h2 { font-size: 1.125rem; font-weight: 600; margin-bottom: 0.35rem; }
+        .score-meta { font-size: 0.8125rem; color: var(--text-muted); margin-top: 0.35rem; }
+
+        .badge { display: inline-block; padding: 0.35rem 0.75rem; border-radius: 999px; font-weight: 600; font-size: 0.8125rem; }
+        .badge.pass    { background: #D1FAE5; color: var(--success); }
+        .badge.warning { background: #FEF3C7; color: var(--warning); }
+        .badge.fail    { background: #FEE2E2; color: var(--danger); }
+
+        .action-buttons { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+        .btn { padding: 0.6rem 1.25rem; border-radius: 8px; font-weight: 600; font-size: 0.875rem; cursor: pointer; transition: all 0.2s; border: none; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-family: inherit; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: #4338CA; transform: translateY(-1px); }
+        .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+        .btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* Dimensions */
+        .dimensions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .dimension-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; }
+        .dimension-card:hover { border-color: var(--primary); box-shadow: 0 4px 12px rgba(79,70,229,0.08); }
+        .dimension-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+        .dimension-icon { width: 36px; height: 36px; background: var(--primary-soft); color: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+        .dimension-title { flex: 1; font-weight: 600; font-size: 0.9375rem; }
+        .dimension-score { font-weight: 700; font-size: 1rem; color: var(--primary); }
+        .progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin: 0.5rem 0; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0; transition: width 0.6s ease; }
+        .dimension-status { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.35rem; }
+        .status-badge { padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+        .status-badge.pass    { background: #D1FAE5; color: var(--success); }
+        .status-badge.warning { background: #FEF3C7; color: var(--warning); }
+        .status-badge.fail    { background: #FEE2E2; color: var(--danger); }
+        .finding { color: var(--text-muted); font-size: 0.8125rem; }
+
+        /* Layers */
+        .layers-section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .layers-title { font-size: 1.125rem; font-weight: 600; margin-bottom: 1.25rem; }
+        .pyramid { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+        .layer { width: 100%; max-width: 520px; padding: 1rem 1.25rem; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); transition: opacity 0.2s; }
+        .layer:hover { opacity: 0.85; }
+        .layer-1 { background: var(--primary-soft); }
+        .layer-2 { background: rgba(79,70,229,0.12); }
+        .layer-3 { background: rgba(79,70,229,0.08); }
+        .layer-4 { background: var(--bg); }
+        .layer-info h3 { font-size: 0.9375rem; font-weight: 600; margin-bottom: 0.15rem; }
+        .layer-info p { color: var(--text-muted); font-size: 0.8125rem; }
+
+        /* Insights */
+        .insights-section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .insights-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.25rem; margin-top: 1rem; }
+        .insight-category h3 { font-size: 0.9375rem; font-weight: 600; margin-bottom: 0.75rem; }
+        .insight-list { list-style: none; }
+        .insight-list li { padding: 0.6rem 0.75rem; background: var(--bg); border-radius: 8px; margin-bottom: 0.4rem; font-size: 0.875rem; border-left: 3px solid var(--border); }
+        .strengths li { border-left-color: var(--success); }
+        .concerns li  { border-left-color: var(--warning); }
+        .recommendation { padding: 0.75rem 1rem; background: var(--primary-soft); border-radius: 8px; font-size: 0.875rem; color: var(--text); margin-bottom: 0.4rem; }
+
+        /* Tabs */
+        .report-tabs { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
+        .tabs-header { display: flex; gap: 0.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .tab-btn { padding: 0.6rem 1rem; background: none; border: none; cursor: pointer; font-weight: 500; font-size: 0.875rem; color: var(--text-muted); position: relative; font-family: inherit; border-radius: 6px; transition: color 0.2s, background 0.2s; }
+        .tab-btn:hover { color: var(--text); background: var(--bg); }
+        .tab-btn.active { color: var(--primary); }
+        .tab-btn.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: var(--primary); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .tab-content h3 { font-size: 1rem; margin-bottom: 0.5rem; }
+        .tab-content p { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem; }
+
+        @media (max-width: 768px) {
+            .score-header { flex-direction: column; text-align: center; }
+            .insights-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html" class="logo">Fairtrust AI Framework</a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="upload.html">Upload</a>
+                <a href="dashboard.html" class="active">Dashboard</a>
+                <a href="docs.html">Docs</a>
+                <a href="admin.html">Admin</a>
+                <div class="user-profile">
+                    <span class="dark-mode-toggle">🌙</span>
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%234F46E5'/%3E%3Ctext x='16' y='22' text-anchor='middle' fill='white' font-size='14' font-family='system-ui'%3EU%3C/text%3E%3C/svg%3E" alt="User">
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="dashboard" id="app"></main>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:5000';
+
+        // ── Helpers ───────────────────────────────────────────────────────────
+        function badgeClass(status) {
+            const s = (status || '').toUpperCase();
+            if (s === 'PASS')    return 'pass';
+            if (s === 'WARNING') return 'warning';
+            return 'fail';
+        }
+
+        function scoreColor(score) {
+            if (score >= 0.80) return 'var(--success)';
+            if (score >= 0.60) return 'var(--warning)';
+            return 'var(--danger)';
+        }
+
+        // ── Render: no data ───────────────────────────────────────────────────
+        function renderNoData() {
+            document.getElementById('app').innerHTML = `
+                <div class="state-card">
+                    <div class="state-icon">📋</div>
+                    <h2>No results found</h2>
+                    <p>Complete an evaluation on the upload page to see your dashboard.</p>
+                    <a href="upload.html" class="btn btn-primary">Start evaluation</a>
+                </div>`;
+        }
+
+        // ── Render dashboard from /dashboard/<id> response ────────────────────
+        function renderDashboard(data) {
+            const score  = data.ethical_score ?? 0;
+            const status = data.overall_status ?? (score >= 0.8 ? 'PASS' : score >= 0.6 ? 'WARNING' : 'FAIL');
+            const bClass = badgeClass(status);
+            const circumference = 2 * Math.PI * 50;
+            const dashOffset    = circumference * (1 - score);
+
+            const badgeLabel = status === 'PASS'
+                ? 'PASS — Certified Fair'
+                : status === 'WARNING' ? 'WARNING — Review Needed' : 'FAIL — Action Required';
+
+            document.getElementById('app').innerHTML = `
+                <div class="score-header">
+                    <div class="score-gauge">
+                        <div class="gauge">
+                            <svg class="gauge-svg" viewBox="0 0 120 120">
+                                <circle class="gauge-circle-bg" cx="60" cy="60" r="50"></circle>
+                                <circle class="gauge-circle-fill" id="gaugeFill" cx="60" cy="60" r="50"
+                                        style="stroke:${scoreColor(score)};"></circle>
+                            </svg>
+                            <div class="gauge-text">${score.toFixed(2)}</div>
+                        </div>
+                        <div class="score-info">
+                            <h2>Ethical Score</h2>
+                            <span class="badge ${bClass}">${badgeLabel}</span>
+                            ${data.records ? `<div class="score-meta">${data.records.toLocaleString()} records evaluated</div>` : ''}
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="downloadCertificate()">Download certificate</button>
+                        <button class="btn btn-secondary" onclick="shareResults()">Share results</button>
+                    </div>
+                </div>
+
+                <div class="dimensions-grid" id="dimensionsGrid"></div>
+
+                <section class="layers-section">
+                    <h2 class="layers-title">Four Layers Evaluation</h2>
+                    <div class="pyramid" id="pyramid"></div>
+                </section>
+
+                <section class="insights-section">
+                    <h2 class="layers-title">Quick Insights</h2>
+                    <div class="insights-grid" id="insightsGrid"></div>
+                </section>
+
+                <section class="report-tabs">
+                    <div class="tabs-header">
+                        <button class="tab-btn active" onclick="switchTab('dev', event)">Developer View</button>
+                        <button class="tab-btn" onclick="switchTab('reg', event)">Regulator View</button>
+                        <button class="tab-btn" onclick="switchTab('user', event)">End-User View</button>
+                        <button class="tab-btn" onclick="downloadAll()">Download all</button>
+                    </div>
+                    <div class="tab-content active" id="devTab">
+                        <h3>Technical Metrics</h3>
+                        <p>SHAP values, feature importance, and detailed fairness metrics available in the Developer Report.</p>
+                        <button class="btn btn-primary" onclick="goReport('developerReport')">View Full Developer Report →</button>
+                    </div>
+                    <div class="tab-content" id="regTab">
+                        <h3>Compliance Summary</h3>
+                        <p>Audit trail, regulatory compliance, and certification details available in the Regulator Report.</p>
+                        <button class="btn btn-primary" onclick="goReport('regulatorReport')">View Full Regulator Report →</button>
+                    </div>
+                    <div class="tab-content" id="userTab">
+                        <h3>Plain Language Summary</h3>
+                        <p>Easy-to-understand explanation of fairness results for end users.</p>
+                        <button class="btn btn-primary" onclick="goReport('humanReport')">View End-User Report →</button>
+                    </div>
+                </section>`;
+
+            fillDimensions(data.dimensions || []);
+            fillLayers(data.layers || []);
+            fillInsights(data.insights || {});
+
+            requestAnimationFrame(() => {
+                const fill = document.getElementById('gaugeFill');
+                if (fill) fill.style.strokeDashoffset = dashOffset;
+            });
+        }
+
+        function fillDimensions(dimensions) {
+            document.getElementById('dimensionsGrid').innerHTML = dimensions.map(d => {
+                const sc  = badgeClass(d.status);
+                const pct = Math.round((d.score ?? 0) * 100);
+                return `
+                <div class="dimension-card" onclick="showDimensionDetails(${d.id})">
+                    <div class="dimension-header">
+                        <div class="dimension-icon">${d.icon}</div>
+                        <span class="dimension-title">${d.title}</span>
+                        <span class="dimension-score">${(d.score ?? 0).toFixed(2)}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" data-pct="${pct}"></div>
+                    </div>
+                    <div class="dimension-status">
+                        <span class="status-badge ${sc}">${d.status}</span>
+                        <span class="finding">${d.finding ?? ''}</span>
+                    </div>
+                </div>`;
+            }).join('');
+
+            requestAnimationFrame(() => {
+                document.querySelectorAll('.progress-fill[data-pct]').forEach(el => {
+                    el.style.width = el.dataset.pct + '%';
+                });
+            });
+        }
+
+        function fillLayers(layers) {
+            document.getElementById('pyramid').innerHTML = layers.map((l, i) => {
+                const sc = badgeClass(l.status);
+                return `
+                <div class="layer layer-${i + 1}">
+                    <div class="layer-info">
+                        <h3>${l.title}</h3>
+                        <p>${l.description}</p>
+                    </div>
+                    <div class="layer-score">
+                        <span class="badge ${sc}">${(l.score ?? 0).toFixed(2)}</span>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function fillInsights(insights) {
+            const strengths = (insights.strengths || []).map(s => `<li>${s}</li>`).join('');
+            const concerns  = (insights.concerns  || []).map(c => `<li>${c}</li>`).join('');
+            const recs      = (insights.recommendations || [])
+                .map(r => `<div class="recommendation">💡 ${r}</div>`).join('');
+
+            document.getElementById('insightsGrid').innerHTML = `
+                <div class="insight-category">
+                    <h3>✅ Top Strengths</h3>
+                    <ul class="insight-list strengths">${strengths || '<li>No data</li>'}</ul>
+                </div>
+                <div class="insight-category">
+                    <h3>⚠️ Top Concerns</h3>
+                    <ul class="insight-list concerns">${concerns || '<li>No data</li>'}</ul>
+                </div>
+                <div class="insight-category">
+                    <h3>💡 Recommendations</h3>
+                    ${recs || '<p style="color:var(--text-muted);font-size:0.875rem">None.</p>'}
+                </div>`;
+        }
+
+        // ── Actions ───────────────────────────────────────────────────────────
+        function switchTab(tab, e) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(`${tab}Tab`).classList.add('active');
+        }
+
+        function showDimensionDetails(id) {
+            const evalId = new URLSearchParams(location.search).get('eval_id') || '';
+            location.href = `developerReport.html#dimension${id}${evalId ? '?eval_id=' + evalId : ''}`;
+        }
+
+        function goReport(page) {
+            const evalId = new URLSearchParams(location.search).get('eval_id') || '';
+            location.href = `${page}.html${evalId ? '?eval_id=' + evalId : ''}`;
+        }
+
+        function downloadCertificate() { alert('Downloading certificate…'); }
+
+        function shareResults() {
+            navigator.clipboard?.writeText(location.href)
+                .then(() => alert('Link copied to clipboard!'))
+                .catch(() => alert('Share link: ' + location.href));
+        }
+
+        function downloadAll() { alert('Preparing ZIP file with all reports…'); }
+
+        document.querySelector('.dark-mode-toggle').addEventListener('click', function () {
+            document.body.classList.toggle('dark-mode');
+            this.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+        });
+
+        // ── Init ──────────────────────────────────────────────────────────────
+        // 1. Get eval_id from URL param (set by page3's redirect) or sessionStorage
+        // 2. Call GET /dashboard/<eval_id> to get the shaped payload
+        // 3. Fallback to raw eval_result cached in sessionStorage if API unreachable
+        (async function init() {
+            const evalId = new URLSearchParams(location.search).get('eval_id')
+                        || sessionStorage.getItem('eval_id');
+
+            if (!evalId) { renderNoData(); return; }
+
+            try {
+                const res  = await fetch(`${API_BASE}/dashboard/${evalId}`);
+                const data = await res.json();
+
+                if (res.ok && data.status === 'complete') {
+                    renderDashboard(data);
+                } else {
+                    throw new Error(data.error || 'not complete');
+                }
+            } catch (_) {
+                // API unreachable or eval not found — fall back to page3's cached result
+                const cached = sessionStorage.getItem('eval_result');
+                if (cached) { renderDashboard(JSON.parse(cached)); return; }
+                renderNoData();
+            }
+        })();
+    </script>
+</body>
+</html>
