@@ -4,785 +4,545 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Developer Report — FairTrust AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-            font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
-        }
-        
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
         :root {
-            --primary: #1A2D4E;      /* Deep Navy - dominant */
-            --primary-light: #2A3F66;
-            --primary-soft: #E9ECF3;  /* Soft navy-tinted background */
-            --secondary: #EBB255;     /* Gold/Amber - minimal accents */
-            --accent: #4A90E2;        /* Soft Blue */
-            --success: #059669;
-            --success-light: rgba(5, 150, 105, 0.12);
-            --warning: #D97706;
-            --warning-light: rgba(217, 119, 6, 0.12);
-            --danger: #DC2626;
-            --danger-light: rgba(220, 38, 38, 0.12);
-            --bg: #F5F6FA;
+            --navy: #0F1E38;
+            --navy-mid: #1A2D4E;
+            --navy-soft: #243D65;
+            --gold: #EBB255;
+            --gold-dim: rgba(235,178,85,0.12);
+            --gold-line: rgba(235,178,85,0.3);
+            --red: #EF4444;
+            --red-dim: rgba(239,68,68,0.1);
+            --amber: #F59E0B;
+            --amber-dim: rgba(245,158,11,0.1);
+            --green: #10B981;
+            --green-dim: rgba(16,185,129,0.1);
+            --blue: #3B82F6;
+            --blue-dim: rgba(59,130,246,0.1);
             --surface: #FFFFFF;
-            --text: #1A2D4E;
-            --text-muted: #5A6169;
-            --border: #E4E7F0;
-            --shadow: 0 10px 30px rgba(26, 45, 78, 0.08);
+            --bg: #F1F3F8;
+            --bg2: #E8EBF2;
+            --rule: #DDE1EC;
+            --text: #0F1E38;
+            --muted: #64748B;
+            --mono: 'IBM Plex Mono', monospace;
+            --display: 'Plus Jakarta Sans', sans-serif;
+            --body: 'Plus Jakarta Sans', sans-serif;
             --radius: 12px;
-            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-        }
-        
-        body { 
-            background: var(--bg); 
-            color: var(--text); 
-            font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+            --shadow: 0 2px 12px rgba(15,30,56,0.07);
+            --shadow-md: 0 8px 32px rgba(15,30,56,0.10);
         }
 
-        /* ================= NAVBAR ================= */
+        body {
+            font-family: var(--body);
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* ── NAV ── */
         .navbar {
-            position: sticky;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.98);
-            padding: 16px 5%;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.97);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--rule);
+            padding: 0 5%;
+            height: 60px;
+            display: flex; align-items: center; justify-content: space-between;
             box-shadow: var(--shadow);
-            z-index: 1000;
-            backdrop-filter: blur(10px);
-            transition: var(--transition);
-            border-bottom: 1px solid rgba(235, 178, 85, 0.15);
         }
 
-        .navbar.scrolled {
-            padding: 12px 5%;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            text-decoration: none;
-            color: var(--primary);
-        }
-
+        .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
         .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--primary), #4A90E2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 20px;
-            font-weight: 700;
-            box-shadow: 0 5px 15px rgba(26, 45, 78, 0.2);
-            transition: var(--transition);
+            width: 34px; height: 34px;
+            background: linear-gradient(135deg, var(--navy), #4A90E2);
+            border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 15px;
         }
+        .logo-text { font-family: var(--display); font-size: 18px; font-weight: 800; color: var(--navy); }
+        .logo-text span { color: var(--gold); }
 
-        .logo:hover .logo-icon {
-            transform: rotate(5deg) scale(1.05);
-        }
-
-        .logo-text {
-            font-size: 22px;
-            font-weight: 800;
-            line-height: 1.2;
-        }
-
-        .logo-text span {
-            color: var(--secondary);
-        }
-
-        .logo-subtitle {
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--secondary);
-            letter-spacing: 1px;
-            margin-top: 2px;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 30px;
-        }
-
+        .nav-links { display: flex; gap: 4px; }
         .nav-links a {
-            text-decoration: none;
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--primary);
-            position: relative;
-            padding: 8px 0;
-            transition: var(--transition);
+            text-decoration: none; font-size: 14px; font-weight: 600;
+            color: var(--muted); padding: 6px 12px; border-radius: 7px;
+            transition: all 0.15s;
         }
+        .nav-links a:hover { color: var(--navy); background: var(--bg); }
 
-        .nav-links a:after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 3px;
-            background: var(--secondary);
-            border-radius: 2px;
-            transition: width 0.3s ease;
-        }
+        /* ── PAGE WRAPPER ── */
+        .page { max-width: 1280px; margin: 0 auto; padding: 2rem 5% 5rem; }
 
-        .nav-links a:hover {
-            color: var(--secondary);
-        }
-
-        .nav-links a:hover:after {
-            width: 100%;
-        }
-
-        .nav-links a.active {
-            color: var(--secondary);
-        }
-
-        .nav-links a.active:after {
-            width: 100%;
-        }
-
-        /* ================= MAIN CONTENT ================= */
-        .developer-report { 
-            max-width: 1200px; 
-            margin: 0 auto; 
-            padding: 2rem 5%; 
-        }
-
-        .report-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 2rem; 
-            flex-wrap: wrap; 
-            gap: 1rem; 
-        }
-
-        .report-header h1 { 
-            font-size: 1.75rem; 
-            font-weight: 800; 
-            color: var(--primary);
-            position: relative;
-            display: inline-block;
-        }
-
-        .report-header h1:after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 0;
-            width: 60px;
-            height: 4px;
-            background: var(--secondary);
-            border-radius: 2px;
-        }
-
-        .report-meta { 
-            font-size: 0.8125rem; 
-            color: var(--text-muted); 
-            margin-top: 0.75rem; 
-        }
-
-        .report-meta code {
-            background: var(--primary-soft);
-            padding: 0.2rem 0.4rem;
-            border-radius: 4px;
-            color: var(--primary);
-        }
-
-        .report-meta a {
-            color: var(--secondary);
-            text-decoration: none;
-            font-weight: 600;
-            transition: var(--transition);
-        }
-
-        .report-meta a:hover {
-            color: var(--primary);
-        }
-
-        .export-buttons { 
-            display: flex; 
-            gap: 0.75rem; 
-        }
-
-        .btn { 
-            padding: 0.7rem 1.5rem; 
-            border-radius: 8px; 
-            font-weight: 600; 
-            font-size: 0.875rem; 
-            cursor: pointer; 
-            transition: var(--transition); 
-            border: 2px solid transparent; 
-            font-family: inherit; 
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-primary { 
-            background: linear-gradient(135deg, var(--primary), #2c3e50); 
-            color: white; 
-            box-shadow: 0 4px 15px rgba(26, 45, 78, 0.2);
-        }
-
-        .btn-primary:hover { 
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(26, 45, 78, 0.3);
-        }
-
-        .btn-secondary { 
-            background: var(--surface); 
-            border: 2px solid var(--border); 
-            color: var(--primary); 
-        }
-
-        .btn-secondary:hover { 
-            border-color: var(--secondary); 
-            color: var(--secondary); 
-            background: rgba(235, 178, 85, 0.05);
-        }
-
-        /* State card */
-        .state-card { 
-            background: var(--surface); 
-            border: 2px solid rgba(26, 45, 78, 0.08);
-            border-radius: var(--radius); 
-            padding: 4rem 2rem; 
-            text-align: center;
-            box-shadow: var(--shadow);
-        }
-
-        .state-card h2 { 
-            font-size: 1.5rem; 
-            font-weight: 700; 
-            color: var(--primary);
-            margin-bottom: 0.75rem; 
-        }
-
-        .state-card p { 
-            color: var(--text-muted); 
-            font-size: 0.9375rem; 
-            margin-bottom: 1.5rem; 
-        }
-
-        /* Sections */
-        .shap-section, 
-        .accordion-section, 
-        .performance-section {
-            background: var(--surface); 
-            border: 2px solid rgba(26, 45, 78, 0.08);
-            border-radius: var(--radius); 
-            padding: 2rem; 
-            margin-bottom: 2rem;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-        }
-
-        .shap-section:hover,
-        .accordion-section:hover,
-        .performance-section:hover {
-            border-color: rgba(26, 45, 78, 0.15);
-            box-shadow: 0 15px 35px rgba(26, 45, 78, 0.12);
-        }
-
-        .section-title { 
-            font-size: 1.25rem; 
-            font-weight: 700; 
-            color: var(--primary);
+        /* ── REPORT HEADER ── */
+        .report-hero {
+            background: var(--navy);
+            border-radius: 16px;
+            padding: 2rem 2.5rem;
             margin-bottom: 1.5rem;
             position: relative;
-            display: inline-block;
-        }
-
-        .section-title:after {
-            content: '';
-            position: absolute;
-            bottom: -6px;
-            left: 0;
-            width: 40px;
-            height: 3px;
-            background: var(--secondary);
-            border-radius: 2px;
-        }
-
-        /* SHAP chart */
-        .shap-grid { 
-            display: grid; 
-            grid-template-columns: 2fr 1fr; 
-            gap: 2rem; 
-        }
-
-        .shap-plot { 
-            background: var(--bg); 
-            border-radius: 10px; 
-            padding: 1.5rem; 
-            border: 1px solid rgba(26, 45, 78, 0.1); 
-            min-height: 280px; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: flex-end; 
-        }
-
-        .shap-bars { 
-            display: flex; 
-            align-items: flex-end; 
-            gap: 6px; 
-            height: 220px; 
-        }
-
-        .shap-bar-wrap { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            gap: 6px; 
-        }
-
-        .shap-bar { 
-            width: 100%; 
-            background: linear-gradient(180deg, var(--primary), #2A3F66); 
-            border-radius: 4px 4px 0 0; 
-            transition: height 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); 
-            min-height: 4px; 
-        }
-
-        .shap-bar-label { 
-            font-size: 0.65rem; 
-            color: var(--text-muted); 
-            text-align: center; 
-            writing-mode: vertical-rl; 
-            text-orientation: mixed; 
-            transform: rotate(180deg); 
-            max-height: 70px; 
             overflow: hidden;
-            font-weight: 500;
         }
+        .report-hero::before {
+            content: '';
+            position: absolute; top: -60px; right: -60px;
+            width: 280px; height: 280px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(235,178,85,0.12) 0%, transparent 70%);
+        }
+        .hero-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; position: relative; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: var(--gold-dim); border: 1px solid var(--gold-line);
+            color: var(--gold); font-size: 11px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            padding: 4px 12px; border-radius: 999px; margin-bottom: 0.75rem;
+        }
+        .hero-title { font-family: var(--display); font-size: 1.75rem; font-weight: 800; color: white; line-height: 1.2; margin-bottom: 0.5rem; }
+        .hero-meta { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 1rem; }
+        .hero-stat { display: flex; flex-direction: column; }
+        .hero-stat-val { font-family: var(--display); font-size: 1.5rem; font-weight: 800; color: var(--gold); }
+        .hero-stat-lbl { font-size: 11px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.08em; }
 
-        .feature-controls { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 1rem; 
+        .hero-score-ring {
+            display: flex; flex-direction: column; align-items: center;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px; padding: 1.25rem 1.75rem; text-align: center;
         }
+        .score-big { font-family: var(--display); font-size: 3rem; font-weight: 800; line-height: 1; }
+        .score-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
 
-        .feature-controls h3 { 
-            font-size: 0.9375rem; 
-            font-weight: 600; 
-            color: var(--primary);
+        .hero-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; flex-wrap: wrap; }
+        .btn-hero {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600;
+            cursor: pointer; border: none; font-family: var(--body); transition: all 0.2s;
         }
+        .btn-hero-primary { background: var(--gold); color: var(--navy); }
+        .btn-hero-primary:hover { background: #dfa342; transform: translateY(-1px); }
+        .btn-hero-ghost { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.15); }
+        .btn-hero-ghost:hover { background: rgba(255,255,255,0.14); color: white; }
 
-        .feature-list { 
-            list-style: none; 
-            max-height: 240px;
-            overflow-y: auto;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 0.5rem;
+        /* ── ALERT BANNER (if critical issues) ── */
+        .alert-banner {
+            display: flex; align-items: flex-start; gap: 1rem;
+            background: var(--red-dim); border: 1px solid rgba(239,68,68,0.25);
+            border-left: 4px solid var(--red);
+            border-radius: 0 10px 10px 0;
+            padding: 1rem 1.25rem; margin-bottom: 1.5rem;
         }
+        .alert-banner.warn { background: var(--amber-dim); border-color: rgba(245,158,11,0.25); border-left-color: var(--amber); }
+        .alert-banner.ok   { background: var(--green-dim); border-color: rgba(16,185,129,0.25); border-left-color: var(--green); }
+        .alert-icon { font-size: 1.25rem; margin-top: 2px; }
+        .alert-icon.critical { color: var(--red); }
+        .alert-icon.warn     { color: var(--amber); }
+        .alert-icon.ok       { color: var(--green); }
+        .alert-title { font-weight: 700; font-size: 0.9375rem; color: var(--text); }
+        .alert-sub   { font-size: 0.8125rem; color: var(--muted); margin-top: 2px; line-height: 1.5; }
 
-        .feature-list li { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 0.5rem 0.75rem; 
-            border-bottom: 1px solid var(--border); 
-            font-size: 0.875rem; 
+        /* ── SECTION LAYOUT ── */
+        .section { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--rule); box-shadow: var(--shadow); margin-bottom: 1.5rem; overflow: hidden; }
+        .section-head {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1.25rem 1.75rem;
+            border-bottom: 1px solid var(--rule);
+            background: var(--bg);
         }
+        .section-title { font-family: var(--display); font-size: 1rem; font-weight: 700; color: var(--navy); display: flex; align-items: center; gap: 8px; }
+        .section-title i { color: var(--gold); font-size: 0.9rem; }
+        .section-body { padding: 1.75rem; }
 
-        .feature-list li:last-child { 
-            border-bottom: none; 
-        }
+        /* ── SHAP CHART (proper proportional bars) ── */
+        .shap-layout { display: grid; grid-template-columns: 1fr 380px; gap: 1.5rem; }
 
-        .feature-list li:hover {
-            background: var(--primary-soft);
-            border-radius: 6px;
-        }
+        .chart-wrap { position: relative; }
+        .chart-title { font-size: 0.8125rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; }
 
-        .feature-val { 
-            font-weight: 700; 
-            color: var(--secondary); 
-            font-size: 0.8125rem; 
+        .shap-row {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 10px; font-family: var(--mono);
         }
-
-        .shap-meta { 
-            margin-top: 1rem; 
-            display: flex; 
-            gap: 0.75rem; 
-            flex-wrap: wrap; 
-        }
-
-        .shap-chip { 
-            padding: 0.35rem 0.875rem; 
-            background: var(--primary-soft); 
-            border: 1px solid rgba(26, 45, 78, 0.15); 
-            border-radius: 6px; 
-            font-size: 0.8rem; 
-            color: var(--primary);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-
-        .shap-chip i {
-            color: var(--secondary);
-            font-size: 0.7rem;
-        }
-
-        .shap-chip span { 
-            font-weight: 700; 
-            color: var(--secondary); 
-            margin-left: 0.25rem;
-        }
-
-        /* Accordion */
-        .accordion-item { 
-            border: 2px solid rgba(26, 45, 78, 0.08); 
-            border-radius: 10px; 
-            margin-bottom: 0.75rem; 
-            overflow: hidden; 
-            transition: var(--transition);
-        }
-
-        .accordion-item:hover {
-            border-color: rgba(26, 45, 78, 0.15);
-        }
-
-        .accordion-header { 
-            padding: 1.25rem 1.5rem; 
-            background: var(--bg); 
-            cursor: pointer; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            transition: var(--transition); 
-            user-select: none; 
-        }
-
-        .accordion-header:hover { 
-            background: var(--primary-soft); 
-        }
-
-        .accordion-title { 
-            display: flex; 
-            align-items: center; 
-            gap: 1rem; 
-            font-size: 0.9375rem; 
-            font-weight: 600; 
-            color: var(--primary);
-        }
-
-        .accordion-title i {
-            color: var(--secondary);
-            width: 20px;
-            font-size: 1rem;
-        }
-
-        .dim-score-badge { 
-            padding: 0.25rem 0.75rem; 
-            border-radius: 6px; 
-            font-size: 0.8125rem; 
-            font-weight: 600; 
-        }
-
-        .dim-score-badge.success { 
-            background: var(--success-light); 
-            color: var(--success); 
-        }
-
-        .dim-score-badge.warning { 
-            background: var(--warning-light); 
-            color: var(--warning); 
-        }
-
-        .accordion-arrow { 
-            transition: transform 0.3s ease; 
-            font-size: 0.75rem; 
-            color: var(--secondary); 
-        }
-
-        .accordion-arrow.open { 
-            transform: rotate(180deg); 
-        }
-
-        .accordion-content { 
-            display: none; 
-            padding: 1.5rem; 
-            font-size: 0.875rem; 
-            border-top: 1px solid var(--border); 
-        }
-
-        .accordion-content.active { 
-            display: block; 
-        }
-
-        .accordion-content p { 
-            color: var(--text-muted); 
-            margin-bottom: 1rem; 
-            line-height: 1.6; 
-        }
-
-        .accordion-content strong { 
-            color: var(--primary); 
-        }
-
-        /* Tables */
-        .comparison-table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin: 1rem 0; 
-            font-size: 0.875rem; 
-        }
-
-        .comparison-table th { 
-            background: var(--primary-soft); 
-            padding: 0.75rem 1rem; 
-            text-align: left; 
-            font-weight: 600; 
-            font-size: 0.8125rem; 
-            color: var(--primary); 
-        }
-
-        .comparison-table td { 
-            padding: 0.75rem 1rem; 
-            border-bottom: 1px solid var(--border); 
-        }
-
-        .comparison-table tr:last-child td { 
-            border-bottom: none; 
-        }
-
-        .comparison-table tr:hover td { 
-            background: var(--primary-soft); 
-        }
-
-        .tag-pass    { 
-            display: inline-block; 
-            padding: 0.2rem 0.6rem; 
-            border-radius: 4px; 
-            background: var(--success-light); 
-            color: var(--success); 
-            font-size: 0.75rem; 
-            font-weight: 600; 
-        }
-
-        .tag-warning { 
-            display: inline-block; 
-            padding: 0.2rem 0.6rem; 
-            border-radius: 4px; 
-            background: var(--warning-light); 
-            color: var(--warning); 
-            font-size: 0.75rem; 
-            font-weight: 600; 
-        }
-
-        .tag-fail    { 
-            display: inline-block; 
-            padding: 0.2rem 0.6rem; 
-            border-radius: 4px; 
-            background: var(--danger-light); 
-            color: var(--danger); 
-            font-size: 0.75rem; 
-            font-weight: 600; 
-        }
-
-        /* Metrics grid */
-        .metrics-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); 
-            gap: 1rem; 
-            margin: 1.25rem 0; 
-        }
-
-        .metric-card { 
-            background: var(--bg); 
-            padding: 1rem; 
-            border-radius: 8px; 
-            text-align: center; 
-            border: 1px solid rgba(26, 45, 78, 0.1); 
-            transition: var(--transition);
-        }
-
-        .metric-card:hover {
-            border-color: var(--secondary);
-            transform: translateY(-2px);
-        }
-
-        .metric-label { 
-            font-size: 0.7rem; 
-            color: var(--text-muted); 
-            margin-bottom: 0.35rem; 
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .metric-value { 
-            font-size: 1.25rem; 
-            font-weight: 700; 
-            color: var(--primary); 
-        }
-
-        /* Performance */
-        .performance-grid { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 2rem; 
-        }
-
-        .perf-section-title { 
-            font-size: 0.9375rem; 
-            font-weight: 600; 
-            color: var(--primary);
-            margin-bottom: 1rem; 
-        }
-
-        .confusion-matrix { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 1px; 
-            background: var(--border); 
-            border: 1px solid var(--border); 
-            border-radius: 10px; 
-            overflow: hidden; 
-        }
-
-        .matrix-cell { 
-            background: var(--surface); 
-            padding: 1.5rem; 
-            text-align: center; 
-        }
-
-        .matrix-cell .mc-value { 
-            font-size: 1.5rem; 
-            font-weight: 700; 
-            color: var(--primary);
-        }
-
-        .matrix-cell .mc-label { 
-            font-size: 0.75rem; 
-            color: var(--text-muted); 
-            margin-top: 0.35rem; 
-        }
-
-        .matrix-cell.tp { 
-            background: var(--success-light); 
-        }
-        .matrix-cell.tn { 
-            background: var(--success-light); 
-        }
-        .matrix-cell.fp { 
-            background: var(--danger-light); 
-        }
-        .matrix-cell.fn { 
-            background: var(--danger-light); 
-        }
-
-        .na-text { 
-            color: var(--text-muted); 
-            font-size: 0.875rem; 
-            font-style: italic; 
-        }
-
-        .home-link {
-            margin-left: 0.5rem;
-            color: var(--secondary);
-            text-decoration: none;
+        .shap-feat-name {
+            width: 180px; flex-shrink: 0;
+            font-size: 0.75rem; color: var(--text);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             font-weight: 600;
-            transition: var(--transition);
+        }
+        .shap-bar-track {
+            flex: 1; height: 22px; background: var(--bg2);
+            border-radius: 4px; overflow: hidden; position: relative;
+        }
+        .shap-bar-fill {
+            height: 100%; border-radius: 4px;
+            display: flex; align-items: center; padding-left: 8px;
+            font-size: 0.7rem; font-weight: 700; color: white;
+            transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            white-space: nowrap;
+            min-width: 40px;
+        }
+        .shap-val {
+            font-size: 0.7rem; color: var(--muted); width: 70px; text-align: right; flex-shrink: 0;
         }
 
-        .home-link:hover {
-            color: var(--primary);
+        /* Color by rank */
+        .shap-fill-1 { background: linear-gradient(90deg, #EF4444, #F87171); }
+        .shap-fill-2 { background: linear-gradient(90deg, #F59E0B, #FBBF24); }
+        .shap-fill-3 { background: linear-gradient(90deg, #3B82F6, #60A5FA); }
+        .shap-fill-4 { background: linear-gradient(90deg, #8B5CF6, #A78BFA); }
+        .shap-fill-5 { background: linear-gradient(90deg, #10B981, #34D399); }
+        .shap-fill-n { background: linear-gradient(90deg, #94A3B8, #CBD5E1); }
+
+        /* SHAP insight panel */
+        .shap-insights { display: flex; flex-direction: column; gap: 1rem; }
+        .insight-card {
+            padding: 1rem 1.125rem;
+            border-radius: 9px; border: 1px solid var(--rule);
+            background: var(--bg);
+        }
+        .insight-card-label {
+            font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+            color: var(--muted); margin-bottom: 4px;
+        }
+        .insight-card-val { font-family: var(--mono); font-size: 1rem; font-weight: 700; color: var(--navy); }
+        .insight-card-sub { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+        .insight-card.danger { border-color: rgba(239,68,68,0.3); background: var(--red-dim); }
+        .insight-card.danger .insight-card-val { color: var(--red); }
+        .insight-card.warn   { border-color: rgba(245,158,11,0.3);  background: var(--amber-dim); }
+        .insight-card.warn   .insight-card-val { color: var(--amber); }
+
+        .proxy-warning {
+            background: rgba(239,68,68,0.07); border: 1px solid rgba(239,68,68,0.2);
+            border-radius: 8px; padding: 0.75rem 1rem; margin-top: 1rem;
+            font-size: 0.8125rem; color: #b91c1c; display: flex; gap: 0.5rem; align-items: flex-start;
+        }
+        .proxy-warning i { margin-top: 2px; flex-shrink: 0; }
+
+        /* ── DIMENSION SCORECARD GRID ── */
+        .dim-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+        .dim-card {
+            border-radius: 10px; padding: 1.125rem;
+            border: 1.5px solid var(--rule);
+            background: var(--surface);
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .dim-card:hover { border-color: var(--gold); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+        .dim-card.critical { border-color: rgba(239,68,68,0.4); }
+        .dim-card.warning  { border-color: rgba(245,158,11,0.4); }
+        .dim-card.passing  { border-color: rgba(16,185,129,0.4); }
+
+        .dim-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; }
+        .dim-icon-wrap {
+            width: 32px; height: 32px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px;
+        }
+        .dim-icon-wrap.critical { background: var(--red-dim); color: var(--red); }
+        .dim-icon-wrap.warning  { background: var(--amber-dim); color: var(--amber); }
+        .dim-icon-wrap.passing  { background: var(--green-dim); color: var(--green); }
+
+        .dim-severity {
+            font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+            padding: 2px 8px; border-radius: 999px;
+        }
+        .dim-severity.critical { background: var(--red-dim); color: var(--red); }
+        .dim-severity.warning  { background: var(--amber-dim); color: var(--amber); }
+        .dim-severity.passing  { background: var(--green-dim); color: var(--green); }
+
+        .dim-name { font-size: 0.8125rem; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+        .dim-score-num { font-family: var(--display); font-size: 1.75rem; font-weight: 800; line-height: 1; }
+        .dim-score-num.critical { color: var(--red); }
+        .dim-score-num.warning  { color: var(--amber); }
+        .dim-score-num.passing  { color: var(--green); }
+
+        .dim-bar-track { height: 4px; background: var(--bg2); border-radius: 100px; margin: 8px 0; overflow: hidden; }
+        .dim-bar-fill { height: 100%; border-radius: 100px; transition: width 0.8s ease; }
+        .dim-bar-fill.critical { background: var(--red); }
+        .dim-bar-fill.warning  { background: var(--amber); }
+        .dim-bar-fill.passing  { background: var(--green); }
+
+        .dim-finding { font-size: 0.75rem; color: var(--muted); line-height: 1.4; margin-top: 4px; }
+        .dim-action  { font-size: 0.7rem; font-weight: 600; color: var(--navy); margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--rule); display: flex; align-items: center; gap: 4px; }
+        .dim-action i { color: var(--gold); font-size: 0.65rem; }
+
+        /* ── DIMENSION DETAIL PANEL (full-width, below grid) ── */
+        .dim-detail {
+            display: none;
+            grid-column: 1 / -1;   /* span all 4 columns */
+            background: var(--bg);
+            border: 1.5px solid var(--gold-line);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: relative;
+            animation: slideDown 0.22s ease;
+        }
+        .dim-detail.open { display: block; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Layout inside detail panel: horizontal two-column */
+        .detail-inner {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 1.5rem;
+            align-items: start;
         }
 
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .detail-close {
+            position: absolute; top: 1rem; right: 1rem;
+            background: var(--bg2); border: none; border-radius: 6px;
+            width: 28px; height: 28px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; color: var(--muted); z-index: 2;
         }
+        .detail-close:hover { background: var(--rule); color: var(--navy); }
 
-        .shap-section,
-        .accordion-section,
-        .performance-section {
-            animation: fadeIn 0.5s ease-out forwards;
+        .detail-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.25rem; }
+        .detail-title { font-family: var(--display); font-size: 1.125rem; font-weight: 700; color: var(--navy); }
+        .detail-desc { font-size: 0.875rem; color: var(--muted); margin-bottom: 1rem; line-height: 1.6; }
+
+        .detail-metrics { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+        .detail-metric { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 0.75rem 1rem; min-width: 120px; }
+        .detail-metric-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 4px; }
+        .detail-metric-val { font-family: var(--mono); font-size: 1.125rem; font-weight: 700; color: var(--navy); }
+
+        /* Fix box */
+        .fix-box {
+            background: linear-gradient(135deg, #0F1E38 0%, #1A2D4E 100%);
+            border-radius: 10px; padding: 1.125rem 1.25rem;
+            margin-top: 1rem;
         }
+        .fix-box-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); margin-bottom: 0.75rem; }
+        .fix-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 0.625rem; font-size: 0.8125rem; color: rgba(255,255,255,0.8); }
+        .fix-item:last-child { margin-bottom: 0; }
+        .fix-num { background: var(--gold); color: var(--navy); width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; flex-shrink: 0; margin-top: 1px; }
+        .fix-code { font-family: var(--mono); font-size: 0.75rem; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; color: #93C5FD; }
 
-        /* Custom scrollbar */
-        .feature-list::-webkit-scrollbar {
-            width: 6px;
+        /* Per-attribute table */
+        .attr-table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; margin-top: 1rem; }
+        .attr-table th { background: var(--bg2); padding: 8px 12px; text-align: left; font-weight: 700; font-size: 0.75rem; color: var(--navy); }
+        .attr-table td { padding: 8px 12px; border-bottom: 1px solid var(--rule); }
+        .attr-table tr:last-child td { border-bottom: none; }
+        .attr-table tr:hover td { background: var(--bg); }
+        .mono { font-family: var(--mono); }
+        .tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 0.7rem; font-weight: 700; }
+        .tag.pass { background: var(--green-dim); color: var(--green); }
+        .tag.fail { background: var(--red-dim); color: var(--red); }
+        .tag.warn { background: var(--amber-dim); color: var(--amber); }
+
+        /* ── MODEL PERFORMANCE ── */
+        .perf-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+        .perf-card {
+            background: var(--bg); border: 1px solid var(--rule); border-radius: 10px;
+            padding: 1.25rem; text-align: center;
         }
+        .perf-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px; }
+        .perf-value { font-family: var(--display); font-size: 2rem; font-weight: 800; line-height: 1; }
+        .perf-bar-track { height: 6px; background: var(--bg2); border-radius: 100px; margin: 10px 0 6px; overflow: hidden; }
+        .perf-bar-fill  { height: 100%; border-radius: 100px; background: var(--blue); transition: width 0.8s ease; }
+        .perf-sub { font-size: 0.75rem; color: var(--muted); }
 
-        .feature-list::-webkit-scrollbar-track {
-            background: var(--primary-soft);
-            border-radius: 3px;
+        /* ── PRIORITY ACTION PLAN ── */
+        .action-list { display: flex; flex-direction: column; gap: 0.875rem; }
+        .action-item {
+            display: flex; align-items: flex-start; gap: 1rem;
+            padding: 1rem 1.25rem;
+            border-radius: 10px; border: 1px solid var(--rule);
+            background: var(--surface); transition: all 0.2s;
         }
+        .action-item:hover { border-color: var(--gold); box-shadow: var(--shadow); }
+        .action-item.critical { border-left: 4px solid var(--red); }
+        .action-item.warning  { border-left: 4px solid var(--amber); }
+        .action-item.info     { border-left: 4px solid var(--blue); }
 
-        .feature-list::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 3px;
+        .action-rank {
+            width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--display); font-size: 0.9rem; font-weight: 800;
         }
+        .action-rank.critical { background: var(--red-dim); color: var(--red); }
+        .action-rank.warning  { background: var(--amber-dim); color: var(--amber); }
+        .action-rank.info     { background: var(--blue-dim); color: var(--blue); }
 
-        .feature-list::-webkit-scrollbar-thumb:hover {
-            background: var(--secondary);
+        .action-title { font-weight: 700; font-size: 0.9375rem; color: var(--navy); margin-bottom: 3px; }
+        .action-body  { font-size: 0.8125rem; color: var(--muted); line-height: 1.5; }
+        .action-code  { font-family: var(--mono); font-size: 0.75rem; background: var(--bg2); padding: 2px 6px; border-radius: 4px; color: var(--blue); margin-top: 4px; display: inline-block; }
+        .action-effort {
+            flex-shrink: 0; font-size: 10px; font-weight: 700; text-transform: uppercase;
+            padding: 3px 8px; border-radius: 999px; align-self: flex-start; margin-top: 2px;
         }
+        .action-effort.high   { background: var(--red-dim); color: var(--red); }
+        .action-effort.medium { background: var(--amber-dim); color: var(--amber); }
+        .action-effort.low    { background: var(--green-dim); color: var(--green); }
 
-        @media (max-width: 768px) {
-            .shap-grid { 
-                grid-template-columns: 1fr; 
+        /* ── FAIRNESS RADAR (CSS polygon approximation) ── */
+        .radar-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center; }
+        .radar-svg-wrap { display: flex; justify-content: center; }
+        .radar-legend { display: flex; flex-direction: column; gap: 0.75rem; }
+        .radar-legend-item { display: flex; align-items: center; gap: 10px; }
+        .radar-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+        .radar-legend-label { font-size: 0.8125rem; color: var(--muted); }
+        .radar-legend-val   { font-family: var(--mono); font-size: 0.8125rem; font-weight: 700; color: var(--navy); margin-left: auto; }
+
+        /* ── LOADING / ERROR ── */
+        .state-wrap {
+            min-height: 400px; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            background: var(--surface); border-radius: var(--radius);
+            border: 1px solid var(--rule);
+        }
+        .state-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+        .state-title { font-family: var(--display); font-size: 1.25rem; font-weight: 700; color: var(--navy); margin-bottom: 0.5rem; }
+        .state-sub   { font-size: 0.9rem; color: var(--muted); margin-bottom: 1.5rem; }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg2); }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+        @media (max-width: 900px) {
+            .dim-grid { grid-template-columns: repeat(2, 1fr); }
+            .shap-layout { grid-template-columns: 1fr; }
+            .radar-layout { grid-template-columns: 1fr; }
+            .perf-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 560px) {
+            .dim-grid { grid-template-columns: 1fr; }
+            .nav-links { display: none; }
+        }
+        /* ── PRINT / PDF STYLES ── */
+        @media print {
+            @page {
+                size: A4;
+                margin: 15mm 12mm 15mm 12mm;
             }
-            
-            .performance-grid { 
-                grid-template-columns: 1fr; 
-            }
-            
-            .report-header { 
-                flex-direction: column; 
-                align-items: flex-start; 
-            }
-            
-            .navbar {
-                padding: 12px 5%;
-            }
-            
-            .nav-links {
-                gap: 15px;
-            }
-        }
 
-        @media (max-width: 640px) {
-            .nav-links {
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+            body { background: white !important; font-size: 11pt; }
+
+            .navbar { display: none !important; }
+
+            .page { padding: 0 !important; max-width: 100% !important; }
+
+            /* Hero: keep dark background */
+            .report-hero {
+                background: #0F1E38 !important;
+                border-radius: 10px !important;
+                padding: 16pt 20pt !important;
+                margin-bottom: 12pt !important;
+                page-break-inside: avoid;
+            }
+
+            .hero-title    { font-size: 18pt !important; color: white !important; }
+            .hero-stat-val { font-size: 14pt !important; }
+            .score-big     { font-size: 28pt !important; }
+
+            /* Hide buttons */
+            .hero-actions { display: none !important; }
+            .detail-close  { display: none !important; }
+
+            /* Alert banners */
+            .alert-banner { page-break-inside: avoid; margin-bottom: 10pt !important; }
+
+            /* Sections */
+            .section {
+                border: 1px solid #DDE1EC !important;
+                border-radius: 8px !important;
+                margin-bottom: 12pt !important;
+                page-break-inside: avoid;
+                box-shadow: none !important;
+            }
+
+            .section-head { background: #F1F3F8 !important; padding: 10pt 14pt !important; }
+            .section-body { padding: 12pt 14pt !important; }
+
+            /* Dim cards: 4-col on print */
+            .dim-grid {
+                display: grid !important;
+                grid-template-columns: repeat(4, 1fr) !important;
+                gap: 8pt !important;
+            }
+
+            .dim-card {
+                padding: 8pt !important;
+                border-radius: 6px !important;
+                page-break-inside: avoid;
+                border: 1.5px solid #DDE1EC !important;
+            }
+
+            .dim-card.critical { border-color: rgba(239,68,68,0.5) !important; }
+            .dim-card.warning  { border-color: rgba(245,158,11,0.5) !important; }
+            .dim-card.passing  { border-color: rgba(16,185,129,0.5) !important; }
+
+            .dim-score-num { font-size: 20pt !important; }
+
+            /* Dim detail drawers: always show on print */
+            .dim-detail { display: block !important; page-break-inside: avoid; margin-top: 8pt !important; }
+
+            /* SHAP layout: stack on print */
+            .shap-layout { grid-template-columns: 1fr !important; gap: 12pt !important; }
+            .shap-insights { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 8pt !important; }
+
+            /* Radar layout */
+            .radar-layout { grid-template-columns: 1fr 1fr !important; gap: 16pt !important; }
+            .radar-svg-wrap svg { width: 220px !important; height: 220px !important; }
+
+            /* Action plan */
+            .action-item { page-break-inside: avoid; margin-bottom: 8pt !important; padding: 10pt !important; }
+
+            /* Perf grid */
+            .perf-grid { grid-template-columns: repeat(3, 1fr) !important; }
+
+            /* Fix box dark background */
+            .fix-box { background: #0F1E38 !important; border-radius: 6px !important; }
+            .fix-item { color: rgba(255,255,255,0.85) !important; }
+            .fix-num  { background: #EBB255 !important; color: #0F1E38 !important; }
+
+            /* SHAP bars: keep colors */
+            .shap-fill-1 { background: linear-gradient(90deg, #EF4444, #F87171) !important; }
+            .shap-fill-2 { background: linear-gradient(90deg, #F59E0B, #FBBF24) !important; }
+            .shap-fill-3 { background: linear-gradient(90deg, #3B82F6, #60A5FA) !important; }
+            .shap-fill-4 { background: linear-gradient(90deg, #8B5CF6, #A78BFA) !important; }
+            .shap-fill-5 { background: linear-gradient(90deg, #10B981, #34D399) !important; }
+            .shap-fill-n { background: linear-gradient(90deg, #94A3B8, #CBD5E1) !important; }
+
+            /* dim bar fills */
+            .dim-bar-fill.critical { background: #EF4444 !important; }
+            .dim-bar-fill.warning  { background: #F59E0B !important; }
+            .dim-bar-fill.passing  { background: #10B981 !important; }
+
+            /* Perf bars */
+            .perf-bar-fill { -webkit-print-color-adjust: exact !important; }
+
+            /* Page breaks */
+            .section:nth-child(3) { page-break-before: always; }
+            .section:nth-child(5) { page-break-before: always; }
+            .section:nth-child(6) { page-break-before: always; }
+
+            /* Print header on each page */
+            .report-hero::after {
+                content: "FairTrust AI — Developer Report";
                 display: none;
-            }
-            
-            .logo-text {
-                font-size: 20px;
             }
         }
     </style>
 </head>
 <body>
 
-<!-- Navbar -->
-<nav class="navbar" id="navbar">
+<nav class="navbar">
     <a href="index.html" class="logo">
-        <div class="logo-icon">
-            <i class="fas fa-shield-alt"></i>
-        </div>
-        <div>
-            <div class="logo-text">Fair<span>Trust</span></div>
-            <div class="logo-subtitle">ETHICAL AI</div>
-        </div>
+        <div class="logo-icon"><i class="fas fa-shield-alt"></i></div>
+        <div class="logo-text">Fair<span>Trust</span></div>
     </a>
-
-    <div class="nav-links" id="navLinks">
+    <div class="nav-links">
         <a href="index.html">Home</a>
         <a href="upload.html">Upload</a>
         <a href="docs.html">Docs</a>
@@ -790,405 +550,750 @@
     </div>
 </nav>
 
-<main class="developer-report" id="app">
-    <div class="state-card">
-        <i class="fas fa-spinner fa-pulse" style="font-size: 2rem; color: var(--secondary); margin-bottom: 1rem;"></i>
-        <h2>Loading report…</h2>
-        <p>Fetching developer data.</p>
+<div class="page" id="app">
+    <div class="state-wrap">
+        <div class="state-icon"><i class="fas fa-spinner fa-pulse" style="color:var(--gold)"></i></div>
+        <div class="state-title">Loading developer report…</div>
+        <div class="state-sub">Fetching fairness analysis data</div>
     </div>
-</main>
+</div>
 
 <script>
-    const API_BASE = 'http://127.0.0.1:5000';
+const API_BASE = 'http://127.0.0.1:5000';
 
-    // Navbar scroll effect
-    window.addEventListener('scroll', function() {
-        const navbar = document.getElementById('navbar');
-        if (window.scrollY > 50) {
-            navbar.classList.add('scrolled');
+// ── helpers ────────────────────────────────────────────────────────────────
+const fmt   = (v, d=4)  => v != null ? Number(v).toFixed(d) : '—';
+const pct   = (v)       => v != null ? Math.round(v * 100) + '%' : '—';
+const fmtPct = (v, d=1) => v != null ? (Number(v)*100).toFixed(d) + '%' : '—';
+
+function severity(score) {
+    if (score == null) return 'unknown';
+    if (score >= 0.80) return 'passing';
+    if (score >= 0.60) return 'warning';
+    return 'critical';
+}
+
+function severityLabel(score) {
+    const s = severity(score);
+    return { passing: 'Pass', warning: 'Marginal', critical: 'Critical' }[s] || '—';
+}
+
+function scoreColor(score) {
+    const s = severity(score);
+    return { passing: 'var(--green)', warning: 'var(--amber)', critical: 'var(--red)' }[s] || 'var(--muted)';
+}
+
+// ── action plan generator ───────────────────────────────────────────────────
+function buildActions(data) {
+    const f   = data.fairness_raw || {};
+    const shap = data.shap || {};
+    const actions = [];
+
+    const di = f.disparateImpact;
+    if (di != null && di < 0.80) {
+        actions.push({
+            severity: 'critical',
+            title: 'Fix Disparate Impact — 80% Rule Violation',
+            body: `The lowest-approval group's rate is only ${fmtPct(di)} of the highest group. Legal threshold is 80%. Apply post-processing threshold calibration per group.`,
+            code: 'fairlearn.postprocessing.ThresholdOptimizer(objective="equalized_odds")',
+            effort: 'medium'
+        });
+    }
+
+    const dp = f.demographicParity;
+    if (dp != null && dp > 0.05) {
+        actions.push({
+            severity: 'critical',
+            title: 'Reduce Demographic Parity Gap',
+            body: `Parity gap of ${fmtPct(dp)} between groups. Retrain with reweighting or adversarial debiasing. Consider Exponentiated Gradient reduction.`,
+            code: 'fairlearn.reductions.ExponentiatedGradient(estimator, constraints=DemographicParity())',
+            effort: 'high'
+        });
+    }
+
+    const gf = f.groupFairness;
+    if (gf != null && gf < 0.80) {
+        actions.push({
+            severity: 'warning',
+            title: 'Improve Equal Opportunity Across Groups',
+            body: `Group fairness score ${fmtPct(gf)} — some protected groups have meaningfully different approval rates. Audit the equalized odds difference per attribute.`,
+            code: 'fairlearn.metrics.equalized_odds_difference(y_true, y_pred, sensitive_features=attr)',
+            effort: 'high'
+        });
+    }
+
+    const cf = f.counterfactual;
+    if (cf != null && cf < 0.80) {
+        actions.push({
+            severity: 'warning',
+            title: 'Eliminate Proxy Feature Sensitivity',
+            body: `Model outcomes shift when protected attributes are flipped (counterfactual score ${fmtPct(cf)}). Audit top SHAP features for correlation with sensitive attributes.`,
+            code: `# Check correlation: df['${shap.top_feature || 'top_feature'}'].corr(df['gender'])`,
+            effort: 'medium'
+        });
+    }
+
+    const inter = f.intersectional;
+    if (inter != null && inter < 0.80) {
+        actions.push({
+            severity: 'warning',
+            title: 'Address Intersectional Bias',
+            body: `Worst-case parity gap across combined groups (e.g. gender × caste) is ${fmtPct(1 - inter)}. Single-attribute fairness checks miss this. Use stratified analysis.`,
+            code: 'df.groupby([attr1, attr2])["prediction"].mean()',
+            effort: 'medium'
+        });
+    }
+
+    const topF = shap.top_feature;
+    if (topF) {
+        const isSensitive = ['gender','sex','race','caste','age','religion','ethnicity','nationality'].some(k => topF.toLowerCase().includes(k));
+        if (isSensitive) {
+            actions.unshift({
+                severity: 'critical',
+                title: `Top SHAP Feature is a Protected Attribute: "${topF}"`,
+                body: `The model's most influential feature is a protected attribute. This almost certainly causes direct discrimination. Remove or neutralize this feature immediately.`,
+                code: `df.drop(columns=['${topF}'])  # Remove protected attribute from features`,
+                effort: 'low'
+            });
         } else {
-            navbar.classList.remove('scrolled');
+            actions.push({
+                severity: 'info',
+                title: `Audit Top Feature for Proxy Discrimination: "${topF}"`,
+                body: `"${topF}" drives predictions most (SHAP max: ${fmt(shap.shap_max, 4)}). Verify it is not a proxy for a protected attribute (e.g. zip code → race).`,
+                code: `# Check: df['${topF}'].corr(df[sensitive_attr]) — should be near 0`,
+                effort: 'low'
+            });
         }
+    }
+
+    if (actions.length === 0) {
+        actions.push({
+            severity: 'info',
+            title: 'Model passes all fairness thresholds',
+            body: 'All 7 dimensions are within acceptable ranges. Continue monitoring for drift as new data arrives.',
+            code: null,
+            effort: 'low'
+        });
+    }
+
+    return actions;
+}
+
+// ── SHAP bar chart ──────────────────────────────────────────────────────────
+function renderShapChart(shap) {
+    if (!shap || !shap.feature_importance?.length) return '<p style="color:var(--muted);font-size:0.875rem;">No SHAP data available.</p>';
+
+    const features = shap.feature_importance.slice(0, 12);
+    const maxVal   = features[0]?.shap_value || 1;
+    const fillClasses = ['shap-fill-1','shap-fill-2','shap-fill-3','shap-fill-4','shap-fill-5'];
+
+    return features.map((f, i) => {
+        const widthPct = Math.max(2, (f.shap_value / maxVal) * 100);
+        const fillCls  = fillClasses[i] || 'shap-fill-n';
+        const isSens   = ['gender','sex','race','caste','age','religion','ethnicity','nationality','proxy']
+            .some(k => f.feature.toLowerCase().includes(k));
+        const label    = widthPct > 18 ? fmt(f.shap_value, 4) : '';
+
+        return `
+        <div class="shap-row" title="${f.feature}: ${fmt(f.shap_value, 5)}">
+            <div class="shap-feat-name" style="${isSens ? 'color:var(--red);' : ''}">
+                ${isSens ? '<i class="fas fa-exclamation-triangle" style="font-size:0.6rem;margin-right:4px;"></i>' : ''}${f.feature}
+            </div>
+            <div class="shap-bar-track">
+                <div class="shap-bar-fill ${fillCls}" style="width:${widthPct}%">${label}</div>
+            </div>
+            <div class="shap-val">${fmt(f.shap_value, 4)}</div>
+        </div>`;
+    }).join('');
+}
+
+// ── Dimension cards ─────────────────────────────────────────────────────────
+const DIM_META = {
+    1: { icon: 'fa-user-check', name: 'Individual Fairness', desc: 'Are similar people treated similarly?', threshold: 0.80 },
+    2: { icon: 'fa-users',      name: 'Group Fairness',      desc: 'Equal opportunity across protected groups?', threshold: 0.80 },
+    3: { icon: 'fa-venus-mars', name: 'Demographic Bias',    desc: 'Are outcome rates equal across demographics?', threshold: 0.80 },
+    4: { icon: 'fa-balance-scale', name: 'Calibration',      desc: 'Are predicted probabilities accurate for all groups?', threshold: 0.80 },
+    5: { icon: 'fa-chart-pie',  name: 'Disparate Impact',    desc: '80% rule: minority approval ≥ 80% of majority', threshold: 0.80 },
+    6: { icon: 'fa-random',     name: 'Counterfactual',      desc: 'Would outcome change if only protected attr changed?', threshold: 0.80 },
+    7: { icon: 'fa-layer-group', name: 'Intersectional',     desc: 'Are overlapping disadvantages compounded?', threshold: 0.80 },
+};
+
+const DIM_FIXES = {
+    1: ['Apply Lipschitz fairness constraints during training', 'Use individual fairness regularization term', 'Increase training data diversity near decision boundary'],
+    2: ['Use ExponentiatedGradient with EqualizedOdds constraint', 'Apply ThresholdOptimizer post-processing', 'Audit equalized_odds_difference per sensitive attribute'],
+    3: ['Reweight training samples by demographic group', 'Apply DemographicParity constraint via fairlearn.reductions', 'Check for label bias in historical training data'],
+    4: ['Apply Platt scaling per demographic subgroup', 'Use isotonic regression calibration per group', 'Verify Brier score equality across groups'],
+    5: ['Apply post-processing threshold calibration per group', 'Use Reweighing preprocessing (AIF360)', 'Ensure min(P(ŷ=1|g)) / max(P(ŷ=1|g)) ≥ 0.80'],
+    6: ['Remove or re-weight features correlated with sensitive attributes', 'Use adversarial debiasing to decorrelate predictions', 'Run counterfactual fairness audit with causalml'],
+    7: ['Stratify training data by intersectional subgroups', 'Audit worst-case pairwise group combinations', 'Apply multicalibration techniques for intersectional subgroups'],
+};
+
+function renderDimCard(dim, meta) {
+    const sev      = severity(dim.score);
+    const score100 = dim.score != null ? Math.round(dim.score * 100) : null;
+    const widthPct = dim.score != null ? (dim.score * 100) : 0;
+
+    const findingText = dim.detail?.description
+        ? dim.detail.description.split('.')[0] + '.'
+        : meta.desc;
+
+    return `
+    <div class="dim-card ${sev}" id="dimcard-${dim.id}" onclick="toggleDimDetail(${dim.id})" style="cursor:pointer">
+        <div class="dim-card-top">
+            <div class="dim-icon-wrap ${sev}"><i class="fas ${meta.icon}"></i></div>
+            <span class="dim-severity ${sev}">${severityLabel(dim.score)}</span>
+        </div>
+        <div class="dim-name">${meta.name}</div>
+        <div class="dim-score-num ${sev}">${score100 != null ? score100 : '—'}<span style="font-size:1rem;opacity:0.5">/100</span></div>
+        <div class="dim-bar-track">
+            <div class="dim-bar-fill ${sev}" style="width:${widthPct}%"></div>
+        </div>
+        <div class="dim-finding">${findingText}</div>
+        ${sev !== 'passing'
+            ? `<div class="dim-action"><i class="fas fa-chevron-down"></i> Click to drill down</div>`
+            : `<div class="dim-action" style="color:var(--green)"><i class="fas fa-check-circle" style="color:var(--green)"></i> Passing threshold</div>`}
+    </div>`;
+}
+
+function renderDimDetail(dim, meta, perAttr) {
+    const fixes = DIM_FIXES[dim.id] || [];
+    const sev   = severity(dim.score);
+    const d     = dim.detail || {};
+
+    // Build per-attribute table if available
+    let attrTable = '';
+    if (dim.id === 2 || dim.id === 3) {
+        const groups = dim.id === 2
+            ? (d.per_attribute || [])
+            : (d.disparities || []).map(dp => ({ attribute: dp.attribute, demographic_parity_difference: dp.raw_dp_diff, equalized_odds_difference: null, fairness_score: null }));
+
+        if (groups.length > 0) {
+            const rows = groups.map(g => {
+                const fs   = g.fairness_score != null ? Number(g.fairness_score) : null;
+                const tag  = fs == null ? '' : fs >= 0.8 ? '<span class="tag pass"><i class="fas fa-check"></i> Pass</span>' : '<span class="tag fail"><i class="fas fa-times"></i> Fail</span>';
+                return `<tr>
+                    <td><strong>${g.attribute}</strong></td>
+                    <td class="mono">${g.equalized_odds_difference != null ? fmt(g.equalized_odds_difference, 4) : '—'}</td>
+                    <td class="mono">${g.demographic_parity_difference != null ? fmt(g.demographic_parity_difference, 4) : '—'}</td>
+                    <td>${tag || (fs != null ? fmt(fs, 4) : '—')}</td>
+                </tr>`;
+            }).join('');
+            attrTable = `
+            <table class="attr-table">
+                <thead><tr><th>Attribute</th><th>EOD ↓</th><th>DP Diff ↓</th><th>Status</th></tr></thead>
+                <tbody>${rows}</tbody>
+            </table>`;
+        }
+    }
+
+    // Specific metrics row
+    let metricsHtml = '';
+    if (dim.id === 1) {
+        metricsHtml = `
+        <div class="detail-metrics">
+            <div class="detail-metric"><div class="detail-metric-lbl">Consistency</div><div class="detail-metric-val">${fmtPct(dim.score)}</div></div>
+            <div class="detail-metric"><div class="detail-metric-lbl">Violation Rate</div><div class="detail-metric-val">${dim.violation_rate != null ? dim.violation_rate + '%' : '—'}</div></div>
+            <div class="detail-metric"><div class="detail-metric-lbl">Method</div><div class="detail-metric-val" style="font-size:0.875rem">KNN k=5</div></div>
+        </div>`;
+    } else if (dim.id === 4) {
+        metricsHtml = `
+        <div class="detail-metrics">
+            <div class="detail-metric"><div class="detail-metric-lbl">Brier Score ↓</div><div class="detail-metric-val">${fmt(d.brier_score, 4)}</div></div>
+            <div class="detail-metric"><div class="detail-metric-lbl">Cal. Score</div><div class="detail-metric-val">${fmt(d.calibration_score, 4)}</div></div>
+        </div>
+        <p style="font-size:0.8125rem;color:var(--muted)">${d.interpretation || ''}</p>`;
+    } else if (dim.id === 5) {
+        const passes = d.passes_80_rule;
+        metricsHtml = `
+        <div class="detail-metrics">
+            <div class="detail-metric" style="${!passes ? 'border-color:rgba(239,68,68,0.3);background:var(--red-dim)' : ''}">
+                <div class="detail-metric-lbl">Impact Ratio</div>
+                <div class="detail-metric-val" style="${!passes ? 'color:var(--red)' : 'color:var(--green)'}">${fmt(d.impact_ratio, 4)}</div>
+            </div>
+            <div class="detail-metric"><div class="detail-metric-lbl">Threshold</div><div class="detail-metric-val">${d.threshold || '0.80'}</div></div>
+            <div class="detail-metric"><div class="detail-metric-lbl">80% Rule</div><div class="detail-metric-val">${passes ? '✅ Pass' : '❌ Fail'}</div></div>
+        </div>`;
+    } else if (dim.id === 6 || dim.id === 7) {
+        metricsHtml = `
+        <div class="detail-metrics">
+            <div class="detail-metric"><div class="detail-metric-lbl">Score</div><div class="detail-metric-val">${fmt(dim.score, 4)}</div></div>
+            ${dim.id === 7 ? `<div class="detail-metric" style="${sev !== 'passing' ? 'border-color:rgba(239,68,68,0.3);background:var(--red-dim)' : ''}"><div class="detail-metric-lbl">Worst-case Gap</div><div class="detail-metric-val">${fmt(d.worst_case_gap, 4)}</div></div>` : ''}
+        </div>
+        <p style="font-size:0.8125rem;color:var(--muted);margin-top:0.5rem">${d.interpretation || ''}</p>`;
+    }
+
+    return `
+    <div class="dim-detail" id="dimdetail-${dim.id}">
+        <button class="detail-close" onclick="event.stopPropagation();closeDimDetail(${dim.id})"><i class="fas fa-times"></i></button>
+        <div class="detail-inner">
+            <div>
+                <div class="detail-header">
+                    <div class="dim-icon-wrap ${sev}" style="width:40px;height:40px;font-size:18px"><i class="fas ${meta.icon}"></i></div>
+                    <div>
+                        <div class="detail-title">${meta.name}</div>
+                        <span class="dim-severity ${sev}">${severityLabel(dim.score)} — Score: ${fmt(dim.score, 4)}</span>
+                    </div>
+                </div>
+                <div class="detail-desc">${d.description || meta.desc}</div>
+                ${metricsHtml}
+                ${attrTable}
+            </div>
+            ${fixes.length ? `
+            <div class="fix-box" style="align-self:start">
+                <div class="fix-box-title"><i class="fas fa-wrench" style="margin-right:6px"></i>How to fix this</div>
+                ${fixes.map((f, i) => `<div class="fix-item"><div class="fix-num">${i+1}</div><div>${f}</div></div>`).join('')}
+            </div>` : ''}
+        </div>
+    </div>`;
+}
+
+// ── Radar chart (SVG polygon) ───────────────────────────────────────────────
+function renderRadar(dims) {
+    const N = dims.length;
+    const cx = 160, cy = 160, R = 120;
+    const angles = dims.map((_, i) => (2 * Math.PI * i / N) - Math.PI / 2);
+
+    function polar(r, i) {
+        return [cx + r * Math.cos(angles[i]), cy + r * Math.sin(angles[i])];
+    }
+
+    // Grid circles
+    const grids = [0.25, 0.5, 0.75, 1.0].map(r =>
+        `<circle cx="${cx}" cy="${cy}" r="${R * r}" fill="none" stroke="var(--rule)" stroke-width="1"/>`
+    ).join('');
+
+    // Spokes
+    const spokes = dims.map((_, i) => {
+        const [x, y] = polar(R, i);
+        return `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--rule)" stroke-width="1"/>`;
+    }).join('');
+
+    // Data polygon
+    const dataPoints = dims.map((d, i) => {
+        const score = d.score != null ? Math.min(d.score, 1.0) : 0;
+        return polar(R * score, i);
+    });
+    const dataPath = dataPoints.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ') + ' Z';
+
+    // Labels
+    const labels = dims.map((d, i) => {
+        const [lx, ly] = polar(R + 22, i);
+        const anchor = lx < cx - 5 ? 'end' : lx > cx + 5 ? 'start' : 'middle';
+        const sev = severity(d.score);
+        const col = sev === 'passing' ? '#10B981' : sev === 'warning' ? '#F59E0B' : '#EF4444';
+        const name = (DIM_META[d.id]?.name || '').replace(' Fairness','').replace(' Bias','').replace('Demographic','Demo.').replace('Counterfactual','CF').replace('Intersectional','Intersect.').replace('Individual','Individ.');
+        return `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}" font-size="9" font-family="DM Sans,sans-serif" font-weight="700" fill="${col}">${name}</text>`;
+    }).join('');
+
+    // Score dots
+    const dots = dataPoints.map((p, i) => {
+        const sev = severity(dims[i].score);
+        const col = sev === 'passing' ? '#10B981' : sev === 'warning' ? '#F59E0B' : '#EF4444';
+        return `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="${col}" stroke="white" stroke-width="1.5"/>`;
+    }).join('');
+
+    return `
+    <svg width="320" height="320" viewBox="0 0 320 320">
+        ${grids}${spokes}
+        <path d="${dataPath}" fill="rgba(59,130,246,0.15)" stroke="var(--blue)" stroke-width="2" stroke-linejoin="round"/>
+        ${dots}${labels}
+        <text x="${cx}" y="${cy + 5}" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="DM Sans,sans-serif">Score</text>
+    </svg>`;
+}
+
+// ── Main render ─────────────────────────────────────────────────────────────
+function renderReport(data, evalId) {
+    const f    = data.fairness_raw || {};
+    const shap = data.shap || {};
+    const dims = data.dimensions || [];
+    const perf = data.model_performance || {};
+    const actions = buildActions(data);
+
+    // Overall status
+    const overallScore = data.ethical_score;
+    const sev = severity(overallScore);
+    const sevColor = scoreColor(overallScore);
+    const criticalDims = dims.filter(d => severity(d.score) === 'critical');
+    const warningDims  = dims.filter(d => severity(d.score) === 'warning');
+
+    // Alert banner
+    let alertHtml = '';
+    if (criticalDims.length > 0) {
+        alertHtml = `<div class="alert-banner">
+            <div class="alert-icon critical"><i class="fas fa-exclamation-triangle"></i></div>
+            <div>
+                <div class="alert-title">${criticalDims.length} Critical Bias Issue${criticalDims.length > 1 ? 's' : ''} Detected — Model Should Not Ship</div>
+                <div class="alert-sub">Critical failures in: ${criticalDims.map(d => DIM_META[d.id]?.name || '').join(', ')}. These indicate the model actively discriminates across protected groups.</div>
+            </div>
+        </div>`;
+    } else if (warningDims.length > 0) {
+        alertHtml = `<div class="alert-banner warn">
+            <div class="alert-icon warn"><i class="fas fa-exclamation-circle"></i></div>
+            <div>
+                <div class="alert-title">${warningDims.length} Marginal Issue${warningDims.length > 1 ? 's' : ''} — Review Before Deploying</div>
+                <div class="alert-sub">Marginal performance in: ${warningDims.map(d => DIM_META[d.id]?.name || '').join(', ')}. These are below best-practice thresholds and should be addressed.</div>
+            </div>
+        </div>`;
+    } else {
+        alertHtml = `<div class="alert-banner ok">
+            <div class="alert-icon ok"><i class="fas fa-check-circle"></i></div>
+            <div>
+                <div class="alert-title">All Fairness Checks Passing</div>
+                <div class="alert-sub">Model meets all 7 fairness dimension thresholds. Continue monitoring for drift in production.</div>
+            </div>
+        </div>`;
+    }
+
+    // Dimension cards — cards and details are siblings inside the same grid
+    const dimCardsHtml = dims.map(d => {
+        const meta = DIM_META[d.id] || { icon: 'fa-chart-bar', name: `Dim ${d.id}`, desc: '' };
+        return renderDimCard(d, meta);
+    }).join('');
+
+    // Detail panels live as grid children after all cards, spanning full width
+    const dimDetailsHtml = dims.map(d => {
+        const meta = DIM_META[d.id] || { icon: 'fa-chart-bar', name: `Dim ${d.id}`, desc: '' };
+        return renderDimDetail(d, meta, data.per_attribute);
+    }).join('');
+
+    // Radar legend
+    const radarLegend = dims.map(d => {
+        const sev = severity(d.score);
+        const col = sev === 'passing' ? '#10B981' : sev === 'warning' ? '#F59E0B' : '#EF4444';
+        return `<div class="radar-legend-item">
+            <div class="radar-dot" style="background:${col}"></div>
+            <span class="radar-legend-label">${DIM_META[d.id]?.name || `Dim ${d.id}`}</span>
+            <span class="radar-legend-val">${fmtPct(d.score, 0)}</span>
+        </div>`;
+    }).join('');
+
+    // SHAP suspicious features
+    const suspiciousFeats = (shap.feature_importance || [])
+        .filter(f => ['gender','sex','race','caste','age','religion','proxy','ethnicity']
+            .some(k => f.feature.toLowerCase().includes(k)));
+
+    document.getElementById('app').innerHTML = `
+        <!-- HERO -->
+        <div class="report-hero">
+            <div class="hero-top">
+                <div>
+                    <div class="hero-badge"><i class="fas fa-code"></i> Developer Report</div>
+                    <div class="hero-title">Fairness Analysis<br>Technical Deep Dive</div>
+                    <div class="hero-meta">
+                        <div class="hero-stat">
+                            <span class="hero-stat-val">${data.records ? data.records.toLocaleString() : '—'}</span>
+                            <span class="hero-stat-lbl">Records</span>
+                        </div>
+                        <div class="hero-stat">
+                            <span class="hero-stat-val">${criticalDims.length + warningDims.length}</span>
+                            <span class="hero-stat-lbl">Issues Found</span>
+                        </div>
+                        <div class="hero-stat">
+                            <span class="hero-stat-val">${shap.top_feature || '—'}</span>
+                            <span class="hero-stat-lbl">Top Feature</span>
+                        </div>
+                        <div class="hero-stat">
+                            <span class="hero-stat-val mono" style="font-size:0.9rem;font-family:var(--mono)">${evalId ? evalId.slice(0,8) + '…' : '—'}</span>
+                            <span class="hero-stat-lbl">Eval ID</span>
+                        </div>
+                    </div>
+                    <div class="hero-actions">
+                        <button class="btn-hero btn-hero-primary" onclick="downloadPDF()"><i class="fas fa-file-pdf"></i> Download PDF</button>
+                        <button class="btn-hero btn-hero-ghost" onclick="downloadJSON()"><i class="fas fa-download"></i> Export JSON</button>
+                        <a href="allReports.html?eval_id=${evalId}" class="btn-hero btn-hero-ghost"><i class="fas fa-arrow-left"></i> All Reports</a>
+                    </div>
+                </div>
+                <div class="hero-score-ring">
+                    <div class="score-big" style="color:${sevColor}">${overallScore != null ? Math.round(overallScore*100) : '—'}</div>
+                    <div class="score-label" style="color:rgba(255,255,255,0.5)">/ 100 Ethical Score</div>
+                    <div style="margin-top:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:${sevColor}">${severityLabel(overallScore)}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ALERT -->
+        ${alertHtml}
+
+        <!-- DIMENSION OVERVIEW -->
+        <div class="section">
+            <div class="section-head">
+                <div class="section-title"><i class="fas fa-th-large"></i> 7 Fairness Dimensions — Click Any Card to Drill Down</div>
+                <span style="font-size:0.8125rem;color:var(--muted)">${criticalDims.length} critical · ${warningDims.length} marginal · ${dims.length - criticalDims.length - warningDims.length} passing</span>
+            </div>
+            <div class="section-body">
+                <div class="dim-grid">
+                    ${dimCardsHtml}
+                    ${dimDetailsHtml}
+                </div>
+            </div>
+        </div>
+
+        <!-- FAIRNESS RADAR -->
+        <div class="section">
+            <div class="section-head">
+                <div class="section-title"><i class="fas fa-spider"></i> Fairness Profile Radar</div>
+                <span style="font-size:0.8125rem;color:var(--muted)">A perfect model fills the entire circle</span>
+            </div>
+            <div class="section-body">
+                <div style="background:var(--bg);border:1px solid var(--rule);border-radius:8px;padding:0.875rem 1rem;margin-bottom:1.25rem;font-size:0.8125rem;color:var(--muted);display:flex;align-items:flex-start;gap:8px;">
+                    <i class="fas fa-info-circle" style="color:var(--gold);margin-top:2px;flex-shrink:0"></i>
+                    <span><strong style="color:var(--navy)">How to read this:</strong> Each axis is one fairness dimension. The <span style="color:var(--blue);font-weight:700">blue polygon</span> shows your model's scores — a perfect model fills the entire circle. <span style="color:var(--red);font-weight:700">Dents inward</span> reveal where bias concentrates. The more lopsided the shape, the more uneven the fairness profile.</span>
+                </div>
+                <div class="radar-layout">
+                    <div class="radar-svg-wrap">${dims.length ? renderRadar(dims) : '<p style="color:var(--muted)">No data</p>'}</div>
+                    <div>
+                        <div class="chart-title">Dimension Scores</div>
+                        <div class="radar-legend">${radarLegend}</div>
+                        <div style="margin-top:1.25rem;padding:1rem;background:var(--bg);border-radius:8px;border:1px solid var(--rule);">
+                            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:8px">Threshold</div>
+                            <div style="font-size:0.8125rem;color:var(--muted)">All dimensions should be <span style="font-family:var(--mono);font-weight:700;color:var(--green)">≥ 0.80</span> to pass. The blue polygon shows your model's actual scores vs the ideal.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SHAP ANALYSIS -->
+        <div class="section">
+            <div class="section-head">
+                <div class="section-title"><i class="fas fa-chart-bar"></i> SHAP Feature Importance — What Drives Predictions?</div>
+                <span style="font-size:0.8125rem;color:var(--muted)">Stability: ${fmt(shap.feature_stability, 4)}</span>
+            </div>
+            <div class="section-body">
+                <div class="shap-layout">
+                    <div>
+                        <div class="chart-title">Mean |SHAP| value — proportional to actual influence</div>
+                        ${renderShapChart(shap)}
+                        ${suspiciousFeats.length ? `
+                        <div class="proxy-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <div><strong>Protected attributes in top features:</strong> ${suspiciousFeats.map(f => `<code style="background:rgba(239,68,68,0.1);padding:1px 5px;border-radius:3px">${f.feature}</code>`).join(', ')} — these should not be predictive features. Remove or neutralize.</div>
+                        </div>` : ''}
+                    </div>
+                    <div class="shap-insights">
+                        <div class="insight-card ${shap.top_feature && ['gender','sex','race','caste'].some(k => (shap.top_feature||'').toLowerCase().includes(k)) ? 'danger' : ''}">
+                            <div class="insight-card-label">Top Predictive Feature</div>
+                            <div class="insight-card-val">${shap.top_feature || '—'}</div>
+                            <div class="insight-card-sub">SHAP max: ${fmt(shap.shap_max, 5)} · min: ${fmt(shap.shap_min, 5)}</div>
+                        </div>
+                        <div class="insight-card">
+                            <div class="insight-card-label">Feature Stability</div>
+                            <div class="insight-card-val">${fmt(shap.feature_stability, 4)}</div>
+                            <div class="insight-card-sub">Consistency of top-5 features across samples. Values near 1.0 are stable.</div>
+                        </div>
+                        <div class="insight-card ${(shap.feature_importance?.length || 0) < 5 ? 'warn' : ''}">
+                            <div class="insight-card-label">Feature Count</div>
+                            <div class="insight-card-val">${shap.feature_importance?.length || 0}</div>
+                            <div class="insight-card-sub">Total features with non-zero SHAP contribution</div>
+                        </div>
+                        <div class="insight-card">
+                            <div class="insight-card-label">Protected Attrs in Top-5</div>
+                            <div class="insight-card-val" style="${suspiciousFeats.filter(f => (shap.feature_importance||[]).slice(0,5).some(x=>x.feature===f.feature)).length > 0 ? 'color:var(--red)' : 'color:var(--green)'}">${suspiciousFeats.filter(f => (shap.feature_importance||[]).slice(0,5).some(x=>x.feature===f.feature)).length}</div>
+                            <div class="insight-card-sub">Should be 0. Any protected attribute here is a red flag.</div>
+                        </div>
+                        <button onclick="downloadSHAP()" style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--bg2);border:1px solid var(--rule);border-radius:8px;font-size:0.8125rem;font-weight:600;cursor:pointer;font-family:var(--body);color:var(--navy);transition:all 0.15s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--rule)'">
+                            <i class="fas fa-download" style="color:var(--gold)"></i> Download SHAP values
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRIORITY ACTION PLAN -->
+        <div class="section">
+            <div class="section-head">
+                <div class="section-title"><i class="fas fa-tools"></i> Priority Action Plan — What to Fix & How</div>
+                <span style="font-size:0.8125rem;color:var(--muted)">${actions.filter(a=>a.severity==='critical').length} critical · ${actions.filter(a=>a.severity==='warning').length} warnings</span>
+            </div>
+            <div class="section-body">
+                <div class="action-list">
+                    ${actions.map((a, i) => `
+                    <div class="action-item ${a.severity === 'info' ? 'info' : a.severity}">
+                        <div class="action-rank ${a.severity === 'info' ? 'info' : a.severity}">${i+1}</div>
+                        <div style="flex:1">
+                            <div class="action-title">${a.title}</div>
+                            <div class="action-body">${a.body}</div>
+                            ${a.code ? `<div class="action-code">${a.code}</div>` : ''}
+                        </div>
+                        <div class="action-effort ${a.effort}">${a.effort} effort</div>
+                    </div>`).join('')}
+                </div>
+            </div>
+        </div>
+
+        <!-- MODEL PERFORMANCE -->
+        <div class="section">
+            <div class="section-head">
+                <div class="section-title"><i class="fas fa-chart-line"></i> Model Performance Metrics</div>
+            </div>
+            <div class="section-body">
+                <div class="perf-grid">
+                    ${[
+                        { label: 'ROC-AUC', val: perf.roc_auc, desc: '> 0.85 is good. Measures ranking quality.' },
+                        { label: 'Accuracy', val: perf.accuracy, desc: 'Overall correct prediction rate.' },
+                        { label: 'F1-Score', val: perf.f1_score, desc: 'Harmonic mean of precision & recall.' }
+                    ].map(m => {
+                        const v = m.val != null ? Number(m.val) : null;
+                        const w = v != null ? (v * 100) : 0;
+                        const col = v == null ? 'var(--muted)' : v >= 0.85 ? 'var(--green)' : v >= 0.70 ? 'var(--amber)' : 'var(--red)';
+                        return `<div class="perf-card">
+                            <div class="perf-label">${m.label}</div>
+                            <div class="perf-value" style="color:${col}">${v != null ? v.toFixed(4) : '—'}</div>
+                            <div class="perf-bar-track"><div class="perf-bar-fill" style="width:${w}%;background:${col}"></div></div>
+                            <div class="perf-sub">${m.desc}</div>
+                        </div>`;
+                    }).join('')}
+                </div>
+                <p style="margin-top:1.25rem;font-size:0.8125rem;color:var(--muted);padding:1rem;background:var(--bg);border-radius:8px;border:1px solid var(--rule);">
+                    <i class="fas fa-info-circle" style="color:var(--gold);margin-right:6px"></i>
+                    <strong>Note for developers:</strong> High accuracy does not mean fair. A model can achieve 90% accuracy while systematically disadvantaging minority groups. Always evaluate both performance <em>and</em> fairness metrics together.
+                </p>
+            </div>
+        </div>
+    `;
+}
+
+// ── Accordion / drawer ──────────────────────────────────────────────────────
+function toggleDimDetail(id) {
+    const detail = document.getElementById(`dimdetail-${id}`);
+    if (!detail) return;
+    const isOpen = detail.classList.contains('open');
+
+    // Close all details and reset all card chevrons
+    document.querySelectorAll('.dim-detail').forEach(d => d.classList.remove('open'));
+    document.querySelectorAll('.dim-card').forEach(c => {
+        c.style.borderColor = '';
+        c.style.boxShadow = '';
+        // Reset chevron icon
+        const action = c.querySelector('.dim-action i.fa-chevron-up');
+        if (action) { action.classList.remove('fa-chevron-up'); action.classList.add('fa-chevron-down'); }
     });
 
-    // ── Helpers ───────────────────────────────────────────────────────────
-    function fmt(v, decimals = 4) {
-        return v != null ? Number(v).toFixed(decimals) : '—';
+    if (!isOpen) {
+        detail.classList.add('open');
+        // Highlight active card with gold border
+        const card = document.getElementById(`dimcard-${id}`);
+        if (card) {
+            card.style.borderColor = 'var(--gold)';
+            card.style.boxShadow = '0 0 0 3px var(--gold-dim)';
+            const chevron = card.querySelector('.dim-action i');
+            if (chevron) { chevron.classList.remove('fa-chevron-down'); chevron.classList.add('fa-chevron-up'); }
+        }
+        setTimeout(() => detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
     }
+}
 
-    function tagClass(status) {
-        const s = (status || '').toUpperCase();
-        if (s === 'PASS')    return 'tag-pass';
-        if (s === 'WARNING') return 'tag-warning';
-        return 'tag-fail';
+function closeDimDetail(id) {
+    document.getElementById(`dimdetail-${id}`)?.classList.remove('open');
+    const card = document.getElementById(`dimcard-${id}`);
+    if (card) {
+        card.style.borderColor = '';
+        card.style.boxShadow = '';
+        const chevron = card.querySelector('.dim-action i');
+        if (chevron) { chevron.classList.remove('fa-chevron-up'); chevron.classList.add('fa-chevron-down'); }
     }
+}
 
-    function dimBadge(score) {
-        return score >= 0.80
-            ? `<span class="dim-score-badge success">${fmt(score, 2)}</span>`
-            : `<span class="dim-score-badge warning">${fmt(score, 2)}</span>`;
-    }
+// ── Actions ──────────────────────────────────────────────────────────────────
+function downloadSHAP() {
+    const cached = sessionStorage.getItem('eval_result');
+    if (!cached) { alert('No SHAP data available.'); return; }
+    const blob = new Blob([JSON.stringify(JSON.parse(cached).shap || {}, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'shap_values.json'; a.click();
+}
 
-    // ── Render: no data ───────────────────────────────────────────────────
-    function renderNoData(msg) {
+function downloadPDF() {
+    // Open all dim detail drawers so they print
+    document.querySelectorAll('.dim-detail').forEach(d => d.classList.add('open'));
+    // Small delay so DOM updates, then print
+    setTimeout(() => {
+        window.print();
+        // Close them again after print dialog
+        setTimeout(() => {
+            document.querySelectorAll('.dim-detail').forEach(d => d.classList.remove('open'));
+        }, 1000);
+    }, 200);
+}
+
+function downloadJSON() {
+    const cached = sessionStorage.getItem('eval_result');
+    if (!cached) { alert('No data to download.'); return; }
+    const blob = new Blob([cached], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'developer_report.json'; a.click();
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+(async function init() {
+    const evalId = new URLSearchParams(location.search).get('eval_id')
+                || sessionStorage.getItem('eval_id');
+
+    if (!evalId) {
         document.getElementById('app').innerHTML = `
-            <div class="state-card">
-                <i class="fas fa-exclamation-circle" style="font-size: 2rem; color: var(--warning); margin-bottom: 1rem;"></i>
-                <h2>No report found</h2>
-                <p>${msg || 'Complete an evaluation first.'}</p>
-                <a href="upload.html" class="btn btn-primary" style="display:inline-flex;margin-top:0.5rem">
-                    <i class="fas fa-play-circle"></i> Start evaluation
-                </a>
-            </div>`;
+        <div class="state-wrap">
+            <div class="state-icon" style="color:var(--amber)"><i class="fas fa-exclamation-circle"></i></div>
+            <div class="state-title">No evaluation found</div>
+            <div class="state-sub">Complete an evaluation on the upload page first.</div>
+            <a href="upload.html" style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;background:var(--navy);color:white;border-radius:8px;text-decoration:none;font-weight:600;font-size:0.875rem"><i class="fas fa-play-circle"></i> Start evaluation</a>
+        </div>`;
+        return;
     }
 
-    // ── SHAP section ──────────────────────────────────────────────────────
-    function renderShap(shap) {
-        const features = shap.feature_importance || [];
-        const top8     = features.slice(0, 8);
-        const maxVal   = top8.length ? top8[0].shap_value : 1;
-
-        const bars = top8.map(f => {
-            const pct = Math.round((f.shap_value / maxVal) * 100);
-            return `
-            <div class="shap-bar-wrap">
-                <div class="shap-bar" style="height:${pct}%"></div>
-                <div class="shap-bar-label">${f.feature}</div>
-            </div>`;
-        }).join('');
-
-        const listItems = features.slice(0, 10).map(f =>
-            `<li>
-                <span>${f.feature}</span>
-                <span class="feature-val">${fmt(f.shap_value, 5)}</span>
-            </li>`
-        ).join('');
-
-        return `
-        <section class="shap-section">
-            <h2 class="section-title"><i class="fas fa-chart-bar" style="margin-right:8px; color: var(--secondary);"></i>SHAP Analysis</h2>
-            <div class="shap-grid">
-                <div>
-                    <div class="shap-plot">
-                        <div class="shap-bars">${bars || '<p class="na-text">No SHAP data available.</p>'}</div>
-                    </div>
-                    <div class="shap-meta">
-                        <div class="shap-chip"><i class="fas fa-star"></i> Top: <span>${shap.top_feature || '—'}</span></div>
-                        <div class="shap-chip"><i class="fas fa-arrow-up"></i> Max: <span>${fmt(shap.shap_max, 5)}</span></div>
-                        <div class="shap-chip"><i class="fas fa-arrow-down"></i> Min: <span>${fmt(shap.shap_min, 5)}</span></div>
-                        <div class="shap-chip"><i class="fas fa-balance-scale"></i> Stability: <span>${fmt(shap.feature_stability, 4)}</span></div>
-                    </div>
-                </div>
-                <div class="feature-controls">
-                    <h3><i class="fas fa-list" style="color: var(--secondary); margin-right:6px;"></i>Feature Importance</h3>
-                    <ul class="feature-list">${listItems || '<li class="na-text">No data</li>'}</ul>
-                    <button class="btn btn-secondary" onclick="downloadSHAP()">
-                        <i class="fas fa-download"></i> Download SHAP values
-                    </button>
-                </div>
-            </div>
-        </section>`;
-    }
-
-    // ── Dimension accordions ──────────────────────────────────────────────
-    function renderDimensionDetail(dim) {
-        const d = dim.detail || {};
-        const icons = {
-            1: 'fa-user-check',
-            2: 'fa-users',
-            3: 'fa-venus-mars',
-            4: 'fa-balance-scale',
-            5: 'fa-chart-pie',
-            6: 'fa-random',
-            7: 'fa-layer-group'
-        };
-        const icon = icons[dim.id] || 'fa-chart-bar';
-
-        switch (dim.id) {
-            case 1: // Individual Fairness
-                return `
-                    <p><i class="fas fa-info-circle" style="color: var(--secondary); margin-right:6px;"></i>${d.description || ''}</p>
-                    <div class="metrics-grid">
-                        <div class="metric-card"><div class="metric-label">Consistency</div><div class="metric-value">${d.consistency_pct ?? '—'}%</div></div>
-                        <div class="metric-card"><div class="metric-label">Violation Rate</div><div class="metric-value">${dim.violation_rate ?? '—'}%</div></div>
-                        <div class="metric-card"><div class="metric-label">Method</div><div class="metric-value" style="font-size:0.8rem">KNN k=5</div></div>
-                    </div>`;
-
-            case 2: // Group Fairness
-                const groups = (d.per_attribute || []).map(g => `
-                    <tr>
-                        <td>${g.attribute}</td>
-                        <td>${fmt(g.equalized_odds_difference, 4)}</td>
-                        <td>${fmt(g.demographic_parity_difference, 4)}</td>
-                        <td>${fmt(g.fairness_score, 4)}</td>
-                    </tr>`).join('') || '<tr><td colspan="4" class="na-text">No attribute data</td></tr>';
-                return `
-                    <p><i class="fas fa-info-circle" style="color: var(--secondary); margin-right:6px;"></i>${d.description || ''}</p>
-                    <table class="comparison-table">
-                        <thead><tr><th>Attribute</th><th>EOD</th><th>DP Diff</th><th>Score</th></tr></thead>
-                        <tbody>${groups}</tbody>
-                    </table>`;
-
-            case 3: // Demographic Bias
-                const disps = (d.disparities || []).map(dp => `
-                    <tr>
-                        <td>${dp.attribute}</td>
-                        <td>${dp.gap_pct}%</td>
-                        <td>${fmt(dp.raw_dp_diff, 4)}</td>
-                    </tr>`).join('') || '<tr><td colspan="3" class="na-text">No data</td></tr>';
-                return `
-                    <p><i class="fas fa-info-circle" style="color: var(--secondary); margin-right:6px;"></i>${d.description || ''}</p>
-                    <div class="metrics-grid">
-                        <div class="metric-card"><div class="metric-label">Raw DP Gap</div><div class="metric-value">${fmt(d.raw_parity_gap, 4)}</div></div>
-                    </div>
-                    <table class="comparison-table">
-                        <thead><tr><th>Attribute</th><th>Gap %</th><th>DP Diff</th></tr></thead>
-                        <tbody>${disps}</tbody>
-                    </table>`;
-
-            case 4: // Calibration
-                return `
-                    <p><i class="fas fa-info-circle" style="color: var(--secondary); margin-right:6px;"></i>${d.description || ''}</p>
-                    <div class="metrics-grid">
-                        <div class="metric-card"><div class="metric-label">Brier Score</div><div class="metric-value">${fmt(d.brier_score, 4)}</div></div>
-                        <div class="metric-card"><div class="metric-label">Cal. Score</div><div class="metric-value">${fmt(d.calibration_score, 4)}</div></div>
-                    </div>
-                    <p style="margin-top:0.5rem">${d.interpretation || ''}</p>`;
-
-            case 5: // Disparate Impact
-                const passes = d.passes_80_rule;
-                return `
-                    <p><i class="fas fa-info-circle" style="color: var(--secondary); margin-right:6px;"></i>${d.description || ''}</p>
-                    <table class="comparison-table">
-                        <tbody>
-                            <tr><td><strong>Impact Ratio</strong></td><td>${fmt(d.impact_ratio, 4)}</td></tr>
-                            <tr><td><strong>Threshold</strong></td><td>${d.threshold}</td></tr>
-                            <tr><td><strong>80% Rule</strong></td><td><span class="${passes ? 'tag-pass' : 'tag-warning'}">${passes ? 'PASS' : 'FAIL'}</span></td></tr>
-                        </tbody>
-                    </table>`;
-
-            case 6: // Counterfactual
-                return `
-                    <p><i class="fas fa-info-circle" style="color: var(--secondary); margin-right:6px;"></i>${d.description || ''}</p>
-                    <div class="metrics-grid">
-                        <div class="metric-card"><div class="metric-label">Consistency Score</div><div class="metric-value">${fmt(d.consistency_score, 4)}</div></div>
-                    </div>
-                    <p style="margin-top:0.5rem">${d.interpretation || ''}</p>`;
-
-            case 7: // Intersectional
-                return `
-                    <p><i class="fas fa-info-circle" style="color: var(--secondary); margin-right:6px;"></i>${d.description || ''}</p>
-                    <div class="metrics-grid">
-                        <div class="metric-card"><div class="metric-label">Worst-case Gap</div><div class="metric-value">${fmt(d.worst_case_gap, 4)}</div></div>
-                    </div>
-                    <p style="margin-top:0.5rem">${d.interpretation || ''}</p>`;
-
-            default:
-                return `<p>${d.description || 'No detail available.'}</p>`;
+    try {
+        const res  = await fetch(`${API_BASE}/report/developer/${evalId}`);
+        const data = await res.json();
+        if (res.ok && data.status === 'complete') { renderReport(data, evalId); return; }
+        throw new Error(data.error || 'not complete');
+    } catch (_) {
+        // Fallback to cached sessionStorage data
+        const cached = sessionStorage.getItem('eval_result');
+        if (cached) {
+            const raw = JSON.parse(cached);
+            renderReport({
+                ethical_score:    raw.ethical_score,
+                records:          raw.records,
+                shap: raw.shap ? {
+                    top_feature:       raw.shap.topFeature,
+                    shap_max:          raw.shap.shapMax,
+                    shap_min:          raw.shap.shapMin,
+                    feature_stability: raw.shap.featureStability,
+                    feature_importance: Object.entries(raw.shap.feature_importance || {})
+                        .sort((a,b) => b[1]-a[1])
+                        .map(([feature, shap_value]) => ({ feature, shap_value })),
+                } : {},
+                dimensions:         [],
+                model_performance:  raw.model_metrics ? {
+                    accuracy: raw.model_metrics.accuracy,
+                    f1_score: raw.model_metrics.f1_score,
+                    roc_auc:  raw.model_metrics.roc_auc,
+                } : {},
+                fairness_raw: raw.fairness ? {
+                    individualFairness: raw.fairness.individualFairness,
+                    groupFairness:      raw.fairness.groupFairness,
+                    demographicParity:  raw.fairness.demographicParity,
+                    disparateImpact:    raw.fairness.disparateImpact,
+                    calibrationError:   raw.fairness.calibrationError,
+                    counterfactual:     raw.fairness.counterfactual,
+                    intersectional:     raw.fairness.intersectional,
+                } : {},
+            }, evalId);
+            return;
         }
-    }
-
-    function renderAccordions(dimensions) {
-        const icons = {
-            1: 'fa-user-check',
-            2: 'fa-users',
-            3: 'fa-venus-mars',
-            4: 'fa-balance-scale',
-            5: 'fa-chart-pie',
-            6: 'fa-random',
-            7: 'fa-layer-group'
-        };
-
-        const items = dimensions.map((dim, i) => {
-            const icon = icons[dim.id] || 'fa-chart-bar';
-            return `
-            <div class="accordion-item" id="dimension${dim.id}">
-                <div class="accordion-header" onclick="toggleAccordion(this, ${i})">
-                    <div class="accordion-title">
-                        <i class="fas ${icon}"></i>
-                        <span>${dim.title}</span>
-                        ${dimBadge(dim.score)}
-                    </div>
-                    <span class="accordion-arrow" id="arrow-${i}"><i class="fas fa-chevron-down"></i></span>
-                </div>
-                <div class="accordion-content" id="content-${i}">
-                    ${renderDimensionDetail(dim)}
-                </div>
-            </div>`;
-        }).join('');
-
-        return `
-        <section class="accordion-section">
-            <h2 class="section-title"><i class="fas fa-balance-scale" style="margin-right:8px; color: var(--secondary);"></i>Fairness Dimensions Analysis</h2>
-            ${items}
-        </section>`;
-    }
-
-    // ── Model performance section ─────────────────────────────────────────
-    function renderPerformance(perf) {
-        const cm = perf.confusion_matrix || {};
-        const tpVal = cm.true_positives  != null ? cm.true_positives  : null;
-        const fpVal = cm.false_positives != null ? cm.false_positives : null;
-        const fnVal = cm.false_negatives != null ? cm.false_negatives : null;
-        const tnVal = cm.true_negatives  != null ? cm.true_negatives  : null;
-        const hasMatrix = tpVal != null;
-
-        const cmHtml = hasMatrix ? `
-            <div class="confusion-matrix">
-                <div class="matrix-cell tp"><div class="mc-value">${tpVal}</div><div class="mc-label">True Positives</div></div>
-                <div class="matrix-cell fp"><div class="mc-value">${fpVal}</div><div class="mc-label">False Positives</div></div>
-                <div class="matrix-cell fn"><div class="mc-value">${fnVal}</div><div class="mc-label">False Negatives</div></div>
-                <div class="matrix-cell tn"><div class="mc-value">${tnVal}</div><div class="mc-label">True Negatives</div></div>
-            </div>` : `<p class="na-text">Confusion matrix not available — requires raw count data from evaluation.</p>`;
-
-        return `
-        <section class="performance-section">
-            <h2 class="section-title"><i class="fas fa-chart-line" style="margin-right:8px; color: var(--secondary);"></i>Model Performance Metrics</h2>
-            <div class="performance-grid">
-                <div>
-                    <div class="perf-section-title"><i class="fas fa-th" style="margin-right:6px; color: var(--secondary);"></i>Confusion Matrix</div>
-                    ${cmHtml}
-                </div>
-                <div>
-                    <div class="perf-section-title"><i class="fas fa-chart-pie" style="margin-right:6px; color: var(--secondary);"></i>Metrics Summary</div>
-                    <table class="comparison-table">
-                        <tbody>
-                            <tr><td>AUC-ROC</td><td><strong>${fmt(perf.roc_auc, 4)}</strong></td></tr>
-                            <tr><td>Accuracy</td><td><strong>${fmt(perf.accuracy, 4)}</strong></td></tr>
-                            <tr><td>F1-Score</td><td><strong>${fmt(perf.f1_score, 4)}</strong></td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>`;
-    }
-
-    // ── Full render ───────────────────────────────────────────────────────
-    function renderReport(data, evalId) {
-        const backLink = `index.html`;
         document.getElementById('app').innerHTML = `
-            <div class="report-header">
-                <div>
-                    <h1>Developer Report — Technical Deep Dive</h1>
-                    <div class="report-meta">
-                        <i class="fas fa-fingerprint" style="margin-right:4px; color: var(--secondary);"></i> Eval ID: <code>${evalId || '—'}</code> &nbsp;|&nbsp;
-                        <i class="fas fa-star" style="color: var(--secondary);"></i> Ethical Score: <strong>${fmt(data.ethical_score, 2)}</strong> &nbsp;|&nbsp;
-                        <i class="fas fa-database"></i> ${data.records ? data.records.toLocaleString() + ' records' : ''}
-                        <a href="${backLink}" class="home-link"><i class="fas fa-home"></i> Home</a>
-                    </div>
-                </div>
-                <div class="export-buttons">
-                    <button class="btn btn-secondary" onclick="downloadJSON()"><i class="fas fa-file-code"></i> JSON</button>
-                    <button class="btn btn-primary" onclick="downloadModelCard()"><i class="fas fa-file-pdf"></i> Model Card</button>
-                </div>
-            </div>
-            ${renderShap(data.shap || {})}
-            ${renderAccordions(data.dimensions || [])}
-            ${renderPerformance(data.model_performance || {})}`;
-
-        // Auto-open accordion if hash present (e.g. #dimension3)
-        const hash = window.location.hash;
-        if (hash) {
-            const dimId = parseInt(hash.replace('#dimension', ''));
-            if (!isNaN(dimId)) {
-                const idx = dimId - 1;
-                const content = document.getElementById(`content-${idx}`);
-                const arrow   = document.getElementById(`arrow-${idx}`);
-                if (content) {
-                    content.classList.add('active');
-                    if (arrow) arrow.classList.add('open');
-                    setTimeout(() => {
-                        document.getElementById(`dimension${dimId}`)?.scrollIntoView({ behavior: 'smooth' });
-                    }, 100);
-                }
-            }
-        }
+        <div class="state-wrap">
+            <div class="state-icon" style="color:var(--red)"><i class="fas fa-times-circle"></i></div>
+            <div class="state-title">Could not load report</div>
+            <div class="state-sub">Evaluation not found or still processing.</div>
+            <a href="upload.html" style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;background:var(--navy);color:white;border-radius:8px;text-decoration:none;font-weight:600;font-size:0.875rem"><i class="fas fa-redo"></i> Try again</a>
+        </div>`;
     }
+})();
 
-    // ── Accordion toggle ──────────────────────────────────────────────────
-    function toggleAccordion(header, idx) {
-        const content = document.getElementById(`content-${idx}`);
-        const arrow   = document.getElementById(`arrow-${idx}`);
-        if (!content) return;
-        content.classList.toggle('active');
-        arrow?.classList.toggle('open');
-    }
-
-    // ── Actions ───────────────────────────────────────────────────────────
-    function downloadSHAP() {
-        const cached = sessionStorage.getItem('eval_result');
-        if (!cached) { alert('No SHAP data available.'); return; }
-        const data = JSON.parse(cached);
-        const blob = new Blob([JSON.stringify(data.shap || {}, null, 2)], { type: 'application/json' });
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-        a.download = 'shap_values.json'; a.click();
-    }
-
-    function downloadJSON() {
-        const cached = sessionStorage.getItem('eval_result');
-        if (!cached) { alert('No data to download.'); return; }
-        const blob = new Blob([cached], { type: 'application/json' });
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-        a.download = 'developer_report.json'; a.click();
-    }
-
-    function downloadModelCard() {
-        alert('Generating model card PDF…');
-    }
-
-    // ── Init ──────────────────────────────────────────────────────────────
-    (async function init() {
-        const evalId = new URLSearchParams(location.search).get('eval_id')
-                    || sessionStorage.getItem('eval_id');
-
-        if (!evalId) { renderNoData('No evaluation ID found.'); return; }
-
-        try {
-            const res  = await fetch(`${API_BASE}/report/developer/${evalId}`);
-            const data = await res.json();
-
-            if (res.ok && data.status === 'complete') {
-                renderReport(data, evalId);
-            } else {
-                throw new Error(data.error || 'not complete');
-            }
-        } catch (_) {
-            // Fallback to cached eval_result from processing
-            const cached = sessionStorage.getItem('eval_result');
-            if (cached) {
-                const raw = JSON.parse(cached);
-                // Shape raw eval into the same structure the API returns
-                renderReport({
-                    ethical_score:    raw.ethical_score,
-                    records:          raw.records,
-                    shap:             raw.shap ? {
-                        top_feature:       raw.shap.topFeature,
-                        shap_max:          raw.shap.shapMax,
-                        shap_min:          raw.shap.shapMin,
-                        feature_stability: raw.shap.featureStability,
-                        feature_importance: Object.entries(raw.shap.feature_importance || {})
-                            .sort((a, b) => b[1] - a[1])
-                            .map(([feature, shap_value]) => ({ feature, shap_value })),
-                    } : {},
-                    dimensions:       [],   // no dimension detail without API
-                    model_performance: raw.model_metrics ? {
-                        accuracy:         raw.model_metrics.accuracy,
-                        f1_score:         raw.model_metrics.f1_score,
-                        roc_auc:          raw.model_metrics.roc_auc,
-                        confusion_matrix: {},
-                    } : {},
-                }, evalId);
-                return;
-            }
-            renderNoData('Could not load developer report.');
-        }
-    })();
-
-    // Make functions global for onclick handlers
-    window.toggleAccordion = toggleAccordion;
-    window.downloadSHAP = downloadSHAP;
-    window.downloadJSON = downloadJSON;
-    window.downloadModelCard = downloadModelCard;
+window.toggleDimDetail = toggleDimDetail;
+window.closeDimDetail  = closeDimDetail;
+window.downloadSHAP    = downloadSHAP;
+window.downloadJSON    = downloadJSON;
 </script>
 </body>
 </html>

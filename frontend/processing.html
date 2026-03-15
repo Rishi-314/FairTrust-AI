@@ -14,11 +14,11 @@
         }
         
         :root {
-            --primary: #1A2D4E;      /* Deep Navy - dominant */
+            --primary: #1A2D4E;
             --primary-light: #2A3F66;
-            --primary-soft: #E9ECF3;  /* Soft navy-tinted background */
-            --secondary: #EBB255;     /* Gold/Amber - minimal accents */
-            --accent: #4A90E2;        /* Soft Blue */
+            --primary-soft: #E9ECF3;
+            --secondary: #EBB255;
+            --accent: #4A90E2;
             --success: #059669;
             --success-soft: #ECFDF5;
             --danger: #DC2626;
@@ -55,6 +55,7 @@
             padding: 2.5rem; 
             box-shadow: var(--shadow);
             transition: var(--transition);
+            animation: fadeIn 0.5s ease-out forwards;
         }
         
         .card:hover {
@@ -67,7 +68,6 @@
             margin-bottom: 1.75rem; 
         }
         
-        /* Spinner ring - navy with gold accent */
         .ring-container {
             position: relative;
             width: 72px;
@@ -112,22 +112,10 @@
             pointer-events: none;
         }
         
-        .ring.done + .ring-icon,
-        .ring.error + .ring-icon {
-            opacity: 1;
-        }
+        .ring.done + .ring-icon { opacity: 1; color: var(--success); }
+        .ring.error + .ring-icon { opacity: 1; color: var(--danger); }
         
-        .ring.done + .ring-icon {
-            color: var(--success);
-        }
-        
-        .ring.error + .ring-icon {
-            color: var(--danger);
-        }
-        
-        @keyframes spin { 
-            to { transform: rotate(360deg); } 
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
         
         .head h1 { 
             font-size: 1.75rem; 
@@ -137,10 +125,7 @@
             margin-bottom: 0.3rem; 
         }
         
-        .head p { 
-            color: var(--muted); 
-            font-size: 0.9375rem; 
-        }
+        .head p { color: var(--muted); font-size: 0.9375rem; }
         
         .eval-id { 
             display: inline-flex;
@@ -165,10 +150,7 @@
             background: rgba(235, 178, 85, 0.05);
         }
         
-        .eval-id i {
-            font-size: 0.7rem;
-            color: var(--secondary);
-        }
+        .eval-id i { font-size: 0.7rem; color: var(--secondary); }
         
         .prog-track { 
             height: 6px; 
@@ -186,9 +168,7 @@
             transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); 
         }
         
-        .steps { 
-            margin-bottom: 2rem; 
-        }
+        .steps { margin-bottom: 2rem; }
         
         .step { 
             display: flex; 
@@ -202,340 +182,120 @@
             border: 2px solid transparent;
         }
         
-        .step.active { 
-            opacity: 1; 
-            background: var(--primary-soft); 
-            border-color: rgba(26, 45, 78, 0.15);
-        }
-        
-        .step.done { 
-            opacity: 1; 
-        }
-        
-        .step.fail { 
-            opacity: 1; 
-            background: var(--danger-soft); 
-            border-color: rgba(220, 38, 38, 0.15);
-        }
+        .step.active { opacity: 1; background: var(--primary-soft); border-color: rgba(26, 45, 78, 0.15); }
+        .step.done   { opacity: 1; }
+        .step.fail   { opacity: 1; background: var(--danger-soft); border-color: rgba(220, 38, 38, 0.15); }
         
         .sdot { 
-            width: 32px; 
-            height: 32px; 
-            border-radius: 50%; 
-            background: rgba(26, 45, 78, 0.15); 
-            color: var(--muted); 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 0.875rem; 
-            font-weight: 700; 
-            flex-shrink: 0; 
-            transition: var(--transition); 
+            width: 32px; height: 32px; border-radius: 50%; 
+            background: rgba(26, 45, 78, 0.15); color: var(--muted); 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 0.875rem; font-weight: 700; flex-shrink: 0; transition: var(--transition); 
         }
         
-        .step.active .sdot { 
-            background: var(--primary); 
-            color: white; 
-            animation: pulse 1.4s ease-in-out infinite; 
-        }
+        .step.active .sdot { background: var(--primary); color: white; animation: pulse 1.4s ease-in-out infinite; }
+        .step.done   .sdot { background: var(--success); color: white; }
+        .step.fail   .sdot { background: var(--danger);  color: white; }
         
-        .step.done .sdot { 
-            background: var(--success); 
-            color: white; 
-        }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
         
-        .step.fail .sdot { 
-            background: var(--danger); 
-            color: white; 
-        }
-        
-        @keyframes pulse { 
-            0%, 100% { transform: scale(1); } 
-            50% { transform: scale(1.08); } 
-        }
-        
-        .sbody { 
-            flex: 1; 
-        }
-        
-        .stitle { 
-            font-size: 0.9375rem; 
-            font-weight: 600; 
-            color: var(--text);
-        }
-        
-        .ssub { 
-            font-size: 0.8rem; 
-            color: var(--muted); 
-            margin-top: 0.1rem; 
-        }
+        .sbody { flex: 1; }
+        .stitle { font-size: 0.9375rem; font-weight: 600; color: var(--text); }
+        .ssub   { font-size: 0.8rem; color: var(--muted); margin-top: 0.1rem; }
         
         .sbadge { 
-            font-size: 0.7rem; 
-            font-weight: 600; 
-            padding: 0.2rem 0.75rem; 
-            border-radius: 999px; 
-            white-space: nowrap; 
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
+            font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.75rem; 
+            border-radius: 999px; white-space: nowrap; transition: var(--transition);
+            display: inline-flex; align-items: center; gap: 0.25rem;
         }
         
-        .step.active .sbadge { 
-            background: rgba(26, 45, 78, 0.1); 
-            color: var(--primary); 
-        }
-        
-        .step.done .sbadge { 
-            background: var(--success-soft); 
-            color: var(--success); 
-        }
-        
-        .step.fail .sbadge { 
-            background: var(--danger-soft); 
-            color: var(--danger); 
-        }
+        .step.active .sbadge { background: rgba(26, 45, 78, 0.1); color: var(--primary); }
+        .step.done   .sbadge { background: var(--success-soft); color: var(--success); }
+        .step.fail   .sbadge { background: var(--danger-soft);  color: var(--danger); }
         
         .metrics { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 1rem; 
-            margin-bottom: 2rem; 
+            display: grid; grid-template-columns: repeat(4, 1fr); 
+            gap: 1rem; margin-bottom: 2rem; 
         }
         
-        @media (max-width: 480px) { 
-            .metrics { 
-                grid-template-columns: repeat(2, 1fr); 
-            } 
-        }
+        @media (max-width: 480px) { .metrics { grid-template-columns: repeat(2, 1fr); } }
         
         .metric { 
-            background: var(--bg); 
-            border: 1px solid rgba(26, 45, 78, 0.1); 
-            border-radius: 10px; 
-            padding: 1rem 0.5rem; 
-            text-align: center; 
-            transition: var(--transition);
+            background: var(--bg); border: 1px solid rgba(26, 45, 78, 0.1); 
+            border-radius: 10px; padding: 1rem 0.5rem; text-align: center; transition: var(--transition);
         }
         
-        .metric:hover {
-            border-color: var(--secondary);
-            background: white;
-            transform: translateY(-2px);
-        }
+        .metric:hover { border-color: var(--secondary); background: white; transform: translateY(-2px); }
         
-        .mlabel { 
-            font-size: 0.65rem; 
-            font-weight: 600; 
-            text-transform: uppercase; 
-            letter-spacing: 0.06em; 
-            color: var(--muted); 
-            margin-bottom: 0.4rem; 
-        }
-        
-        .mval { 
-            font-size: 1.25rem; 
-            font-weight: 700; 
-            color: var(--primary); 
-        }
+        .mlabel { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.4rem; }
+        .mval   { font-size: 1.25rem; font-weight: 700; color: var(--primary); }
         
         .quote { 
-            background: var(--primary-soft); 
-            border-left: 4px solid var(--secondary); 
-            border-radius: 0 10px 10px 0; 
-            padding: 1.25rem; 
-            text-align: center; 
-            margin-bottom: 2rem; 
+            background: var(--primary-soft); border-left: 4px solid var(--secondary); 
+            border-radius: 0 10px 10px 0; padding: 1.25rem; text-align: center; margin-bottom: 2rem; 
         }
         
-        .qtext { 
-            font-size: 0.875rem; 
-            color: var(--text); 
-            font-style: italic; 
-            transition: opacity 0.4s; 
-            line-height: 1.6;
-        }
+        .qtext { font-size: 0.875rem; color: var(--text); font-style: italic; transition: opacity 0.4s; line-height: 1.6; }
         
         .errbox { 
-            display: none; 
-            background: var(--danger-soft); 
-            border-left: 4px solid var(--danger); 
-            border-radius: 0 10px 10px 0; 
-            padding: 1.25rem; 
-            margin-bottom: 1.5rem; 
-            font-size: 0.875rem; 
-            color: var(--danger); 
+            display: none; background: var(--danger-soft); border-left: 4px solid var(--danger); 
+            border-radius: 0 10px 10px 0; padding: 1.25rem; margin-bottom: 1.5rem; 
+            font-size: 0.875rem; color: var(--danger); 
         }
         
-        .errbox i {
-            margin-right: 0.5rem;
-        }
-        
-        .errbox a {
-            color: var(--danger);
-            text-decoration: none;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-            margin-top: 0.5rem;
-        }
-        
-        .errbox a:hover {
-            text-decoration: underline;
-        }
+        .errbox i { margin-right: 0.5rem; }
+        .errbox a { color: var(--danger); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 0.25rem; margin-top: 0.5rem; }
+        .errbox a:hover { text-decoration: underline; }
         
         .donebox { 
-            display: none; 
-            background: var(--success-soft); 
-            border-left: 4px solid var(--success); 
-            border-radius: 0 10px 10px 0; 
-            padding: 1.5rem; 
-            margin-bottom: 1.5rem; 
-            text-align: center; 
+            display: none; background: var(--success-soft); border-left: 4px solid var(--success); 
+            border-radius: 0 10px 10px 0; padding: 1.5rem; margin-bottom: 1.5rem; text-align: center; 
         }
         
-        .dscore { 
-            font-size: 3rem; 
-            font-weight: 800; 
-            color: var(--success); 
-            letter-spacing: -0.03em; 
-            margin-bottom: 0.25rem; 
-        }
+        .dscore { font-size: 3rem; font-weight: 800; color: var(--success); letter-spacing: -0.03em; margin-bottom: 0.25rem; }
+        .dlabel { font-size: 0.875rem; color: var(--text-light); }
         
-        .dlabel { 
-            font-size: 0.875rem; 
-            color: var(--text-light); 
-        }
-        
-        .actions { 
-            text-align: center; 
-        }
+        .actions { text-align: center; }
         
         .btn-view { 
-            display: none; 
-            width: 100%; 
-            padding: 1rem; 
+            width: 100%; padding: 1rem; 
             background: linear-gradient(135deg, var(--primary), #2c3e50); 
-            color: white; 
-            border: none; 
-            border-radius: 10px; 
-            font-size: 1rem; 
-            font-weight: 700; 
-            font-family: inherit; 
-            cursor: pointer; 
-            margin-bottom: 0.875rem; 
-            transition: var(--transition); 
+            color: white; border: none; border-radius: 10px; 
+            font-size: 1rem; font-weight: 700; font-family: inherit; cursor: pointer; 
+            margin-bottom: 0.875rem; transition: var(--transition); 
             box-shadow: 0 4px 20px rgba(26, 45, 78, 0.2);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
+            display: none;
+            align-items: center; justify-content: center; gap: 0.5rem;
         }
         
-        .btn-view:hover { 
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(26, 45, 78, 0.3);
-        }
+        .btn-view:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(26, 45, 78, 0.3); }
         
         .cancel { 
-            font-size: 0.875rem; 
-            color: var(--muted); 
-            text-decoration: none; 
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.375rem;
+            font-size: 0.875rem; color: var(--muted); text-decoration: none; 
+            transition: var(--transition); display: inline-flex; align-items: center; gap: 0.375rem;
         }
         
-        .cancel:hover { 
-            color: var(--primary); 
-        }
+        .cancel:hover { color: var(--primary); }
 
-        /* Debug log - navy themed */
-        .debug-wrap { 
-            max-width: 560px; 
-            width: 100%; 
-            margin-top: 1.5rem; 
-        }
+        .debug-wrap { max-width: 560px; width: 100%; margin-top: 1.5rem; }
         
-        .debug-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 0.5rem; 
-        }
+        .debug-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
         
-        .debug-title { 
-            font-size: 0.75rem; 
-            font-weight: 600; 
-            color: var(--muted); 
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
+        .debug-title { font-size: 0.75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; display: flex; align-items: center; gap: 0.25rem; }
+        .debug-title i { color: var(--secondary); }
         
-        .debug-title i {
-            color: var(--secondary);
-        }
+        .debug-clear { font-size: 0.7rem; color: var(--muted); background: none; border: 1px solid rgba(26, 45, 78, 0.15); border-radius: 5px; padding: 0.2rem 0.6rem; cursor: pointer; transition: var(--transition); display: inline-flex; align-items: center; gap: 0.25rem; }
+        .debug-clear:hover { border-color: var(--secondary); color: var(--secondary); background: rgba(235, 178, 85, 0.05); }
         
-        .debug-clear { 
-            font-size: 0.7rem; 
-            color: var(--muted); 
-            background: none; 
-            border: 1px solid rgba(26, 45, 78, 0.15); 
-            border-radius: 5px; 
-            padding: 0.2rem 0.6rem; 
-            cursor: pointer; 
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
+        #debugPanel { background: #0F1A2A; border-radius: 10px; padding: 1rem; font-family: 'SF Mono', monospace; font-size: 0.7rem; max-height: 220px; overflow-y: auto; border: 1px solid rgba(235, 178, 85, 0.15); }
         
-        .debug-clear:hover {
-            border-color: var(--secondary);
-            color: var(--secondary);
-            background: rgba(235, 178, 85, 0.05);
-        }
-        
-        #debugPanel { 
-            background: #0F1A2A; /* Navy-tinted dark background */
-            border-radius: 10px; 
-            padding: 1rem; 
-            font-family: 'SF Mono', monospace; 
-            font-size: 0.7rem; 
-            max-height: 220px; 
-            overflow-y: auto; 
-            border: 1px solid rgba(235, 178, 85, 0.15);
-        }
-        
-        .dlog { 
-            padding: 0.25rem 0; 
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
-            line-height: 1.5; 
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-        
-        .dlog.ok  { color: #34D399; } 
+        .dlog { padding: 0.25rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); line-height: 1.5; display: flex; align-items: center; gap: 0.25rem; }
+        .dlog.ok  { color: #34D399; }
         .dlog.err { color: #F87171; }
-        .dlog.inf { color: #93C5FD; } 
+        .dlog.inf { color: #93C5FD; }
         .dlog.wrn { color: #FCD34D; }
 
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .card {
-            animation: fadeIn 0.5s ease-out forwards;
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -560,79 +320,46 @@
     <div class="steps" id="steps">
         <div class="step" id="s1">
             <div class="sdot">1</div>
-            <div class="sbody">
-                <div class="stitle">Data validation</div>
-                <div class="ssub">Checking formats & structure</div>
-            </div>
+            <div class="sbody"><div class="stitle">Data validation</div><div class="ssub">Checking formats &amp; structure</div></div>
             <span class="sbadge">Pending</span>
         </div>
         <div class="step" id="s2">
             <div class="sdot">2</div>
-            <div class="sbody">
-                <div class="stitle">EDA & bias detection</div>
-                <div class="ssub">Analysing distributions</div>
-            </div>
+            <div class="sbody"><div class="stitle">EDA &amp; bias detection</div><div class="ssub">Analysing distributions</div></div>
             <span class="sbadge">Pending</span>
         </div>
         <div class="step" id="s3">
             <div class="sdot">3</div>
-            <div class="sbody">
-                <div class="stitle">Feature engineering</div>
-                <div class="ssub">Preparing features</div>
-            </div>
+            <div class="sbody"><div class="stitle">Feature engineering</div><div class="ssub">Preparing features</div></div>
             <span class="sbadge">Pending</span>
         </div>
         <div class="step" id="s4">
             <div class="sdot">4</div>
-            <div class="sbody">
-                <div class="stitle">Fairness analysis</div>
-                <div class="ssub">Demographic parity, equalized odds…</div>
-            </div>
+            <div class="sbody"><div class="stitle">Fairness analysis</div><div class="ssub">Demographic parity, equalized odds…</div></div>
             <span class="sbadge">Pending</span>
         </div>
         <div class="step" id="s5">
             <div class="sdot">5</div>
-            <div class="sbody">
-                <div class="stitle">Model evaluation</div>
-                <div class="ssub">Accuracy, F1, ROC-AUC</div>
-            </div>
+            <div class="sbody"><div class="stitle">Model evaluation</div><div class="ssub">Accuracy, F1, ROC-AUC</div></div>
             <span class="sbadge">Pending</span>
         </div>
         <div class="step" id="s6">
             <div class="sdot">6</div>
-            <div class="sbody">
-                <div class="stitle">SHAP explanation</div>
-                <div class="ssub">Feature importance scores</div>
-            </div>
+            <div class="sbody"><div class="stitle">SHAP explanation</div><div class="ssub">Feature importance scores</div></div>
             <span class="sbadge">Pending</span>
         </div>
         <div class="step" id="s7">
             <div class="sdot">7</div>
-            <div class="sbody">
-                <div class="stitle">Report generation</div>
-                <div class="ssub">Building fairness certificate</div>
-            </div>
+            <div class="sbody"><div class="stitle">Report generation</div><div class="ssub">Building fairness certificate</div></div>
             <span class="sbadge">Pending</span>
         </div>
     </div>
 
     <div class="metrics">
-        <div class="metric">
-            <div class="mlabel">Records</div>
-            <div class="mval" id="mRec">—</div>
-        </div>
-        <div class="metric">
-            <div class="mlabel">Dimensions</div>
-            <div class="mval">7</div>
-        </div>
-        <div class="metric">
-            <div class="mlabel">Fairness</div>
-            <div class="mval" id="mScore">—</div>
-        </div>
-        <div class="metric">
-            <div class="mlabel">Status</div>
-            <div class="mval" id="mStatus" style="font-size:0.85rem">Queued</div>
-        </div>
+        <div class="metric"><div class="mlabel">Records</div><div class="mval" id="mRec">—</div></div>
+        <div class="metric"><div class="mlabel">Dimensions</div><div class="mval">7</div></div>
+        <div class="metric"><div class="mlabel">Fairness</div><div class="mval" id="mScore">—</div></div>
+        <div class="metric"><div class="mlabel">Status</div><div class="mval" id="mStatus" style="font-size:0.85rem">Queued</div></div>
     </div>
 
     <div class="quote">
@@ -647,7 +374,7 @@
 
     <div class="donebox" id="doneBox">
         <div class="dscore" id="dScore">—</div>
-        <div class="dlabel">Fairness Score — redirecting to your report…</div>
+        <div class="dlabel" id="dLabel">Fairness Score — redirecting to your report…</div>
     </div>
 
     <div class="actions">
@@ -674,22 +401,25 @@
 </div>
 
 <script>
-    // ── Config ────────────────────────────────────────────────────────────────
-    const API_BASE    = 'http://127.0.0.1:5000';
-    const POLL_MS     = 2500;   // poll every 2.5 seconds
-    const MAX_POLLS   = 240;    // ~10 min timeout
+    const API_BASE  = 'http://127.0.0.1:5000';
+    const POLL_MS   = 2500;
+    const MAX_POLLS = 240;
 
-    // ── State ─────────────────────────────────────────────────────────────────
     let evalId        = null;
     let pollTimer     = null;
     let pollCount     = 0;
     let completedSteps = new Set();
     let redirectTimer = null;
 
-    // Progress % per step (cumulative)
+    // ── Read URL params once at startup ──────────────────────────────────────
+    const _urlParams = new URLSearchParams(window.location.search);
+
+    // dest = 'allReports' when user chose "Generate all reports" on upload.html
+    // Falls back to sessionStorage key set by upload.html, then defaults to null
+    const _dest = _urlParams.get('dest') || sessionStorage.getItem('eval_dest') || null;
+
     const STEP_PROGRESS = { 1: 10, 2: 25, 3: 38, 4: 60, 5: 75, 6: 88, 7: 100 };
 
-    // Quotes carousel
     const QUOTES = [
         '"Fairness cannot be assumed — it must be proven."',
         '"Bias in, bias out — the model reflects the data."',
@@ -700,13 +430,12 @@
     ];
     let quoteIdx = 0;
 
-    // ── Debug logger ──────────────────────────────────────────────────────────
     function log(msg, type = 'inf') {
         const panel = document.getElementById('debugPanel');
         const ts    = new Date().toLocaleTimeString();
         const div   = document.createElement('div');
         div.className = `dlog ${type}`;
-        div.innerHTML = `<i class="fas fa-circle" style="font-size: 0.3rem; color: currentColor; opacity: 0.5; margin-right: 4px;"></i>[${ts}] ${msg}`;
+        div.innerHTML = `<i class="fas fa-circle" style="font-size:0.3rem;color:currentColor;opacity:0.5;margin-right:4px;"></i>[${ts}] ${msg}`;
         panel.appendChild(div);
         panel.scrollTop = panel.scrollHeight;
     }
@@ -716,11 +445,8 @@
         log('Debug log cleared', 'inf');
     }
 
-    // ── Eval ID ───────────────────────────────────────────────────────────────
     function getEvalId() {
-        // Try URL param first, then sessionStorage
-        const params = new URLSearchParams(window.location.search);
-        return params.get('eval_id') || sessionStorage.getItem('eval_id');
+        return _urlParams.get('eval_id') || sessionStorage.getItem('eval_id');
     }
 
     function copyEvalId() {
@@ -728,13 +454,10 @@
         navigator.clipboard.writeText(evalId).then(() => {
             const badge = document.getElementById('evalBadge');
             badge.innerHTML = '<i class="fas fa-check"></i> Copied!';
-            setTimeout(() => { 
-                badge.innerHTML = '<i class="fas fa-copy"></i> ' + evalId; 
-            }, 1500);
+            setTimeout(() => { badge.innerHTML = '<i class="fas fa-copy"></i> ' + evalId; }, 1500);
         });
     }
 
-    // ── Step rendering ────────────────────────────────────────────────────────
     function setStep(n, state) {
         const el = document.getElementById(`s${n}`);
         if (!el) return;
@@ -743,25 +466,18 @@
         if (state === 'active') badge.innerHTML = 'Running… <i class="fas fa-spinner fa-pulse" style="margin-left:4px;"></i>';
         else if (state === 'done') badge.innerHTML = 'Done <i class="fas fa-check-circle" style="margin-left:4px;"></i>';
         else if (state === 'fail') badge.innerHTML = 'Error <i class="fas fa-exclamation-circle" style="margin-left:4px;"></i>';
-        else badge.innerHTML = 'Pending';
+        else badge.textContent = 'Pending';
     }
 
     function renderSteps(currentStep, isFailed) {
         for (let i = 1; i <= 7; i++) {
-            if (isFailed && i === currentStep) {
-                setStep(i, 'fail');
-            } else if (i < currentStep) {
-                setStep(i, 'done');
-                completedSteps.add(i);
-            } else if (i === currentStep) {
-                setStep(i, 'active');
-            } else {
-                setStep(i, '');
-            }
+            if (isFailed && i === currentStep) setStep(i, 'fail');
+            else if (i < currentStep)          setStep(i, 'done');
+            else if (i === currentStep)        setStep(i, 'active');
+            else                               setStep(i, '');
         }
     }
 
-    // ── Poll ──────────────────────────────────────────────────────────────────
     async function poll() {
         if (!evalId) return;
         pollCount++;
@@ -779,10 +495,7 @@
 
             if (!res.ok) {
                 log(`API error ${res.status}: ${data.error || 'unknown'}`, 'err');
-                if (res.status === 404) {
-                    clearInterval(pollTimer);
-                    showError(`Evaluation '${evalId}' not found on server.`);
-                }
+                if (res.status === 404) { clearInterval(pollTimer); showError(`Evaluation '${evalId}' not found on server.`); }
                 return;
             }
 
@@ -792,122 +505,109 @@
             const step    = data.current_step || 0;
             const records = data.records || 0;
 
-            // Update metrics bar
             if (records > 0) document.getElementById('mRec').textContent = records.toLocaleString();
             document.getElementById('mStatus').textContent = status.charAt(0).toUpperCase() + status.slice(1);
 
-            // Rotate quote
             quoteIdx = (quoteIdx + 1) % QUOTES.length;
             const qel = document.getElementById('quote');
             qel.style.opacity = '0';
             setTimeout(() => { qel.textContent = QUOTES[quoteIdx]; qel.style.opacity = '1'; }, 200);
 
-            // Progress bar
             const pct = step > 0 ? (STEP_PROGRESS[step] || Math.min(step * 14, 95)) : 5;
             document.getElementById('prog').style.width = pct + '%';
 
-            // Render steps
             renderSteps(step, status === 'error');
 
-            // ── Terminal states ───────────────────────────────────────────────
-            if (status === 'complete') {
-                clearInterval(pollTimer);
-                onComplete(data);
-                return;
-            }
-
-            if (status === 'error') {
-                clearInterval(pollTimer);
-                onError(data.error || 'Unknown error during evaluation');
-                return;
-            }
+            if (status === 'complete') { clearInterval(pollTimer); onComplete(data); return; }
+            if (status === 'error')    { clearInterval(pollTimer); onError(data.error || 'Unknown error'); return; }
 
         } catch (err) {
             log(`Fetch error: ${err.message}`, 'err');
-            // Don't stop polling on network glitch — retry
         }
     }
 
-    // ── Completion ────────────────────────────────────────────────────────────
     function onComplete(data) {
-        // Mark all steps done
         renderSteps(8, false);
         document.getElementById('prog').style.width = '100%';
 
         const ring = document.getElementById('ring');
         ring.classList.add('done');
-        
-        const ringIcon = document.getElementById('ringIcon');
-        ringIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+        document.getElementById('ringIcon').innerHTML = '<i class="fas fa-check-circle"></i>';
 
         document.getElementById('hTitle').textContent = 'Analysis complete!';
         document.getElementById('hSub').textContent   = 'Your fairness report is ready.';
 
-        const score = data.ethical_score ?? data.fairness?.fairness_score;
+        const score    = data.ethical_score ?? data.fairness?.fairness_score;
         const scorePct = score != null ? Math.round(score * 100) + '%' : '—';
 
         document.getElementById('mScore').textContent  = scorePct;
         document.getElementById('mStatus').textContent = 'Done ✓';
+        document.getElementById('dScore').textContent  = scorePct;
+        document.getElementById('doneBox').style.display = 'block';
 
-        const doneBox = document.getElementById('doneBox');
-        document.getElementById('dScore').textContent = scorePct;
-        doneBox.style.display = 'block';
-
-        // Update button label to match the chosen report
+        // ── Update button label based on destination ──────────────────────────
         const reportType = sessionStorage.getItem('report_type') || 'developer';
+        const isAllReports = (_dest === 'allReports' || reportType === 'all');
+
         const LABEL_MAP = {
             developer: '<i class="fas fa-code"></i> View Developer Report',
             regulator: '<i class="fas fa-gavel"></i> View Regulator Report',
             enduser:   '<i class="fas fa-users"></i> View Human Report',
-            all:       '<i class="fas fa-layer-group"></i> View Reports',
         };
-        document.getElementById('btnView').innerHTML = LABEL_MAP[reportType] || '<i class="fas fa-chart-line"></i> View Report';
+
+        const btnLabel = isAllReports
+            ? '<i class="fas fa-layer-group"></i> View All Reports'
+            : (LABEL_MAP[reportType] || '<i class="fas fa-chart-line"></i> View Report');
+
+        document.getElementById('btnView').innerHTML = btnLabel;
         document.getElementById('btnView').style.display = 'inline-flex';
         document.getElementById('cancelLink').innerHTML = '<i class="fas fa-arrow-left"></i> Back to upload';
 
-        // Save full result for dashboard
+        if (isAllReports) {
+            document.getElementById('dLabel').textContent = 'Fairness Score — redirecting to all reports…';
+        }
+
         sessionStorage.setItem('eval_result', JSON.stringify(data));
         sessionStorage.setItem('eval_id', evalId);
 
         log(`✅ Complete! Fairness score = ${scorePct}`, 'ok');
-        if (data.shap) {
-            log(`   topFeature=${data.shap?.topFeature}  stability=${data.shap?.featureStability}`, 'ok');
-        }
-        if (data.fairness) {
-            log(`   indFairness=${data.fairness?.individualFairness}  groupFairness=${data.fairness?.groupFairness}`, 'ok');
-        }
+        log(`   dest=${_dest || 'none'} reportType=${reportType} → routing to ${isAllReports ? 'allReports.html' : 'individual report'}`, 'ok');
+        if (data.shap)    log(`   topFeature=${data.shap?.topFeature}  stability=${data.shap?.featureStability}`, 'ok');
+        if (data.fairness) log(`   indFairness=${data.fairness?.individualFairness}  groupFairness=${data.fairness?.groupFairness}`, 'ok');
 
         // Auto-redirect after 3 seconds
         redirectTimer = setTimeout(goDash, 3000);
     }
 
+    // ── KEY FIX: goDash now routes to allReports.html when dest=allReports ──
     function goDash() {
         if (redirectTimer) clearTimeout(redirectTimer);
 
-        // Route to the correct report page based on what the user selected on upload.html
-        const reportType = sessionStorage.getItem('report_type') || 'developer';
+        const reportType   = sessionStorage.getItem('report_type') || 'developer';
+        const isAllReports = (_dest === 'allReports' || reportType === 'all');
+
+        if (isAllReports) {
+            // User chose "Generate all reports" → go to the hub page
+            window.location.href = `allReports.html?eval_id=${evalId}`;
+            return;
+        }
+
+        // Single report type → go directly to that report page
         const PAGE_MAP = {
             developer: 'developerReport.html',
             regulator: 'regulatorReport.html',
             enduser:   'humanReport.html',
-            all:       'developerReport.html',   // "all" → show developer first
         };
         const page = PAGE_MAP[reportType] || 'developerReport.html';
         window.location.href = `${page}?eval_id=${evalId}`;
     }
 
-    // ── Error ─────────────────────────────────────────────────────────────────
     function onError(msg) {
-        const ring = document.getElementById('ring');
-        ring.classList.add('error');
-        
-        const ringIcon = document.getElementById('ringIcon');
-        ringIcon.innerHTML = '<i class="fas fa-exclamation-circle"></i>';
-
+        document.getElementById('ring').classList.add('error');
+        document.getElementById('ringIcon').innerHTML = '<i class="fas fa-exclamation-circle"></i>';
         document.getElementById('hTitle').textContent = 'Analysis failed';
         document.getElementById('hSub').textContent   = 'Something went wrong during evaluation.';
         document.getElementById('mStatus').textContent = 'Error';
-
         showError(msg);
         log(`❌ Error: ${msg}`, 'err');
     }
@@ -917,7 +617,6 @@
         document.getElementById('errBox').style.display = 'block';
     }
 
-    // ── Init ─────────────────────────────────────────────────────────────────
     window.addEventListener('DOMContentLoaded', () => {
         evalId = getEvalId();
 
@@ -931,14 +630,13 @@
             return;
         }
 
+        log(`dest param = "${_dest || 'none'}"`, 'inf');
         document.getElementById('evalBadge').innerHTML = '<i class="fas fa-copy"></i> ' + evalId;
         log(`Starting poll for eval_id=${evalId}`, 'inf');
 
-        // Poll immediately, then on interval
         poll();
         pollTimer = setInterval(poll, POLL_MS);
 
-        // Rotate quotes every 8s
         setInterval(() => {
             quoteIdx = (quoteIdx + 1) % QUOTES.length;
             const qel = document.getElementById('quote');
@@ -947,10 +645,9 @@
         }, 8000);
     });
 
-    // Make functions global for onclick handlers
     window.copyEvalId = copyEvalId;
-    window.clearLog = clearLog;
-    window.goDash = goDash;
+    window.clearLog   = clearLog;
+    window.goDash     = goDash;
 </script>
 </body>
 </html>

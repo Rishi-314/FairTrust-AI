@@ -3,3 +3,4 @@ venv
 __pycache__/
 /generated/prisma
 node_modules  
+uploads/

@@ -3,635 +3,296 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Human-Readable Report — FairTrust AI</title>
+    <title>Your Fairness Report — FairTrust AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-            font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
-        }
-        
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
         :root {
-            --primary: #1A2D4E;      /* Deep Navy - dominant */
-            --primary-light: #2A3F66;
-            --primary-soft: #E9ECF3;  /* Soft navy-tinted background */
-            --secondary: #EBB255;     /* Gold/Amber - minimal accents */
-            --accent: #4A90E2;        /* Soft Blue */
-            --success: #059669;
-            --success-light: rgba(5, 150, 105, 0.12);
-            --warning: #D97706;
-            --warning-light: rgba(217, 119, 6, 0.12);
-            --danger: #DC2626;
-            --danger-light: rgba(220, 38, 38, 0.12);
-            --bg: #F5F6FA;
-            --surface: #FFFFFF;
-            --text: #1A2D4E;
-            --text-muted: #5A6169;
-            --border: #E4E7F0;
-            --shadow: 0 10px 30px rgba(26, 45, 78, 0.08);
-            --radius: 16px;
-            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --navy:     #0F1E38;
+            --gold:     #EBB255;
+            --gold-dim: rgba(235,178,85,0.12);
+            --green:    #059669;
+            --green-dim:rgba(5,150,105,0.08);
+            --amber:    #D97706;
+            --amber-dim:rgba(217,119,6,0.08);
+            --red:      #DC2626;
+            --red-dim:  rgba(220,38,38,0.08);
+            --bg:       #F8F6F2;   /* warm off-white, not cold gray */
+            --surface:  #FFFFFF;
+            --rule:     #E8E4DC;
+            --muted:    #6B7280;
+            --text:     #1C1917;
+            --serif:    'Lora', Georgia, serif;
+            --sans:     'Plus Jakarta Sans', sans-serif;
+            --mono:     'IBM Plex Mono', monospace;
         }
-        
+
         body {
-            background: linear-gradient(180deg, var(--bg) 0%, #E9ECF3 100%);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 2rem 1rem;
+            font-family: var(--sans);
+            background: var(--bg);
             color: var(--text);
+            min-height: 100vh;
             line-height: 1.6;
-            font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
         }
 
-        /* ================= NAVBAR ================= */
+        /* ── NAVBAR ── */
         .navbar {
-            position: sticky;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.98);
-            padding: 16px 5%;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: var(--shadow);
-            z-index: 1000;
-            backdrop-filter: blur(10px);
-            transition: var(--transition);
-            border-bottom: 1px solid rgba(235, 178, 85, 0.15);
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.97);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--rule);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 2.5rem; height: 60px;
+        }
+        .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .nav-logo-icon { width: 34px; height: 34px; background: var(--navy); border-radius: 9px; display: flex; align-items: center; justify-content: center; }
+        .nav-logo-icon svg { width: 20px; height: 20px; }
+        .nav-logo-name { font-family: var(--sans); font-weight: 800; font-size: 1.0625rem; color: var(--navy); }
+        .nav-logo-name span { color: var(--gold); }
+        .nav-links { display: flex; gap: 0.25rem; }
+        .nav-links a { font-size: 0.875rem; font-weight: 600; color: var(--muted); text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 7px; transition: color 0.15s, background 0.15s; }
+        .nav-links a:hover { color: var(--navy); background: #F1EDE8; }
+
+        /* ── PAGE ── */
+        .page { max-width: 720px; margin: 0 auto; padding: 3rem 2rem 6rem; }
+
+        /* ── VERDICT HERO ── */
+        .verdict-hero {
+            border-radius: 20px;
+            padding: 2.5rem 2.5rem 2rem;
             margin-bottom: 2rem;
-        }
-
-        .navbar.scrolled {
-            padding: 12px 5%;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            text-decoration: none;
-            color: var(--primary);
-        }
-
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--primary), #4A90E2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 20px;
-            font-weight: 700;
-            box-shadow: 0 5px 15px rgba(26, 45, 78, 0.2);
-            transition: var(--transition);
-        }
-
-        .logo:hover .logo-icon {
-            transform: rotate(5deg) scale(1.05);
-        }
-
-        .logo-text {
-            font-size: 22px;
-            font-weight: 800;
-            line-height: 1.2;
-        }
-
-        .logo-text span {
-            color: var(--secondary);
-        }
-
-        .logo-subtitle {
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--secondary);
-            letter-spacing: 1px;
-            margin-top: 2px;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 30px;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--primary);
             position: relative;
-            padding: 8px 0;
-            transition: var(--transition);
+            overflow: hidden;
         }
+        .verdict-hero.fair    { background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%); border: 1.5px solid rgba(5,150,105,0.2); }
+        .verdict-hero.partial { background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%); border: 1.5px solid rgba(217,119,6,0.2); }
+        .verdict-hero.concern { background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%); border: 1.5px solid rgba(220,38,38,0.2); }
 
-        .nav-links a:after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 3px;
-            background: var(--secondary);
-            border-radius: 2px;
-            transition: width 0.3s ease;
+        .verdict-eyebrow {
+            font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.1em;
+            text-transform: uppercase; margin-bottom: 0.75rem;
+            display: flex; align-items: center; gap: 6px;
         }
+        .fair    .verdict-eyebrow { color: var(--green); }
+        .partial .verdict-eyebrow { color: var(--amber); }
+        .concern .verdict-eyebrow { color: var(--red); }
 
-        .nav-links a:hover {
-            color: var(--secondary);
-        }
+        .verdict-icon-row { display: flex; align-items: flex-start; gap: 1.25rem; }
+        .verdict-emoji { font-size: 3rem; line-height: 1; flex-shrink: 0; margin-top: 4px; }
+        .verdict-headline { font-family: var(--serif); font-size: 1.875rem; font-weight: 700; line-height: 1.2; margin-bottom: 0.625rem; }
+        .fair    .verdict-headline { color: #065F46; }
+        .partial .verdict-headline { color: #78350F; }
+        .concern .verdict-headline { color: #7F1D1D; }
+        .verdict-sub { font-size: 1rem; line-height: 1.6; }
+        .fair    .verdict-sub { color: #047857; }
+        .partial .verdict-sub { color: #92400E; }
+        .concern .verdict-sub { color: #991B1B; }
 
-        .nav-links a:hover:after {
-            width: 100%;
-        }
+        /* Score bar */
+        .score-bar-wrap { margin-top: 1.5rem; }
+        .score-bar-label { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+        .score-bar-title { font-size: 0.8125rem; font-weight: 600; color: var(--muted); }
+        .score-bar-num   { font-family: var(--mono); font-size: 1.125rem; font-weight: 700; }
+        .fair    .score-bar-num { color: var(--green); }
+        .partial .score-bar-num { color: var(--amber); }
+        .concern .score-bar-num { color: var(--red); }
+        .score-track { height: 10px; background: rgba(0,0,0,0.08); border-radius: 100px; overflow: hidden; }
+        .score-fill  { height: 100%; border-radius: 100px; transition: width 1s ease; }
+        .fair    .score-fill { background: linear-gradient(90deg, #059669, #34D399); }
+        .partial .score-fill { background: linear-gradient(90deg, #D97706, #FCD34D); }
+        .concern .score-fill { background: linear-gradient(90deg, #DC2626, #F87171); }
+        .score-ticks { display: flex; justify-content: space-between; margin-top: 4px; }
+        .score-tick  { font-size: 0.6875rem; color: var(--muted); }
 
-        .nav-links a.active {
-            color: var(--secondary);
+        /* ── PLAIN ENGLISH EXPLAINER ── */
+        .explainer-box {
+            background: var(--surface); border-radius: 14px;
+            border: 1.5px solid var(--rule); padding: 1.75rem;
+            margin-bottom: 1.25rem;
         }
+        .box-heading {
+            font-family: var(--serif); font-size: 1.125rem; font-weight: 700;
+            color: var(--navy); margin-bottom: 0.25rem;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .box-heading i { color: var(--gold); font-size: 0.9375rem; }
+        .box-sub { font-size: 0.8125rem; color: var(--muted); margin-bottom: 1.25rem; }
 
-        .nav-links a.active:after {
-            width: 100%;
+        /* ── CHECK LIST ── */
+        .check-list { display: flex; flex-direction: column; gap: 0.75rem; }
+        .check-item {
+            display: flex; align-items: flex-start; gap: 1rem;
+            padding: 1rem 1.125rem; border-radius: 10px;
+            border: 1.5px solid var(--rule); background: var(--surface);
+            transition: transform 0.15s, box-shadow 0.15s;
         }
+        .check-item:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(15,30,56,0.07); }
+        .check-item.ok   { border-color: rgba(5,150,105,0.2); background: #FAFFFE; }
+        .check-item.warn { border-color: rgba(217,119,6,0.2); background: #FFFDF7; }
 
-        /* Back link */
-        .back-bar { 
-            width: 100%; 
-            max-width: 640px; 
-            margin-bottom: 1rem; 
-            font-size: 0.875rem; 
+        .check-icon-wrap {
+            width: 38px; height: 38px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.125rem; flex-shrink: 0;
         }
-        
-        .back-bar a { 
-            color: var(--secondary); 
-            text-decoration: none; 
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.375rem;
-            transition: var(--transition);
-        }
-        
-        .back-bar a:hover { 
-            color: var(--primary);
-            transform: translateX(-3px);
-        }
+        .check-icon-wrap.ok   { background: rgba(5,150,105,0.1); color: var(--green); }
+        .check-icon-wrap.warn { background: rgba(217,119,6,0.1);  color: var(--amber); }
 
-        .report-container {
-            max-width: 640px; 
-            width: 100%;
-            background: var(--surface); 
-            border: 2px solid rgba(26, 45, 78, 0.08);
-            border-radius: var(--radius); 
-            padding: 2.5rem;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-        }
+        .check-body { flex: 1; }
+        .check-name { font-weight: 700; font-size: 0.9375rem; color: var(--navy); margin-bottom: 3px; }
+        .check-detail { font-size: 0.8125rem; color: var(--muted); line-height: 1.55; }
 
-        .report-container:hover {
-            border-color: rgba(26, 45, 78, 0.15);
-            box-shadow: 0 15px 35px rgba(26, 45, 78, 0.12);
-        }
-
-        .section-spacer { 
-            margin-bottom: 2.5rem; 
-        }
-
-        /* State card */
-        .state-card { 
-            text-align: center; 
-            padding: 3rem 0; 
-        }
-        
-        .state-card h2 { 
-            font-size: 1.5rem; 
-            font-weight: 700; 
-            color: var(--primary);
-            margin-bottom: 0.75rem; 
-        }
-        
-        .state-card p { 
-            color: var(--text-muted); 
-            margin-bottom: 1.5rem; 
-        }
-
-        /* Header */
-        .report-header { 
-            text-align: center; 
-            margin-bottom: 2.5rem; 
-        }
-        
-        .outcome-title { 
-            font-size: 2rem; 
-            font-weight: 800; 
-            margin-bottom: 0.75rem; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-        
-        .outcome-fair     { 
-            color: var(--success); 
-        }
-        
-        .outcome-partial  { 
-            color: var(--warning); 
-        }
-        
-        .outcome-concern  { 
-            color: var(--danger); 
-        }
-        
-        .outcome-sub { 
-            color: var(--text-muted); 
-            font-size: 0.9375rem; 
-            margin-bottom: 1rem; 
-        }
-        
-        .confidence-badge {
-            display: inline-flex; 
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1.25rem;
-            background: var(--primary-soft); 
-            border: 1px solid rgba(26, 45, 78, 0.15);
-            border-radius: 999px; 
-            font-size: 0.875rem; 
-            color: var(--primary);
-        }
-
-        .confidence-badge i {
-            color: var(--secondary);
-        }
-
-        /* Factor list */
-        .explanation-title { 
-            font-size: 1.25rem; 
-            font-weight: 700; 
-            color: var(--primary);
-            margin-bottom: 1.5rem;
-            position: relative;
-            display: inline-block;
-        }
-
-        .explanation-title:after {
-            content: '';
-            position: absolute;
-            bottom: -6px;
-            left: 0;
-            width: 40px;
-            height: 3px;
-            background: var(--secondary);
-            border-radius: 2px;
-        }
-        
-        .factor-list { 
-            list-style: none; 
-        }
-        
-        .factor-item {
-            display: flex; 
-            align-items: flex-start; 
-            gap: 1rem;
-            padding: 1.25rem; 
-            background: var(--surface); 
-            border: 2px solid rgba(26, 45, 78, 0.08);
-            border-radius: 10px; 
-            margin-bottom: 0.75rem;
-            transition: var(--transition);
-        }
-        
-        .factor-item:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 4px 12px rgba(26, 45, 78, 0.1); 
-            border-color: var(--secondary); 
-        }
-        
-        .factor-icon {
-            width: 40px; 
-            height: 40px; 
-            background: rgba(235, 178, 85, 0.1); 
-            color: var(--secondary);
-            border-radius: 10px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            font-size: 1.25rem; 
-            flex-shrink: 0;
-            transition: var(--transition);
-        }
-
-        .factor-item:hover .factor-icon {
-            background: var(--secondary);
-            color: white;
-            transform: rotate(5deg);
-        }
-        
-        .factor-icon.warning { 
-            background: var(--warning-light); 
-            color: var(--warning); 
-        }
-        
-        .factor-details { 
-            flex: 1; 
-        }
-        
-        .factor-name { 
-            font-weight: 700; 
-            font-size: 0.9375rem; 
-            color: var(--primary);
-        }
-        
-        .factor-detail { 
-            font-size: 0.8125rem; 
-            color: var(--text-muted); 
-            margin-top: 0.2rem; 
-            line-height: 1.5; 
-        }
-        
-        .factor-status {
-            font-size: 1rem; 
-            font-weight: 700; 
-            width: 32px; 
-            height: 32px; 
-            flex-shrink: 0;
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            border-radius: 50%; 
-            margin-left: auto; 
+        .check-badge {
+            flex-shrink: 0; display: flex; align-items: center; gap: 4px;
+            padding: 4px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 700;
             align-self: center;
         }
-        
-        .factor-status.approved { 
-            color: var(--success); 
-            background: var(--success-light); 
-        }
-        
-        .factor-status.rejected { 
-            color: var(--danger); 
-            background: var(--danger-light); 
-        }
+        .check-badge.ok   { background: rgba(5,150,105,0.1); color: var(--green); }
+        .check-badge.warn { background: rgba(217,119,6,0.1);  color: var(--amber); }
+        .check-badge.fail { background: rgba(220,38,38,0.1);  color: var(--red); }
 
-        /* Bias indicators */
-        .bias-check {
-            background: var(--warning-light); 
-            border-left: 4px solid var(--warning);
-            border-radius: 0 12px 12px 0; 
-            padding: 1.5rem; 
-            margin-bottom: 2.5rem;
+        /* ── BIAS ALERT ── */
+        .bias-alert {
+            border-radius: 14px; padding: 1.5rem 1.75rem;
+            margin-bottom: 1.25rem;
+            display: flex; gap: 1rem;
         }
-        
-        .bias-check.clean { 
-            background: var(--success-light); 
-            border-left-color: var(--success); 
+        .bias-alert.has-issues { background: #FFFBEB; border: 1.5px solid rgba(217,119,6,0.25); }
+        .bias-alert.all-clear  { background: #ECFDF5; border: 1.5px solid rgba(5,150,105,0.2); }
+        .bias-alert-icon {
+            width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center; font-size: 1.125rem;
         }
-        
-        .bias-icon { 
-            font-size: 2rem; 
-            margin-bottom: 0.5rem; 
-        }
-        
-        .bias-title { 
-            font-size: 1.125rem; 
-            font-weight: 700; 
-            margin-bottom: 0.75rem; 
-            color: #92400E; 
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
+        .has-issues .bias-alert-icon { background: rgba(217,119,6,0.12); color: var(--amber); }
+        .all-clear  .bias-alert-icon { background: rgba(5,150,105,0.1);  color: var(--green); }
+        .bias-alert-title { font-weight: 700; font-size: 0.9375rem; color: var(--navy); margin-bottom: 0.5rem; }
+        .bias-issue-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+        .bias-issue-item { font-size: 0.8375rem; color: #78350F; line-height: 1.55; display: flex; gap: 8px; }
+        .bias-issue-item::before { content: '▸'; color: var(--amber); flex-shrink: 0; }
+        .all-clear .bias-issue-item { color: #047857; }
+        .all-clear .bias-issue-item::before { color: var(--green); }
 
-        .bias-title i {
-            color: var(--warning);
+        /* ── WHAT THIS MEANS ── */
+        .meaning-text {
+            font-family: var(--serif); font-size: 1.0625rem; line-height: 1.75;
+            color: #374151; margin-bottom: 1.25rem; font-style: italic;
         }
-        
-        .bias-check.clean .bias-title { 
-            color: var(--success); 
-        }
-
-        .bias-check.clean .bias-title i {
-            color: var(--success);
-        }
-        
-        .bias-list { 
-            list-style: none; 
-        }
-        
-        .bias-list li {
-            position: relative; 
-            padding-left: 1.5rem;
-            font-size: 0.875rem; 
-            color: #92400E; 
-            margin-bottom: 0.5rem; 
-            line-height: 1.6;
-        }
-        
-        .bias-list li:last-child { 
-            margin-bottom: 0; 
-        }
-        
-        .bias-list li::before { 
-            content: '▸'; 
-            position: absolute; 
-            left: 0; 
-            font-weight: 700; 
-            color: var(--warning); 
-        }
-        
-        .bias-check.clean .bias-list li { 
-            color: var(--success); 
-        }
-        
-        .bias-check.clean .bias-list li::before { 
-            color: var(--success); 
-        }
-
-        /* What this means */
-        .action-section { 
-            margin-bottom: 2.5rem; 
-        }
-        
-        .action-summary { 
-            color: var(--text-muted); 
-            margin-bottom: 1.5rem; 
-            font-size: 0.9375rem; 
-            line-height: 1.6; 
-        }
-        
-        .action-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); 
-            gap: 1rem; 
-            margin: 1.5rem 0; 
-        }
-        
+        .action-cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
         .action-card {
-            background: var(--surface); 
-            padding: 1.5rem 1rem;
-            border-radius: 10px; 
-            text-align: center; 
-            border: 2px solid rgba(26, 45, 78, 0.08);
-            transition: var(--transition);
+            background: var(--bg); border: 1.5px solid var(--rule); border-radius: 10px;
+            padding: 1.125rem; text-align: center; transition: transform 0.15s, box-shadow 0.15s;
         }
-        
-        .action-card:hover { 
-            transform: translateY(-3px); 
-            box-shadow: 0 4px 12px rgba(26, 45, 78, 0.1); 
-            border-color: var(--secondary); 
-        }
-        
-        .action-icon { 
-            font-size: 2rem; 
-            margin-bottom: 0.75rem; 
-            line-height: 1;
-            color: var(--secondary);
-        }
-        
-        .action-card h3 { 
-            font-size: 0.9375rem; 
-            font-weight: 700; 
-            color: var(--primary);
-            margin-bottom: 0.3rem; 
-        }
-        
-        .action-text { 
-            color: var(--text-muted); 
-            font-size: 0.8125rem; 
-            line-height: 1.4; 
-        }
+        .action-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(15,30,56,0.08); }
+        .action-card-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .action-card-title { font-weight: 700; font-size: 0.875rem; color: var(--navy); margin-bottom: 4px; }
+        .action-card-text  { font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
 
-        /* Recommendations */
-        .recs-section { 
-            margin-bottom: 0.5rem; 
+        /* ── RECOMMENDATIONS ── */
+        .rec-list { display: flex; flex-direction: column; gap: 0.625rem; }
+        .rec-item {
+            display: flex; gap: 1rem; align-items: flex-start;
+            padding: 0.875rem 1rem; background: var(--bg);
+            border: 1.5px solid var(--rule); border-radius: 9px;
+            transition: border-color 0.15s;
         }
-        
-        .print-btn {
-            display: inline-flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 0.5rem;
-            width: 100%; 
-            padding: 1rem; 
-            background: linear-gradient(135deg, var(--primary), #2c3e50); 
-            color: white;
-            border: none; 
-            border-radius: 8px; 
-            font-size: 0.9375rem; 
-            font-weight: 700;
-            cursor: pointer; 
-            transition: var(--transition); 
-            margin-top: 1.5rem; 
-            font-family: inherit;
-            box-shadow: 0 4px 15px rgba(26, 45, 78, 0.2);
+        .rec-item:hover { border-color: var(--gold); }
+        .rec-num {
+            width: 26px; height: 26px; border-radius: 50%; background: var(--navy);
+            color: white; font-size: 0.6875rem; font-weight: 700; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center; margin-top: 1px;
         }
-        
-        .print-btn:hover { 
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(26, 45, 78, 0.3);
-        }
+        .rec-icon { font-size: 1.25rem; flex-shrink: 0; line-height: 1; margin-top: 2px; }
+        .rec-title  { font-weight: 700; font-size: 0.9rem; color: var(--navy); }
+        .rec-detail { font-size: 0.8125rem; color: var(--muted); margin-top: 2px; line-height: 1.5; }
 
-        .print-btn i {
-            color: var(--secondary);
+        /* ── FAQ BOX ── */
+        .faq-item {
+            border-bottom: 1px solid var(--rule); padding: 1rem 0;
         }
+        .faq-item:last-child { border-bottom: none; }
+        .faq-q {
+            font-weight: 700; font-size: 0.9375rem; color: var(--navy);
+            cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+            user-select: none;
+        }
+        .faq-q i { color: var(--gold); font-size: 0.75rem; transition: transform 0.2s; }
+        .faq-q.open i { transform: rotate(180deg); }
+        .faq-a {
+            font-size: 0.875rem; color: var(--muted); line-height: 1.65;
+            margin-top: 0.75rem; display: none;
+        }
+        .faq-a.open { display: block; }
 
-        .btn { 
-            padding: 0.7rem 1.5rem; 
-            border-radius: 8px; 
-            font-weight: 600; 
-            font-size: 0.875rem; 
-            cursor: pointer; 
-            transition: var(--transition); 
-            border: 2px solid transparent; 
-            font-family: inherit; 
-            display: inline-flex; 
-            align-items: center; 
-            gap: 0.5rem; 
+        /* ── PRINT BUTTON ── */
+        .print-row {
+            display: flex; gap: 0.75rem; margin-top: 1.5rem; flex-wrap: wrap;
         }
-        
-        .btn-primary { 
-            background: linear-gradient(135deg, var(--primary), #2c3e50); 
-            color: white; 
-            box-shadow: 0 4px 15px rgba(26, 45, 78, 0.2);
+        .btn-print {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 0.75rem 1.5rem; border-radius: 9px;
+            font-family: var(--sans); font-size: 0.875rem; font-weight: 700;
+            cursor: pointer; border: none; transition: all 0.15s;
         }
-        
-        .btn-primary:hover { 
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(26, 45, 78, 0.3);
-        }
+        .btn-print-primary { background: var(--navy); color: white; }
+        .btn-print-primary:hover { background: #1A2D4E; }
+        .btn-print-ghost { background: transparent; border: 1.5px solid var(--rule); color: var(--muted); }
+        .btn-print-ghost:hover { border-color: var(--navy); color: var(--navy); }
 
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* ── SECTION DIVIDER ── */
+        .section-label {
+            font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.1em;
+            text-transform: uppercase; color: var(--muted);
+            display: flex; align-items: center; gap: 10px; margin-bottom: 0.75rem;
         }
+        .section-label::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
 
-        .report-container {
-            animation: fadeIn 0.5s ease-out forwards;
-        }
+        /* ── STATES ── */
+        .state-wrap { text-align: center; padding: 5rem 2rem; }
+        .state-icon  { font-size: 2.5rem; margin-bottom: 1rem; }
+        .state-title { font-family: var(--serif); font-size: 1.5rem; font-weight: 700; color: var(--navy); margin-bottom: 0.5rem; }
+        .state-sub   { color: var(--muted); font-size: 0.9rem; }
 
+        /* ── PRINT ── */
         @media print {
-            body { 
-                background: white; 
-                padding: 0; 
-            }
-            .navbar, .back-bar { 
-                display: none; 
-            }
-            .print-btn { 
-                display: none; 
-            }
-            .report-container { 
-                box-shadow: none; 
-                border: none; 
-            }
-        }
-        
-        @media (max-width: 600px) {
-            .report-container { 
-                padding: 1.5rem; 
-            }
-            .outcome-title { 
-                font-size: 1.5rem; 
-            }
-            .navbar {
-                padding: 12px 5%;
-            }
-            .nav-links {
-                gap: 15px;
-            }
+            @page { size: A4; margin: 15mm; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            .navbar, .print-row { display: none !important; }
+            body { background: white !important; }
+            .verdict-hero, .explainer-box, .check-item, .action-card, .bias-alert { break-inside: avoid; }
         }
 
-        @media (max-width: 640px) {
-            .nav-links {
-                display: none;
-            }
-            .logo-text {
-                font-size: 20px;
-            }
+        /* ── ANIMATIONS ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
+        .anim { opacity: 0; animation: fadeUp 0.45s ease forwards; }
+        .anim-1 { animation-delay: 0.05s; }
+        .anim-2 { animation-delay: 0.12s; }
+        .anim-3 { animation-delay: 0.19s; }
+        .anim-4 { animation-delay: 0.26s; }
+        .anim-5 { animation-delay: 0.33s; }
+        .anim-6 { animation-delay: 0.40s; }
+        .anim-7 { animation-delay: 0.47s; }
     </style>
 </head>
 <body>
 
-<!-- Navbar -->
-<nav class="navbar" id="navbar">
-    <a href="index.html" class="logo">
-        <div class="logo-icon">
-            <i class="fas fa-shield-alt"></i>
+<nav class="navbar">
+    <a href="upload.html" class="nav-logo">
+        <div class="nav-logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 3L4 7V13C4 17.42 7.58 21.29 12 22C16.42 21.29 20 17.42 20 13V7L12 3Z" fill="white" fill-opacity="0.15"/>
+                <path d="M9 12L11.5 14.5L16 10" stroke="white" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
         </div>
-        <div>
-            <div class="logo-text">Fair<span>Trust</span></div>
-            <div class="logo-subtitle">ETHICAL AI</div>
-        </div>
+        <span class="nav-logo-name">Fair<span>Trust</span></span>
     </a>
-
-    <div class="nav-links" id="navLinks">
+    <div class="nav-links">
         <a href="index.html">Home</a>
         <a href="upload.html">Upload</a>
         <a href="docs.html">Docs</a>
@@ -639,198 +300,324 @@
     </div>
 </nav>
 
-<div class="back-bar" id="backBar"></div>
-
-<div class="report-container" id="app">
-    <div class="state-card">
-        <i class="fas fa-spinner fa-pulse" style="font-size: 2rem; color: var(--secondary); margin-bottom: 1rem;"></i>
-        <h2>Loading report…</h2>
-        <p>Fetching plain-language summary.</p>
+<main class="page" id="app">
+    <div class="state-wrap">
+        <div class="state-icon" style="color:var(--gold)"><i class="fas fa-spinner fa-pulse"></i></div>
+        <div class="state-title">Loading your report…</div>
+        <div class="state-sub">Just a moment.</div>
     </div>
-</div>
+</main>
 
 <script>
-    const API_BASE = 'http://127.0.0.1:5000';
+const API_BASE = 'http://127.0.0.1:5000';
 
-    // Navbar scroll effect
-    window.addEventListener('scroll', function() {
-        const navbar = document.getElementById('navbar');
-        if (window.scrollY > 50) {
-            navbar.classList.add('scrolled');
-        } else {
-            navbar.classList.remove('scrolled');
-        }
-    });
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function outcomeClass(score) {
+    if (score >= 0.80) return 'fair';
+    if (score >= 0.65) return 'partial';
+    return 'concern';
+}
 
-    function renderNoData(msg) {
+function checkSev(ok) { return ok ? 'ok' : 'warn'; }
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function renderReport(data, evalId) {
+    const score    = data.ethical_score || 0;
+    const pct      = Math.round(score * 100);
+    const cls      = outcomeClass(score);
+    const summary  = data.overall_summary || {};
+    const factors  = data.factor_items    || [];
+    const biases   = data.bias_indicators || [];
+    const wtm      = data.what_this_means || {};
+    const recs     = data.recommendations || [];
+
+    // ── Verdict hero ─────────────────────────────────────────────────────
+    const heroHtml = `
+    <div class="verdict-hero ${cls} anim anim-1">
+        <div class="verdict-eyebrow"><i class="fas fa-shield-alt"></i> FairTrust AI · Fairness Assessment</div>
+        <div class="verdict-icon-row">
+            <div class="verdict-emoji">${summary.icon || (cls === 'fair' ? '✅' : cls === 'partial' ? '⚠️' : '🔴')}</div>
+            <div>
+                <div class="verdict-headline">${summary.verdict || 'Assessment Complete'}</div>
+                <div class="verdict-sub">${summary.sub || ''}</div>
+            </div>
+        </div>
+        <div class="score-bar-wrap">
+            <div class="score-bar-label">
+                <span class="score-bar-title">Overall Fairness Score</span>
+                <span class="score-bar-num">${pct} / 100</span>
+            </div>
+            <div class="score-track">
+                <div class="score-fill" id="scoreFill" style="width:0%"></div>
+            </div>
+            <div class="score-ticks">
+                <span class="score-tick">0</span>
+                <span class="score-tick">Poor ←</span>
+                <span class="score-tick">→ 80 Passing</span>
+                <span class="score-tick">100</span>
+            </div>
+        </div>
+    </div>`;
+
+    // ── Checks ───────────────────────────────────────────────────────────
+    const checkItems = factors.map(f => {
+        const sev  = f.status === 'approved' ? 'ok' : 'warn';
+        const icon = f.status === 'approved' ? 'fa-check' : 'fa-exclamation';
+        const badgeLabel = f.status === 'approved' ? 'Looks Good' : 'Needs Attention';
+        return `
+        <div class="check-item ${sev}">
+            <div class="check-icon-wrap ${sev}"><i class="fas ${icon}"></i></div>
+            <div class="check-body">
+                <div class="check-name">${f.name}</div>
+                <div class="check-detail">${f.detail}</div>
+            </div>
+            <div class="check-badge ${sev}">
+                <i class="fas ${f.status === 'approved' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                ${badgeLabel}
+            </div>
+        </div>`;
+    }).join('');
+
+    const checksHtml = `
+    <div class="explainer-box anim anim-2">
+        <div class="box-heading"><i class="fas fa-list-check"></i> How was this model checked?</div>
+        <div class="box-sub">We ran ${factors.length} automated fairness checks. Here's what we found, in plain English.</div>
+        <div class="check-list">${checkItems || '<p style="color:var(--muted)">No checks available.</p>'}</div>
+    </div>`;
+
+    // ── Bias alert ────────────────────────────────────────────────────────
+    const isClean = biases.length === 1 && biases[0].title.toLowerCase().includes('no major');
+    const biasClass = isClean ? 'all-clear' : 'has-issues';
+    const biasIcon  = isClean ? 'fa-check-circle' : 'fa-exclamation-triangle';
+    const biasTitle = isClean ? 'No major bias detected' : `${biases.length} bias indicator${biases.length !== 1 ? 's' : ''} found`;
+    const biasItems = biases.map(b => `
+        <li class="bias-issue-item">
+            <strong>${b.title}:</strong> ${b.detail}
+        </li>`).join('');
+
+    const biasHtml = `
+    <div class="bias-alert ${biasClass} anim anim-3">
+        <div class="bias-alert-icon"><i class="fas ${biasIcon}"></i></div>
+        <div>
+            <div class="bias-alert-title">${biasTitle}</div>
+            <ul class="bias-issue-list">${biasItems}</ul>
+        </div>
+    </div>`;
+
+    // ── What this means ───────────────────────────────────────────────────
+    const actionCards = (wtm.action_cards || []).map(c => `
+        <div class="action-card">
+            <div class="action-card-icon">${c.icon}</div>
+            <div class="action-card-title">${c.title}</div>
+            <div class="action-card-text">${c.text}</div>
+        </div>`).join('');
+
+    const meaningHtml = `
+    <div class="explainer-box anim anim-4">
+        <div class="box-heading"><i class="fas fa-comment-alt"></i> What does this mean for you?</div>
+        <div class="box-sub">A plain-English summary of the key takeaways.</div>
+        <p class="meaning-text">"${wtm.summary || ''}"</p>
+        ${actionCards ? `<div class="action-cards-grid">${actionCards}</div>` : ''}
+    </div>`;
+
+    // ── Recommendations ───────────────────────────────────────────────────
+    const recItems = recs.map((r, i) => `
+        <div class="rec-item">
+            <div class="rec-num">${i + 1}</div>
+            <div class="rec-icon">${r.icon}</div>
+            <div>
+                <div class="rec-title">${r.title}</div>
+                <div class="rec-detail">${r.detail}</div>
+            </div>
+        </div>`).join('');
+
+    const recsHtml = recs.length ? `
+    <div class="explainer-box anim anim-5">
+        <div class="box-heading"><i class="fas fa-lightbulb"></i> Recommended next steps</div>
+        <div class="box-sub">Actions that would improve this model's fairness.</div>
+        <div class="rec-list">${recItems}</div>
+    </div>` : '';
+
+    // ── FAQ ───────────────────────────────────────────────────────────────
+    const faqs = [
+        {
+            q: 'What is a "fairness score" and what does mine mean?',
+            a: `A fairness score between 0–100 measures how equally the model treats different groups of people. Your model scored ${pct}/100. A score of 80 or above is considered passing. ${pct >= 80 ? 'Your model is above this threshold.' : 'Your model is below this threshold and needs improvement.'}`,
+        },
+        {
+            q: 'What are "protected attributes"?',
+            a: 'Protected attributes are characteristics like gender, race, age, or caste. A fair model should not base its decisions on these — it should focus on relevant factors only. Our checks verify this.',
+        },
+        {
+            q: 'Does a high accuracy mean the model is fair?',
+            a: 'No. A model can be 90% accurate while still being unfair — for example, by making correct predictions for most people but systematically disadvantaging a minority group. Fairness and accuracy are separate measures.',
+        },
+        {
+            q: 'What is the 80% rule?',
+            a: 'The 80% rule (or four-fifths rule) is a legal standard: the least-favoured group should receive positive outcomes at least 80% as often as the most-favoured group. If this ratio drops below 0.80, it may constitute unlawful disparate impact.',
+        },
+        {
+            q: 'What happens if this model fails its fairness checks?',
+            a: 'The model should not be deployed until the identified issues are resolved. The recommended next steps above outline the specific technical actions needed to bring the model within acceptable fairness thresholds.',
+        },
+    ];
+
+    const faqItems = faqs.map((f, i) => `
+        <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(${i})" id="faq-q-${i}">
+                ${f.q}
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-a" id="faq-a-${i}">${f.a}</div>
+        </div>`).join('');
+
+    const faqHtml = `
+    <div class="explainer-box anim anim-6">
+        <div class="box-heading"><i class="fas fa-question-circle"></i> Common questions</div>
+        <div class="box-sub">Answers to things people often ask about AI fairness reports.</div>
+        ${faqItems}
+    </div>`;
+
+    // ── Footer actions ────────────────────────────────────────────────────
+    const footerHtml = `
+    <div class="anim anim-7">
+        <div class="print-row">
+            <button class="btn-print btn-print-primary" onclick="window.print()">
+                <i class="fas fa-print"></i> Print this report
+            </button>
+            <a href="allReports.html?eval_id=${evalId}" class="btn-print btn-print-ghost">
+                <i class="fas fa-arrow-left"></i> All reports
+            </a>
+        </div>
+        <p style="font-size:0.75rem;color:var(--muted);margin-top:1rem">
+            Eval ID: <span style="font-family:var(--mono)">${evalId || '—'}</span> &nbsp;·&nbsp;
+            Records evaluated: ${(data.records || 0).toLocaleString()} &nbsp;·&nbsp;
+            Generated by FairTrust AI Automated Ethics Framework
+        </p>
+    </div>`;
+
+    // ── Assemble ──────────────────────────────────────────────────────────
+    document.getElementById('app').innerHTML = `
+        <div class="section-label">Your Fairness Report</div>
+        ${heroHtml}
+        <div class="section-label" style="margin-top:2rem">What we checked</div>
+        ${checksHtml}
+        ${biasHtml}
+        <div class="section-label" style="margin-top:0.5rem">What this means</div>
+        ${meaningHtml}
+        ${recsHtml}
+        <div class="section-label" style="margin-top:0.5rem">Questions & Answers</div>
+        ${faqHtml}
+        ${footerHtml}
+    `;
+
+    // Animate score bar
+    setTimeout(() => {
+        const fill = document.getElementById('scoreFill');
+        if (fill) fill.style.width = pct + '%';
+    }, 200);
+}
+
+// ── FAQ toggle ────────────────────────────────────────────────────────────────
+function toggleFaq(i) {
+    const q = document.getElementById(`faq-q-${i}`);
+    const a = document.getElementById(`faq-a-${i}`);
+    q.classList.toggle('open');
+    a.classList.toggle('open');
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(async function init() {
+    const evalId = new URLSearchParams(location.search).get('eval_id')
+                || sessionStorage.getItem('eval_id');
+
+    if (!evalId) {
         document.getElementById('app').innerHTML = `
-            <div class="state-card">
-                <i class="fas fa-exclamation-circle" style="font-size: 2rem; color: var(--warning); margin-bottom: 1rem;"></i>
-                <h2>No report found</h2>
-                <p>${msg || 'Complete an evaluation first.'}</p>
-                <a href="upload.html" class="btn btn-primary" style="display:inline-flex;margin-top:0.5rem">
-                    <i class="fas fa-play-circle"></i> Start evaluation
-                </a>
+            <div class="state-wrap">
+                <div class="state-icon" style="color:var(--amber)"><i class="fas fa-exclamation-circle"></i></div>
+                <div class="state-title">No evaluation found</div>
+                <div class="state-sub">Complete an evaluation on the upload page first.</div>
+                <a href="upload.html" style="display:inline-flex;align-items:center;gap:6px;margin-top:1.5rem;padding:10px 20px;background:var(--navy);color:white;border-radius:8px;text-decoration:none;font-weight:600;font-size:0.875rem"><i class="fas fa-play-circle"></i> Start evaluation</a>
+            </div>`;
+        return;
+    }
+
+    try {
+        const res  = await fetch(`${API_BASE}/report/enduser/${evalId}`);
+        const data = await res.json();
+        if (res.ok && data.status === 'complete') { renderReport(data, evalId); return; }
+        throw new Error(data.error || 'not complete');
+    } catch (_) {
+        const cached = sessionStorage.getItem('eval_result');
+        if (cached) {
+            const raw      = JSON.parse(cached);
+            const fairness = raw.fairness || {};
+            const score    = raw.ethical_score || 0;
+            const cls      = outcomeClass(score);
+
+            const verdicts = {
+                fair:    { verdict: 'This model is treating people fairly.', sub: 'Our automated checks found no major fairness problems.', icon: '✅', outcome: 'FAIR' },
+                partial: { verdict: 'This model has some fairness concerns.', sub: 'It works well in most cases but has specific areas that need attention.', icon: '⚠️', outcome: 'PARTIAL' },
+                concern: { verdict: 'This model has significant fairness issues.', sub: 'There are areas where the model may treat people unfairly.', icon: '🔴', outcome: 'CONCERN' },
+            };
+
+            const makeFactor = (name, icon, scoreVal, threshold, goodText, badText) => ({
+                icon, name,
+                detail: scoreVal >= threshold ? goodText : badText,
+                status: scoreVal >= threshold ? 'approved' : 'rejected',
+                status_label: scoreVal >= threshold ? '✓' : '!',
+                icon_style: scoreVal >= threshold ? 'normal' : 'warning',
+            });
+
+            renderReport({
+                ethical_score:   score, records: raw.records || 0,
+                overall_summary: verdicts[cls],
+                factor_items: [
+                    makeFactor('Similar people are treated similarly', '📊', fairness.individualFairness || 0, 0.8,
+                        `${Math.round((fairness.individualFairness||0)*100)}% of similar people get the same outcome.`,
+                        `Only ${Math.round((fairness.individualFairness||0)*100)}% consistency — some similar people get different outcomes.`),
+                    makeFactor('Different groups are treated equally', '👥', fairness.groupFairness || 0, 0.8,
+                        'No significant gap in outcomes between different demographic groups.',
+                        'Some groups are receiving meaningfully different outcomes.'),
+                    makeFactor('Approval rates are similar across groups', '📉', fairness.disparateImpact || 0, 0.8,
+                        `The least-favoured group receives outcomes at ${Math.round((fairness.disparateImpact||0)*100)}% the rate of the best-favoured group — above the 80% legal threshold.`,
+                        `The least-favoured group receives outcomes at only ${Math.round((fairness.disparateImpact||0)*100)}% the rate — below the 80% legal threshold.`),
+                    makeFactor('The model\'s predictions are reliable', '🎯', 1 - (fairness.calibrationError || 0), 0.8,
+                        'When the model predicts a high likelihood, it is correct most of the time.',
+                        'The model\'s confidence levels don\'t always match real outcomes.'),
+                    makeFactor('Changing someone\'s background doesn\'t change the outcome', '🔄', fairness.counterfactual || 0, 0.8,
+                        'Swapping gender, race, or age in a profile does not change the decision.',
+                        'In some cases, changing only gender or race changes the decision.'),
+                ],
+                bias_indicators: (fairness.intersectional < 0.8 || fairness.disparateImpact < 0.8 || fairness.demographicParity > 0.1)
+                    ? [
+                        fairness.intersectional < 0.8 && { title: 'Intersectional Bias', detail: 'Some combinations of characteristics (e.g. older women) face compounding disadvantages.' },
+                        fairness.disparateImpact < 0.8 && { title: 'Disparate Impact', detail: `The approval gap between groups falls below the legal 80% threshold (currently ${Math.round((fairness.disparateImpact||0)*100)}%).` },
+                        fairness.demographicParity > 0.1 && { title: 'Demographic Gap', detail: `A ${Math.round((fairness.demographicParity||0)*100)}% outcome gap exists between demographic groups.` },
+                      ].filter(Boolean)
+                    : [{ title: 'No Major Bias Indicators Found', detail: 'The model passed all automated bias checks.' }],
+                what_this_means: {
+                    summary: score >= 0.8
+                        ? 'This model is performing fairly across our checks. It uses relevant factors and does not show significant bias against protected groups.'
+                        : `This model has fairness concerns that should be addressed before deployment. The score of ${Math.round(score*100)}/100 is below the recommended threshold of 80.`,
+                    action_cards: [
+                        { icon: score >= 0.8 ? '✅' : '⚠️', title: 'Fairness Risk', text: score >= 0.8 ? 'Within acceptable limits.' : 'Adjustment recommended before deployment.' },
+                        { icon: '⚖️', title: 'Legal Compliance', text: (fairness.disparateImpact || 0) >= 0.8 ? 'Meets 80% rule threshold.' : 'Does not meet 80% rule threshold.' },
+                        { icon: '🔀', title: 'Group Fairness', text: (fairness.intersectional || 0) >= 0.8 ? 'No intersectional disadvantage found.' : 'Intersectional bias detected.' },
+                    ],
+                },
+                recommendations: [{ icon: '📋', title: 'View the full technical report', detail: 'The Developer Report contains specific code-level fixes and SHAP analysis.' }],
+            }, evalId);
+            return;
+        }
+        document.getElementById('app').innerHTML = `
+            <div class="state-wrap">
+                <div class="state-icon" style="color:var(--red)"><i class="fas fa-times-circle"></i></div>
+                <div class="state-title">Could not load report</div>
+                <div class="state-sub">Please try again or start a new evaluation.</div>
             </div>`;
     }
-
-    // ── Section renderers ─────────────────────────────────────────────────
-
-    function renderHeader(summary, score) {
-        const outcomeClass = {
-            FAIR:    'outcome-fair',
-            PARTIAL: 'outcome-partial',
-            CONCERN: 'outcome-concern',
-        }[summary.outcome] || 'outcome-partial';
-
-        return `
-        <header class="report-header">
-            <div class="outcome-title ${outcomeClass}">${summary.icon} ${summary.verdict}</div>
-            <p class="outcome-sub">${summary.sub}</p>
-            <span class="confidence-badge">
-                <i class="fas fa-star"></i> Plain Language Summary · Score: ${score.toFixed(2)}
-            </span>
-        </header>`;
-    }
-
-    function renderFactors(items) {
-        const rows = items.map(f => `
-            <li class="factor-item">
-                <div class="factor-icon ${f.icon_style === 'warning' ? 'warning' : ''}">${f.icon}</div>
-                <div class="factor-details">
-                    <div class="factor-name">${f.name}</div>
-                    <div class="factor-detail">${f.detail}</div>
-                </div>
-                <div class="factor-status ${f.status}">
-                    ${f.status_label === '✓' ? '<i class="fas fa-check-circle"></i>' : '<i class="fas fa-exclamation-circle"></i>'}
-                </div>
-            </li>`).join('');
-
-        return `
-        <section class="section-spacer">
-            <h2 class="explanation-title"><i class="fas fa-clipboard-check" style="margin-right:8px; color: var(--secondary);"></i>Model Fairness Checks</h2>
-            <ul class="factor-list">${rows}</ul>
-        </section>`;
-    }
-
-    function renderBiasIndicators(indicators) {
-        const isClean = indicators.length === 1 && indicators[0].title.includes('No Major');
-        const cardClass = isClean ? 'bias-check clean' : 'bias-check';
-        const icon  = isClean ? '<i class="fas fa-check-circle"></i>' : '<i class="fas fa-search"></i>';
-        const title = isClean ? 'No Major Bias Indicators Found' : 'Bias Indicators Identified';
-
-        const listItems = indicators.map(ind => `
-            <li><strong>${ind.title}:</strong> ${ind.detail}</li>`).join('');
-
-        return `
-        <section class="${cardClass}">
-            <div class="bias-icon">${icon}</div>
-            <div class="bias-title"><i class="fas ${isClean ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i> ${title}</div>
-            <ul class="bias-list">${listItems}</ul>
-        </section>`;
-    }
-
-    function renderWhatThisMeans(wtm) {
-        const cards = (wtm.action_cards || []).map(c => `
-            <div class="action-card">
-                <div class="action-icon">${c.icon}</div>
-                <h3>${c.title}</h3>
-                <div class="action-text">${c.text}</div>
-            </div>`).join('');
-
-        return `
-        <div class="action-section">
-            <h2 class="explanation-title"><i class="fas fa-lightbulb" style="margin-right:8px; color: var(--secondary);"></i>What this means</h2>
-            <p class="action-summary">${wtm.summary}</p>
-            <div class="action-grid">${cards}</div>
-        </div>`;
-    }
-
-    function renderRecommendations(recs) {
-        const rows = recs.map(r => `
-            <li class="factor-item">
-                <div class="factor-icon">${r.icon}</div>
-                <div class="factor-details">
-                    <div class="factor-name">${r.title}</div>
-                    <div class="factor-detail">${r.detail}</div>
-                </div>
-            </li>`).join('');
-
-        return `
-        <section class="recs-section">
-            <h2 class="explanation-title"><i class="fas fa-tasks" style="margin-right:8px; color: var(--secondary);"></i>Recommended Improvements</h2>
-            <ul class="factor-list">${rows}</ul>
-            <button class="print-btn" onclick="window.print()">
-                <i class="fas fa-print"></i> Print Report
-            </button>
-        </section>`;
-    }
-
-    // ── Full render ───────────────────────────────────────────────────────
-    function renderReport(data, evalId) {
-        document.getElementById('app').innerHTML =
-            renderHeader(data.overall_summary, data.ethical_score) +
-            renderFactors(data.factor_items || []) +
-            renderBiasIndicators(data.bias_indicators || []) +
-            renderWhatThisMeans(data.what_this_means || {}) +
-            renderRecommendations(data.recommendations || []);
-
-        // Back bar
-        const backLink = `index.html`;
-        document.getElementById('backBar').innerHTML =
-            `<a href="${backLink}"><i class="fas fa-arrow-left"></i> Back to Home</a>`;
-    }
-
-    // ── Init ──────────────────────────────────────────────────────────────
-    (async function init() {
-        const evalId = new URLSearchParams(location.search).get('eval_id')
-                    || sessionStorage.getItem('eval_id');
-
-        if (!evalId) { renderNoData('No evaluation ID found.'); return; }
-
-        try {
-            const res  = await fetch(`${API_BASE}/report/enduser/${evalId}`);
-            const data = await res.json();
-
-            if (res.ok && data.status === 'complete') {
-                renderReport(data, evalId);
-            } else {
-                throw new Error(data.error || 'not complete');
-            }
-        } catch (_) {
-            // Fallback: build minimal view from page3 cached result
-            const cached = sessionStorage.getItem('eval_result');
-            if (cached) {
-                const raw      = JSON.parse(cached);
-                const fairness = raw.fairness || {};
-                const score    = raw.ethical_score || 0;
-
-                // Minimal client-side shaping
-                const outcome = score >= 0.80 ? 'FAIR' : score >= 0.65 ? 'PARTIAL' : 'CONCERN';
-                const icons   = { FAIR: '✅', PARTIAL: '⚠️', CONCERN: '🔴' };
-                const verdicts = {
-                    FAIR:    'This model is performing fairly.',
-                    PARTIAL: 'This model has some fairness concerns.',
-                    CONCERN: 'This model has significant fairness issues.',
-                };
-
-                renderReport({
-                    ethical_score:   score,
-                    overall_summary: { verdict: verdicts[outcome], sub: 'See details below.', outcome, icon: icons[outcome] },
-                    factor_items: [
-                        { icon: '📊', icon_style: 'normal', name: 'Individual Fairness', detail: `Score: ${(fairness.individualFairness || 0).toFixed(2)}`, status: (fairness.individualFairness ?? 0) >= 0.8 ? 'approved' : 'rejected', status_label: (fairness.individualFairness ?? 0) >= 0.8 ? '✓' : '!' },
-                        { icon: '👥', icon_style: 'normal', name: 'Group Fairness',      detail: `Score: ${(fairness.groupFairness || 0).toFixed(2)}`,      status: (fairness.groupFairness ?? 0) >= 0.8      ? 'approved' : 'rejected', status_label: (fairness.groupFairness ?? 0) >= 0.8 ? '✓' : '!' },
-                        { icon: '📉', icon_style: 'normal', name: 'Disparate Impact',    detail: `Score: ${(fairness.disparateImpact || 0).toFixed(2)}`,     status: (fairness.disparateImpact ?? 0) >= 0.8    ? 'approved' : 'rejected', status_label: (fairness.disparateImpact ?? 0) >= 0.8 ? '✓' : '!' },
-                    ],
-                    bias_indicators: [{ title: 'Evaluation Complete', detail: `Ethical score: ${score}` }],
-                    what_this_means: { summary: `The model received an ethical score of ${score}.`, action_cards: [] },
-                    recommendations: [{ icon: '✅', title: 'Continue monitoring', detail: 'Re-evaluate as new data is collected.' }],
-                }, evalId);
-                return;
-            }
-            renderNoData('Could not load end-user report.');
-        }
-    })();
+})();
 </script>
 </body>
 </html>
