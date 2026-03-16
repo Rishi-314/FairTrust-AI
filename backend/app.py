@@ -7,6 +7,8 @@ from routes.developer_report import developer_report_routes
 from routes.regulator_report import regulator_report_routes
 from routes.comparison import comparison_routes
 from routes.admin import admin_routes
+from routes.executive_report import executive_report_routes
+from routes.remediation import remediation_routes
 from services.model_loader import load_artifacts
 
 import os
@@ -20,7 +22,7 @@ try:
 except FileNotFoundError as e:
     print(f"⚠️  {e} — will fall back to on-the-fly training")
 
-# ── CORS — allow everything from any origin ───────────────────────────────────
+# ── CORS ──────────────────────────────────────────────────────────────────────
 CORS(app,
      origins="*",
      allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
@@ -28,7 +30,6 @@ CORS(app,
      supports_credentials=False,
      automatic_options=True)
 
-# Explicitly handle OPTIONS preflight for every route
 @app.before_request
 def handle_options():
     if request.method == "OPTIONS":
@@ -55,6 +56,10 @@ app.register_blueprint(regulator_report_routes)
 app.register_blueprint(comparison_routes)
 app.register_blueprint(admin_routes)
 
+# ── New Round 3 blueprints ────────────────────────────────────────────────────
+app.register_blueprint(executive_report_routes)
+app.register_blueprint(remediation_routes)
+
 FRONTEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend"))
 
 @app.route("/")
@@ -67,7 +72,7 @@ def serve_page(page):
 
 @app.route("/health", methods=["GET"])
 def health():
-    return jsonify({"status": "ok"}), 200
+    return jsonify({"status": "ok", "version": "3.0", "round": "JEDI Round 3"}), 200
 
 if __name__ == "__main__":
     print(f"\n  Frontend : {FRONTEND_DIR}")
@@ -77,5 +82,5 @@ if __name__ == "__main__":
         port=5000,
         debug=True,
         threaded=True,
-        use_reloader=False   # prevents reload when files are uploaded to uploads/
+        use_reloader=False
     )
