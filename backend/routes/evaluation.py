@@ -261,6 +261,18 @@ def _run_evaluation(
             print(f"[counterfactual_examples] Error: {e}")
             cf_examples = []
 
+        # ── Step 6c: LIME local explanations ──────────────────────────────
+        try:
+            from services.lime_explainer import compute_lime
+            lime_results = compute_lime(
+                df.drop(columns=[pred_col], errors="ignore"),
+                target_col=target_col,
+                n_samples=5,
+            )
+        except Exception as e:
+            print(f"[lime_explainer] Error: {e}")
+            lime_results = {"method": "unavailable", "instances": [], "global_summary": "LIME not available."}
+        
         # ── Step 7: Report generation ─────────────────────────────────────────
         evaluations[eval_id]["current_step"] = 7
         report_type_enum = REPORT_TYPE_MAP.get(report_type.lower(), "DEVELOPER")
@@ -345,6 +357,8 @@ def _run_evaluation(
                 "featureStability":   shap_results["featureStability"],
                 "feature_importance": shap_results.get("feature_importance", {}),
             },
+            
+            "lime": lime_results,
 
             # Counterfactual examples
             "counterfactual_examples": cf_examples,
