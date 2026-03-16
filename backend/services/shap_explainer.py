@@ -48,7 +48,8 @@ def compute_shap(df: pd.DataFrame, target_col: str = "approved") -> dict:
                 y_temp = y_temp.values
 
             if len(X) > 2000:
-                idx    = np.random.choice(len(X), 2000, random_state=42, replace=False)
+                rng    = np.random.RandomState(42)
+                idx    = rng.choice(len(X), 2000, replace=False)
                 X      = X.iloc[idx].reset_index(drop=True)
                 y_temp = y_temp[idx]
 
@@ -68,7 +69,8 @@ def compute_shap(df: pd.DataFrame, target_col: str = "approved") -> dict:
 
     # Sample for speed (max 2000 rows)
     if len(X) > 2000:
-        idx = np.random.choice(len(X), 2000, random_state=42, replace=False)
+        rng = np.random.RandomState(42)
+        idx = rng.choice(len(X), 2000, replace=False)
         X   = X.iloc[idx].reset_index(drop=True)
 
     # ── SHAP values ───────────────────────────────────────────────────────
