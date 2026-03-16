@@ -646,13 +646,19 @@ function buildActions(data) {
 
     const topF = shap.top_feature;
     if (topF) {
-        const isSensitive = ['gender','sex','race','caste','age','religion','ethnicity','nationality'].some(k => topF.toLowerCase().includes(k));
-        if (isSensitive) {
+        const sensitiveKeywords = ['gender','sex','race','caste','age','religion','ethnicity','nationality','caste_proxy'];
+        const top5Features = (shap.feature_importance || []).slice(0, 5);
+        const sensitiveInTop5 = top5Features.filter(f => 
+            sensitiveKeywords.some(k => f.feature.toLowerCase().includes(k))
+        );
+        
+        if (sensitiveInTop5.length > 0) {
+            const nameList = sensitiveInTop5.map(f => `"${f.feature}"`).join(', ');
             actions.unshift({
                 severity: 'critical',
-                title: `Top SHAP Feature is a Protected Attribute: "${topF}"`,
-                body: `The model's most influential feature is a protected attribute. This almost certainly causes direct discrimination. Remove or neutralize this feature immediately.`,
-                code: `df.drop(columns=['${topF}'])  # Remove protected attribute from features`,
+                title: `${sensitiveInTop5.length} Protected Attribute(s) in Top SHAP Features: ${nameList}`,
+                body: `The following protected attributes are among the model's most influential features: ${nameList}. This is direct evidence of discrimination — these features should not be driving predictions. Remove or neutralize all of them immediately.`,
+                code: `protected_cols = ${JSON.stringify(sensitiveInTop5.map(f => f.feature))}\ndf.drop(columns=protected_cols, inplace=True)`,
                 effort: 'low'
             });
         } else {

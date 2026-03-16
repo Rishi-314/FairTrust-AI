@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
         :root {
             --navy:      #0F1E38;
             --navy-mid:  #1A2D4E;
@@ -39,10 +38,7 @@
             --shadow:    0 2px 12px rgba(15,30,56,0.07);
             --shadow-md: 0 8px 32px rgba(15,30,56,0.10);
         }
-
         body { font-family: var(--body); background: var(--bg); color: var(--text); line-height: 1.6; }
-
-        /* ── NAV ── */
         .navbar {
             position: sticky; top: 0; z-index: 100;
             background: rgba(255,255,255,0.97); backdrop-filter: blur(12px);
@@ -57,11 +53,7 @@
         .nav-links { display: flex; gap: 4px; }
         .nav-links a { text-decoration: none; font-size: 14px; font-weight: 600; color: var(--muted); padding: 6px 12px; border-radius: 7px; transition: all 0.15s; }
         .nav-links a:hover { color: var(--navy); background: var(--bg); }
-
-        /* ── PAGE ── */
         .page { max-width: 1280px; margin: 0 auto; padding: 2rem 5% 5rem; }
-
-        /* ── HERO — exact same pattern as developerReport ── */
         .report-hero { background: var(--navy); border-radius: 16px; padding: 2rem 2.5rem; margin-bottom: 1.5rem; position: relative; overflow: hidden; }
         .report-hero::before { content: ''; position: absolute; top: -60px; right: -60px; width: 280px; height: 280px; border-radius: 50%; background: radial-gradient(circle, rgba(235,178,85,0.12) 0%, transparent 70%); }
         .hero-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; position: relative; }
@@ -81,8 +73,6 @@
         .btn-hero-primary:hover { background: #dfa342; transform: translateY(-1px); }
         .btn-hero-ghost { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.15); }
         .btn-hero-ghost:hover { background: rgba(255,255,255,0.14); color: white; }
-
-        /* ── VERDICT BANNER — same as alert-banner in devReport ── */
         .verdict-banner { display: flex; align-items: flex-start; gap: 1rem; border-radius: 0 10px 10px 0; padding: 1rem 1.25rem; margin-bottom: 1.5rem; border: 1px solid; border-left: 4px solid; }
         .verdict-banner.approved { background: var(--green-dim); border-color: rgba(16,185,129,0.25); border-left-color: var(--green); }
         .verdict-banner.warn     { background: var(--amber-dim); border-color: rgba(245,158,11,0.25); border-left-color: var(--amber); }
@@ -97,15 +87,11 @@
         .verdict-banner.approved .verdict-action { color: var(--green); }
         .verdict-banner.warn     .verdict-action { color: var(--amber); }
         .verdict-banner.blocked  .verdict-action { color: var(--red); }
-
-        /* ── SECTION ── */
         .section { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--rule); box-shadow: var(--shadow); margin-bottom: 1.5rem; overflow: hidden; }
         .section-head { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.75rem; border-bottom: 1px solid var(--rule); background: var(--bg); }
         .section-title { font-family: var(--display); font-size: 1rem; font-weight: 700; color: var(--navy); display: flex; align-items: center; gap: 8px; }
         .section-title i { color: var(--gold); font-size: 0.9rem; }
         .section-body { padding: 1.75rem; }
-
-        /* ── STATS ROW ── */
         .stats-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
         .stat-card { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 1.125rem 1rem; text-align: center; box-shadow: var(--shadow); transition: transform 0.15s, border-color 0.15s; }
         .stat-card:hover { transform: translateY(-2px); border-color: var(--gold); }
@@ -114,8 +100,6 @@
         .stat-val.amber { color: var(--amber); }
         .stat-val.red   { color: var(--red); }
         .stat-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-top: 5px; }
-
-        /* ── 5 DIMENSIONS — same pattern as dim-card ── */
         .dim5-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; }
         .dim5-card { border-radius: 10px; padding: 1.125rem; border: 1.5px solid var(--rule); background: var(--surface); transition: all 0.2s; }
         .dim5-card:hover { border-color: var(--gold); box-shadow: var(--shadow-md); transform: translateY(-2px); }
@@ -143,8 +127,6 @@
         .dim5-bar.critical { background: var(--red); }
         .dim5-weight { font-size: 10px; color: var(--muted); font-family: var(--mono); }
         .dim5-plain { font-size: 0.75rem; color: var(--muted); margin-top: 6px; line-height: 1.45; }
-
-        /* ── RISK LIST — same as action-item ── */
         .risk-list { display: flex; flex-direction: column; gap: 0.875rem; }
         .risk-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem 1.25rem; border-radius: 10px; border: 1px solid var(--rule); background: var(--surface); transition: all 0.2s; }
         .risk-item:hover { border-color: var(--gold); box-shadow: var(--shadow); }
@@ -162,8 +144,6 @@
         .risk-badge.high   { background: var(--red-dim);   color: var(--red); }
         .risk-badge.medium { background: var(--amber-dim); color: var(--amber); }
         .risk-badge.low    { background: var(--green-dim); color: var(--green); }
-
-        /* ── ACTION LIST — identical to devReport ── */
         .action-list { display: flex; flex-direction: column; gap: 0.875rem; }
         .action-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem 1.25rem; border-radius: 10px; border: 1px solid var(--rule); background: var(--surface); transition: all 0.2s; }
         .action-item:hover { border-color: var(--gold); box-shadow: var(--shadow); }
@@ -180,8 +160,6 @@
         .action-effort.high   { background: var(--red-dim);   color: var(--red); }
         .action-effort.medium { background: var(--amber-dim); color: var(--amber); }
         .action-effort.low    { background: var(--green-dim); color: var(--green); }
-
-        /* ── LEGAL TABLE ── */
         .legal-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
         .legal-table th { background: var(--bg2); padding: 8px 12px; text-align: left; font-weight: 700; font-size: 0.75rem; color: var(--navy); border-bottom: 1.5px solid var(--rule); }
         .legal-table td { padding: 0.875rem 12px; border-bottom: 1px solid var(--rule); vertical-align: middle; }
@@ -194,8 +172,6 @@
         .legal-pill.warn    { background: var(--amber-dim); color: var(--amber); }
         .legal-pill.fail    { background: var(--red-dim);   color: var(--red); }
         .legal-pill.neutral { background: var(--bg2); color: var(--muted); border: 1px solid var(--rule); }
-
-        /* ── PERF ── */
         .perf-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
         .perf-card { background: var(--bg); border: 1px solid var(--rule); border-radius: 10px; padding: 1.25rem; text-align: center; }
         .perf-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px; }
@@ -203,26 +179,14 @@
         .perf-bar-track { height: 6px; background: var(--bg2); border-radius: 100px; margin: 10px 0 6px; overflow: hidden; }
         .perf-bar-fill  { height: 100%; border-radius: 100px; background: var(--blue); transition: width 0.8s ease; }
         .perf-sub { font-size: 0.75rem; color: var(--muted); }
-
-        /* ── INFO BOX ── */
         .info-box { background: var(--bg); border: 1px solid var(--rule); border-radius: 8px; padding: 0.875rem 1rem; margin-bottom: 1.25rem; font-size: 0.8125rem; color: var(--muted); display: flex; align-items: flex-start; gap: 8px; }
         .info-box i { color: var(--gold); margin-top: 2px; flex-shrink: 0; }
-
-        /* ── STATE ── */
         .state-wrap { min-height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--surface); border-radius: var(--radius); border: 1px solid var(--rule); }
         .state-icon  { font-size: 2.5rem; margin-bottom: 1rem; }
         .state-title { font-family: var(--display); font-size: 1.25rem; font-weight: 700; color: var(--navy); margin-bottom: 0.5rem; }
         .state-sub   { font-size: 0.9rem; color: var(--muted); margin-bottom: 1.5rem; }
-
-        @media (max-width: 900px) {
-            .dim5-grid  { grid-template-columns: repeat(3, 1fr); }
-            .stats-grid { grid-template-columns: repeat(3, 1fr); }
-            .perf-grid  { grid-template-columns: 1fr; }
-        }
-        @media (max-width: 560px) {
-            .dim5-grid { grid-template-columns: repeat(2, 1fr); }
-            .nav-links { display: none; }
-        }
+        @media (max-width: 900px) { .dim5-grid { grid-template-columns: repeat(3, 1fr); } .stats-grid { grid-template-columns: repeat(3, 1fr); } .perf-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 560px) { .dim5-grid { grid-template-columns: repeat(2, 1fr); } .nav-links { display: none; } }
         @media print {
             @page { size: A4; margin: 15mm 12mm; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
@@ -234,7 +198,6 @@
     </style>
 </head>
 <body>
-
 <nav class="navbar">
     <a href="index.html" class="logo">
         <div class="logo-icon"><i class="fas fa-shield-alt"></i></div>
@@ -247,7 +210,6 @@
         <a href="admin.html">Admin</a>
     </div>
 </nav>
-
 <div class="page" id="app">
     <div class="state-wrap">
         <div class="state-icon"><i class="fas fa-spinner fa-pulse" style="color:var(--gold)"></i></div>
@@ -255,7 +217,6 @@
         <div class="state-sub">Preparing strategic summary</div>
     </div>
 </div>
-
 <script>
 const API_BASE = 'http://127.0.0.1:5000';
 const fmt    = (v, d=4) => v != null ? Number(v).toFixed(d) : '—';
@@ -270,21 +231,96 @@ function sev(score) {
 function sevLabel(score) { return {passing:'Pass', warning:'Marginal', critical:'Fail'}[sev(score)] || '—'; }
 function sevColor(score) { return {passing:'var(--green)', warning:'var(--amber)', critical:'var(--red)'}[sev(score)] || 'var(--muted)'; }
 
-function buildDimensions(ev) {
-    const overall = ev.ethical_score || ev.fairness?.fairness_score || 0;
-    // safe: use the value if it's a valid number (including 1.0), else fall back to overall
-    const safe = (v) => {
+/**
+ * Extract a numeric score from an object using multiple candidate paths.
+ * Returns the first value that is a finite number in [0,1].
+ * Returns null (never 0 as a false-negative) only when truly missing.
+ */
+function pickScore(/* ...candidateValues */) {
+    for (let i = 0; i < arguments.length; i++) {
+        const v = arguments[i];
+        if (v === null || v === undefined) continue;
         const n = Number(v);
-        if (!isNaN(n) && n > 0) return n;      // includes n === 1.0
-        if (overall > 0) return overall;
-        return 0.5;
-    };
+        if (isFinite(n) && n >= 0 && n <= 1) return n;
+    }
+    return null;
+}
+
+/**
+ * Extract a performance metric (accuracy, f1, roc_auc) which may be > 1
+ * for some representations, but we keep it as-is and just check finite.
+ */
+function pickPerf(/* ...candidateValues */) {
+    for (let i = 0; i < arguments.length; i++) {
+        const v = arguments[i];
+        if (v === null || v === undefined) continue;
+        const n = Number(v);
+        if (isFinite(n) && n >= 0) return n;
+    }
+    return null;
+}
+
+function buildDimensions(ev) {
+    // The backend stores scores at BOTH top-level keys AND nested inside objects.
+    // We try every known location so the report works whether data came from
+    // /report/executive/ (top-level keys) or sessionStorage (nested objects).
     return [
-        { key:'fairness',       name:'Fairness',       icon:'fa-balance-scale',   score: safe(ev.fairness_score || ev.fairness?.fairness_score), weight:'40% of overall score', plain:'Measures whether the model treats all demographic groups equally — gender, race, caste, age, and other protected attributes.' },
-        { key:'privacy',        name:'Privacy',        icon:'fa-lock',            score: safe(ev.privacy_score  || ev.privacy?.privacy_score),   weight:'20% of overall score', plain:'Checks whether the dataset contains personal data (PII) and whether sensitive information is handled appropriately before model training.' },
-        { key:'robustness',     name:'Robustness',     icon:'fa-shield-alt',      score: safe(ev.robustness_score || ev.robustness?.robustness_score), weight:'15% of overall score', plain:'Tests whether model decisions are stable. A low score means small input changes could flip a decision — making the system unreliable at scale.' },
-        { key:'transparency',   name:'Transparency',   icon:'fa-eye',             score: safe(ev.transparency_score || ev.transparency?.transparency_score), weight:'15% of overall score', plain:'Measures how explainable the model is. Can we understand why it made a specific decision? High transparency enables audit and appeals.' },
-        { key:'accountability', name:'Accountability', icon:'fa-clipboard-check', score: safe(ev.accountability_score || ev.accountability?.accountability_score), weight:'10% of overall score', plain:'Verifies that protected attributes were declared, all fairness checks were completed, and the evaluation is fully documented for compliance purposes.' },
+        {
+            key: 'fairness',
+            name: 'Fairness',
+            icon: 'fa-balance-scale',
+            score: pickScore(
+                ev.fairness_score,
+                ev.fairness && ev.fairness.fairness_score,
+                ev.fairness && ev.fairness.ethical_score
+            ),
+            weight: '40% of overall score',
+            plain: 'Measures whether the model treats all demographic groups equally — gender, race, caste, age, and other protected attributes.',
+        },
+        {
+            key: 'privacy',
+            name: 'Privacy',
+            icon: 'fa-lock',
+            score: pickScore(
+                ev.privacy_score,
+                ev.privacy && ev.privacy.privacy_score
+            ),
+            weight: '20% of overall score',
+            plain: 'Checks whether the dataset contains personal data (PII) and whether sensitive information is handled appropriately before model training.',
+        },
+        {
+            key: 'robustness',
+            name: 'Robustness',
+            icon: 'fa-shield-alt',
+            score: pickScore(
+                ev.robustness_score,
+                ev.robustness && ev.robustness.robustness_score
+            ),
+            weight: '15% of overall score',
+            plain: 'Tests whether model decisions are stable. A low score means small input changes could flip a decision — making the system unreliable at scale.',
+        },
+        {
+            key: 'transparency',
+            name: 'Transparency',
+            icon: 'fa-eye',
+            score: pickScore(
+                ev.transparency_score,
+                ev.transparency && ev.transparency.transparency_score
+            ),
+            weight: '15% of overall score',
+            plain: 'Measures how explainable the model is. Can we understand why it made a specific decision? High transparency enables audit and appeals.',
+        },
+        {
+            key: 'accountability',
+            name: 'Accountability',
+            icon: 'fa-clipboard-check',
+            score: pickScore(
+                ev.accountability_score,
+                ev.accountability && ev.accountability.accountability_score
+            ),
+            weight: '10% of overall score',
+            plain: 'Verifies that protected attributes were declared, all fairness checks were completed, and the evaluation is fully documented for compliance purposes.',
+        },
     ];
 }
 
@@ -293,27 +329,20 @@ function buildRisks(ev) {
     const p = ev.privacy  || {};
     const r = ev.robustness || {};
     const risks = [];
-
     if (f.disparateImpact != null && f.disparateImpact < 0.80)
         risks.push({ sev:'high', cat:'Legal / Regulatory', icon:'fa-gavel', title:'Disparate Impact Violation — Potential Legal Liability', detail:`The approval rate for the least-favoured demographic group is only ${fmtPct(f.disparateImpact)} of the most-favoured group. The EEOC 80% Rule requires at least 80%. This creates legal exposure to discrimination claims.` });
-
     if (f.demographicParity != null && f.demographicParity > 0.05)
         risks.push({ sev:'medium', cat:'Reputational', icon:'fa-users', title:'Demographic Outcome Gap — Reputational Risk', detail:`A ${fmtPct(f.demographicParity)} gap in outcomes exists between demographic groups. If this becomes public or subject to audit, it could attract regulatory scrutiny and erode stakeholder trust.` });
-
     const pii = (p.pii_columns || []);
     if (pii.length > 0)
         risks.push({ sev:'high', cat:'Privacy / Data Protection', icon:'fa-user-secret', title:`Personal Data Detected in Training Set (${pii.length} column${pii.length>1?'s':''})`, detail:`Columns containing personally identifiable information were found: ${pii.slice(0,3).join(', ')}${pii.length>3?'…':''}. This creates GDPR and IT Act liability. All PII must be removed or pseudonymised before training.` });
-
     if (f.counterfactual != null && f.counterfactual < 0.80)
         risks.push({ sev:'high', cat:'Discrimination Risk', icon:'fa-not-equal', title:'Model Sensitive to Protected Attributes — Direct Bias Detected', detail:`When only a person's gender, caste, or race is changed (keeping everything else identical), the model produces a different outcome. This is direct evidence that protected characteristics are influencing decisions.` });
-
     const br = r.boundary_instability || 0;
     if (br > 0.25)
         risks.push({ sev:'medium', cat:'Operational', icon:'fa-exclamation-triangle', title:'Unstable Decisions for Borderline Cases', detail:`${Math.round(br*100)}% of model decisions fall in an uncertain zone where a small change in input would flip the outcome. This means the system is unreliable for borderline applicants — creating inconsistency at scale.` });
-
     if (risks.length === 0)
         risks.push({ sev:'low', cat:'Overall Assessment', icon:'fa-check-circle', title:'No Significant Business Risks Detected', detail:'The model passes all major risk checks. No legal, reputational, or operational concerns were identified. Continue with standard monitoring and quarterly re-evaluation.' });
-
     return risks;
 }
 
@@ -321,8 +350,6 @@ function buildActions(ev, dims) {
     const f = ev.fairness || {};
     const rem = ev.remediation || {};
     const actions = [];
-
-    // Use remediation plan if available
     const fixes = rem.all_fixes || [];
     if (fixes.length > 0) {
         return fixes.slice(0, 4).map(fix => ({
@@ -333,41 +360,37 @@ function buildActions(ev, dims) {
             effort: (fix.effort || 'medium').toLowerCase(),
         }));
     }
-
-    // Fallback: derive from raw
     if (f.disparateImpact != null && f.disparateImpact < 0.80)
         actions.push({ sev:'critical', title:'Adjust decision thresholds per demographic group', why:`The least-favoured group is approved at only ${fmtPct(f.disparateImpact)} the rate of the most-favoured group — below the legal 80% standard.`, what:'Apply post-processing threshold optimisation so each demographic group receives approvals at a balanced rate. This does not require retraining the model.', effort:'medium' });
-
     if (f.demographicParity != null && f.demographicParity > 0.05)
         actions.push({ sev:'critical', title:'Retrain the model with balanced demographic representation', why:`A ${fmtPct(f.demographicParity)} outcome gap exists between demographic groups. This indicates the training data was imbalanced.`, what:'Work with the data team to oversample underrepresented groups or apply fairness-aware training. The goal is to close the outcome gap across all protected groups.', effort:'high' });
-
-    dims.filter(d => sev(d.score) !== 'passing').forEach(d => {
+    dims.filter(d => d.score != null && sev(d.score) !== 'passing').forEach(d => {
         if (d.key === 'privacy')
             actions.push({ sev:'warning', title:'Remove or anonymise personal data from the dataset', why:`The Privacy score is ${Math.round(d.score*100)}%. Personal identifiable information was detected in the training data.`, what:'Work with the data engineering team to remove direct identifiers and pseudonymise quasi-identifiers (age, zip code) before the next training run.', effort:'low' });
         else if (d.key === 'robustness')
-            actions.push({ sev:'warning', title:'Apply confidence calibration to reduce decision instability', why:`The Robustness score is ${Math.round(d.score*100)}%. Many decisions fall in an uncertain zone.`, what:'Ask the ML team to apply a calibration technique that makes the model\'s confidence scores better reflect reality. This reduces flip-prone borderline decisions.', effort:'low' });
+            actions.push({ sev:'warning', title:'Apply confidence calibration to reduce decision instability', why:`The Robustness score is ${Math.round(d.score*100)}%. Many decisions fall in an uncertain zone.`, what:"Ask the ML team to apply a calibration technique that makes the model's confidence scores better reflect reality. This reduces flip-prone borderline decisions.", effort:'low' });
         else if (d.key === 'accountability')
             actions.push({ sev:'warning', title:'Declare all sensitive attributes before running evaluations', why:`The Accountability score is ${Math.round(d.score*100)}%. Protected attributes were not fully declared.`, what:'Ensure gender, race, caste, age, and religion are explicitly declared in the evaluation configuration so fairness checks run across all relevant groups.', effort:'low' });
     });
-
     if (actions.length === 0)
         actions.push({ sev:'info', title:'No immediate actions required — continue monitoring', why:'The model passes all ethical thresholds across all five dimensions.', what:'Schedule a re-evaluation every quarter or whenever the model is retrained. Set up automated fairness alerts for production drift.', effort:'low' });
-
     return actions.slice(0, 4);
 }
 
 function renderReport(ev, evalId) {
-    const overallScore = ev.ethical_score || ev.fairness?.fairness_score || 0;
+    const overallScore = pickScore(ev.ethical_score, ev.fairness_score, ev.fairness && ev.fairness.fairness_score) || 0;
     const scoreInt     = Math.round(overallScore * 100);
     const s            = sev(overallScore);
     const color        = sevColor(overallScore);
     const fairness     = ev.fairness || {};
-    const perf         = ev.model_metrics || {};
-    // Look for metrics in multiple possible key names
-    const perfVal = (key) => { const v = perf[key] ?? perf['model_'+key]; return (v != null && Number(v) > 0) ? Number(v) : null; };
-    const dims         = buildDimensions(ev);
-    const risks        = buildRisks(ev);
-    const actions      = buildActions(ev, dims);
+
+    // Performance metrics — stored under model_metrics or model_performance
+    const perfSrc = ev.model_metrics || ev.model_performance || {};
+    const perfVal = (key) => pickPerf(perfSrc[key]);
+
+    const dims    = buildDimensions(ev);
+    const risks   = buildRisks(ev);
+    const actions = buildActions(ev, dims);
 
     let vClass, vIcon, vTitle, vSub, vAction;
     if (scoreInt >= 80) {
@@ -388,7 +411,7 @@ function renderReport(ev, evalId) {
     }
 
     const diPasses = (fairness.disparateImpact || 0) >= 0.80;
-    const hasPII   = (ev.privacy?.pii_columns || []).length > 0;
+    const hasPII   = ((ev.privacy && ev.privacy.pii_columns) || []).length > 0;
 
     const legalRows = [
         { fw:'India — NITI Aayog Responsible AI', note:'Voluntary compliance framework. Aligned with transparency, accountability, and non-discrimination principles.', status:'Voluntary Compliant', cls:'pass' },
@@ -398,8 +421,10 @@ function renderReport(ev, evalId) {
         { fw:'India IT Act 2000 — Data Protection', note: hasPII ? 'Personal data detected in training set. Data processing agreements and anonymisation required before deployment.' : 'No direct PII detected. Data handling appears to comply with data protection requirements.', status: hasPII?'Review Required':'Documented', cls: hasPII?'warn':'pass' },
     ];
 
-    document.getElementById('app').innerHTML = `
+    const passingDims = dims.filter(d => d.score != null && sev(d.score) === 'passing').length;
+    const failingDims = dims.filter(d => d.score != null && sev(d.score) !== 'passing').length;
 
+    document.getElementById('app').innerHTML = `
         <div class="report-hero">
             <div class="hero-top">
                 <div>
@@ -407,7 +432,7 @@ function renderReport(ev, evalId) {
                     <div class="hero-title">Ethics &amp; Risk<br>Strategic Summary</div>
                     <div class="hero-meta">
                         <div class="hero-stat"><span class="hero-stat-val">${(ev.records||0).toLocaleString()}</span><span class="hero-stat-lbl">Records Evaluated</span></div>
-                        <div class="hero-stat"><span class="hero-stat-val">${dims.filter(d=>sev(d.score)==='passing').length} / 5</span><span class="hero-stat-lbl">Dimensions Passing</span></div>
+                        <div class="hero-stat"><span class="hero-stat-val">${passingDims} / 5</span><span class="hero-stat-lbl">Dimensions Passing</span></div>
                         <div class="hero-stat"><span class="hero-stat-val">${risks.filter(r=>r.sev==='high').length}</span><span class="hero-stat-lbl">High Risks</span></div>
                         <div class="hero-stat"><span class="hero-stat-val mono" style="font-size:0.9rem;font-family:var(--mono)">${evalId?evalId.slice(0,8)+'…':'—'}</span><span class="hero-stat-lbl">Eval ID</span></div>
                     </div>
@@ -437,7 +462,7 @@ function renderReport(ev, evalId) {
         <div class="stats-grid">
             <div class="stat-card"><div class="stat-val ${s}">${scoreInt}</div><div class="stat-lbl">Ethics Score /100</div></div>
             <div class="stat-card"><div class="stat-val">${(ev.records||0).toLocaleString()}</div><div class="stat-lbl">Records Evaluated</div></div>
-            <div class="stat-card"><div class="stat-val ${dims.filter(d=>sev(d.score)==='passing').length===5?'green':'amber'}">${dims.filter(d=>sev(d.score)==='passing').length} / 5</div><div class="stat-lbl">Dimensions Passing</div></div>
+            <div class="stat-card"><div class="stat-val ${passingDims===5?'green':'amber'}">${passingDims} / 5</div><div class="stat-lbl">Dimensions Passing</div></div>
             <div class="stat-card"><div class="stat-val ${risks.filter(r=>r.sev==='high').length===0?'green':'red'}">${risks.filter(r=>r.sev==='high').length}</div><div class="stat-lbl">High Business Risks</div></div>
             <div class="stat-card"><div class="stat-val">${perfVal('accuracy')!=null?Math.round(perfVal('accuracy')*100)+'%':'—'}</div><div class="stat-lbl">Model Accuracy</div></div>
             <div class="stat-card"><div class="stat-val">${perfVal('roc_auc')!=null?Number(perfVal('roc_auc')).toFixed(3):'—'}</div><div class="stat-lbl">ROC-AUC</div></div>
@@ -446,7 +471,7 @@ function renderReport(ev, evalId) {
         <div class="section">
             <div class="section-head">
                 <div class="section-title"><i class="fas fa-th-large"></i> 5-Dimension Ethical Profile — What Was Tested</div>
-                <span style="font-size:0.8125rem;color:var(--muted)">${dims.filter(d=>sev(d.score)==='passing').length} passing &nbsp;·&nbsp; ${dims.filter(d=>sev(d.score)!=='passing').length} need attention</span>
+                <span style="font-size:0.8125rem;color:var(--muted)">${passingDims} passing &nbsp;·&nbsp; ${failingDims} need attention</span>
             </div>
             <div class="section-body">
                 <div class="info-box">
@@ -455,11 +480,17 @@ function renderReport(ev, evalId) {
                 </div>
                 <div class="dim5-grid">
                     ${dims.map(d => {
-                        const sv = sev(d.score); const p = Math.round((d.score||0)*100);
+                        const scoreVal = d.score != null ? d.score : 0;
+                        const sv = sev(d.score);
+                        const p  = Math.round(scoreVal * 100);
+                        const displayScore = d.score != null ? p : '—';
                         return `<div class="dim5-card ${sv}">
-                            <div class="dim5-top"><div class="dim5-icon ${sv}"><i class="fas ${d.icon}"></i></div><span class="dim5-sev ${sv}">${sevLabel(d.score)}</span></div>
+                            <div class="dim5-top">
+                                <div class="dim5-icon ${sv}"><i class="fas ${d.icon}"></i></div>
+                                <span class="dim5-sev ${sv}">${d.score != null ? sevLabel(d.score) : 'No data'}</span>
+                            </div>
                             <div class="dim5-name">${d.name}</div>
-                            <div class="dim5-score ${sv}">${p}<span style="font-size:1rem;opacity:0.5">/100</span></div>
+                            <div class="dim5-score ${sv}">${displayScore}<span style="font-size:1rem;opacity:0.5">/100</span></div>
                             <div class="dim5-bar-track"><div class="dim5-bar ${sv}" style="width:${p}%"></div></div>
                             <div class="dim5-weight">${d.weight}</div>
                             <div class="dim5-plain">${d.plain}</div>
@@ -498,7 +529,7 @@ function renderReport(ev, evalId) {
             <div class="section-body">
                 <div class="info-box">
                     <i class="fas fa-info-circle"></i>
-                    <span>Actions are listed in priority order — most critical first. Each action explains <strong style="color:var(--navy)">why it is needed</strong> and <strong style="color:var(--navy)">what the team should do</strong> in plain language. For code-level fixes, see the Remediation Toolkit.</span>
+                    <span>Actions are listed in priority order — most critical first. Each action explains <strong style="color:var(--navy)">why it is needed</strong> and <strong style="color:var(--navy)">what the team should do</strong> in plain language.</span>
                 </div>
                 <div class="action-list">
                     ${actions.map((a,i) => `
@@ -540,10 +571,20 @@ function renderReport(ev, evalId) {
             </div>
             <div class="section-body">
                 <div class="perf-grid">
-                    ${[{label:'ROC-AUC',val:perfVal('roc_auc'),desc:'Measures how well the model ranks outcomes. Above 0.85 is strong.'},{label:'Accuracy',val:perfVal('accuracy'),desc:'Percentage of decisions that are correct overall.'},{label:'F1-Score',val:perfVal('f1_score'),desc:'Balances precision and recall. Important when classes are unequal.'}].map(m=>{
-                        const v=m.val!=null?Number(m.val):null; const w=v!=null?v*100:0;
-                        const col=v==null?'var(--muted)':v>=0.85?'var(--green)':v>=0.70?'var(--amber)':'var(--red)';
-                        return `<div class="perf-card"><div class="perf-label">${m.label}</div><div class="perf-value" style="color:${col}">${v!=null?v.toFixed(4):'—'}</div><div class="perf-bar-track"><div class="perf-bar-fill" style="width:${w}%;background:${col}"></div></div><div class="perf-sub">${m.desc}</div></div>`;
+                    ${[
+                        {label:'ROC-AUC',  val:perfVal('roc_auc'),   desc:'Measures how well the model ranks outcomes. Above 0.85 is strong.'},
+                        {label:'Accuracy', val:perfVal('accuracy'),  desc:'Percentage of decisions that are correct overall.'},
+                        {label:'F1-Score', val:perfVal('f1_score'),  desc:'Balances precision and recall. Important when classes are unequal.'}
+                    ].map(m => {
+                        const v   = m.val != null ? Number(m.val) : null;
+                        const w   = v != null ? v * 100 : 0;
+                        const col = v == null ? 'var(--muted)' : v >= 0.85 ? 'var(--green)' : v >= 0.70 ? 'var(--amber)' : 'var(--red)';
+                        return `<div class="perf-card">
+                            <div class="perf-label">${m.label}</div>
+                            <div class="perf-value" style="color:${col}">${v != null ? v.toFixed(4) : '—'}</div>
+                            <div class="perf-bar-track"><div class="perf-bar-fill" style="width:${w}%;background:${col}"></div></div>
+                            <div class="perf-sub">${m.desc}</div>
+                        </div>`;
                     }).join('')}
                 </div>
                 <p style="margin-top:1.25rem;font-size:0.8125rem;color:var(--muted);padding:1rem;background:var(--bg);border-radius:8px;border:1px solid var(--rule);">
@@ -555,32 +596,100 @@ function renderReport(ev, evalId) {
     `;
 }
 
-function buildFromCache(cached, evalId) {
-    const raw = JSON.parse(cached);
+/**
+ * Normalise raw session-cache data into the flat shape renderReport() expects.
+ * Tries every known location for each score — top-level keys, nested objects,
+ * the remediation 'scores' sub-object, and the executive report 'dimensions' array.
+ */
+function normaliseEv(raw) {
+    // Log the raw keys so we can see exactly what the cache contains
+    console.log('[FairTrust] normaliseEv raw keys:', Object.keys(raw));
+    console.log('[FairTrust] score candidates:', {
+        ethical_score:        raw.ethical_score,
+        fairness_score:       raw.fairness_score,
+        privacy_score:        raw.privacy_score,
+        robustness_score:     raw.robustness_score,
+        transparency_score:   raw.transparency_score,
+        accountability_score: raw.accountability_score,
+        scores:               raw.scores,
+        fairness_obj:         raw.fairness && raw.fairness.fairness_score,
+        privacy_obj:          raw.privacy  && raw.privacy.privacy_score,
+        robustness_obj:       raw.robustness && raw.robustness.robustness_score,
+        transparency_obj:     raw.transparency && raw.transparency.transparency_score,
+        accountability_obj:   raw.accountability && raw.accountability.accountability_score,
+    });
 
-    // Field names confirmed from session cache inspection:
-    // ethical_score, fairness_score, privacy_score, robustness_score,
-    // transparency_score, accountability_score — all at top level
-    // model_metrics.accuracy / .f1_score / .roc_auc
-    // records (top level)
-    const overall = raw.ethical_score || raw.fairness_score || raw.fairness?.fairness_score || 0;
+    // The remediation endpoint wraps scores inside a 'scores' object
+    const sc = raw.scores || {};
 
-    renderReport({
-        ethical_score:        raw.ethical_score        || overall,
-        fairness_score:       raw.fairness_score        || raw.fairness?.fairness_score || overall,
-        privacy_score:        raw.privacy_score         || raw.privacy?.privacy_score   || overall,
-        robustness_score:     raw.robustness_score      || raw.robustness?.robustness_score || overall,
-        transparency_score:   raw.transparency_score    || raw.transparency?.transparency_score || overall,
-        accountability_score: raw.accountability_score  || raw.accountability?.accountability_score || overall,
-        records:              raw.records || 0,
-        fairness:             raw.fairness      || {},
-        privacy:              raw.privacy       || {},
-        robustness:           raw.robustness    || {},
-        transparency:         raw.transparency  || {},
-        accountability:       raw.accountability|| {},
-        model_metrics:        raw.model_metrics || {},
-        remediation:          raw.remediation   || {},
-    }, evalId);
+    // The executive report endpoint returns a 'dimensions' array like:
+    // [{name:'Fairness', score:0.7, ...}, ...]
+    // Extract those into a lookup map
+    const dimMap = {};
+    if (Array.isArray(raw.dimensions)) {
+        raw.dimensions.forEach(d => {
+            if (d.name) dimMap[d.name.toLowerCase()] = d.score;
+        });
+    }
+
+    const fairness_score = pickScore(
+        raw.fairness_score,
+        sc.fairness,
+        raw.fairness && raw.fairness.fairness_score,
+        raw.fairness && raw.fairness.ethical_score,
+        dimMap['fairness']
+    );
+    const privacy_score = pickScore(
+        raw.privacy_score,
+        sc.privacy,
+        raw.privacy && raw.privacy.privacy_score,
+        dimMap['privacy']
+    );
+    const robustness_score = pickScore(
+        raw.robustness_score,
+        sc.robustness,
+        raw.robustness && raw.robustness.robustness_score,
+        dimMap['robustness']
+    );
+    const transparency_score = pickScore(
+        raw.transparency_score,
+        sc.transparency,
+        raw.transparency && raw.transparency.transparency_score,
+        dimMap['transparency']
+    );
+    const accountability_score = pickScore(
+        raw.accountability_score,
+        sc.accountability,
+        raw.accountability && raw.accountability.accountability_score,
+        dimMap['accountability']
+    );
+    const ethical_score = pickScore(
+        raw.ethical_score,
+        sc.overall,
+        fairness_score
+    );
+
+    console.log('[FairTrust] resolved scores:', {
+        ethical_score, fairness_score, privacy_score,
+        robustness_score, transparency_score, accountability_score
+    });
+
+    return {
+        ethical_score,
+        fairness_score,
+        privacy_score,
+        robustness_score,
+        transparency_score,
+        accountability_score,
+        records:        raw.records     ?? 0,
+        fairness:       raw.fairness    ?? {},
+        privacy:        raw.privacy     ?? {},
+        robustness:     raw.robustness  ?? {},
+        transparency:   raw.transparency  ?? {},
+        accountability: raw.accountability ?? {},
+        model_metrics:  raw.model_metrics  ?? raw.model_performance ?? {},
+        remediation:    raw.remediation    ?? {},
+    };
 }
 
 (async function init() {
@@ -589,23 +698,14 @@ function buildFromCache(cached, evalId) {
         document.getElementById('app').innerHTML = `<div class="state-wrap"><div class="state-icon" style="color:var(--amber)"><i class="fas fa-exclamation-circle"></i></div><div class="state-title">No evaluation found</div><div class="state-sub">Complete an evaluation on the upload page first.</div><a href="upload.html" style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;background:var(--navy);color:white;border-radius:8px;text-decoration:none;font-weight:600;font-size:0.875rem"><i class="fas fa-play-circle"></i> Start evaluation</a></div>`;
         return;
     }
-    // First try the API endpoint
+
+    // Try the API endpoint first
     try {
         const res = await fetch(`${API_BASE}/report/executive/${evalId}`);
         if (res.ok) {
             const data = await res.json();
             if (data && (data.status === 'complete' || data.ethical_score != null)) {
-                const overall = data.ethical_score || data.fairness?.fairness_score || data.fairness_score || 0;
-                renderReport({
-                    ...data,
-                    ethical_score:        data.ethical_score        || overall,
-                    fairness_score:       data.fairness_score        || data.fairness?.fairness_score || overall,
-                    privacy_score:        data.privacy_score         || data.privacy?.privacy_score   || overall,
-                    robustness_score:     data.robustness_score      || data.robustness?.robustness_score || overall,
-                    transparency_score:   data.transparency_score    || data.transparency?.transparency_score || overall,
-                    accountability_score: data.accountability_score  || data.accountability?.accountability_score || overall,
-                    model_metrics:        data.model_metrics || {},
-                }, evalId);
+                renderReport(normaliseEv(data), evalId);
                 return;
             }
         }
@@ -613,7 +713,14 @@ function buildFromCache(cached, evalId) {
 
     // Fall back to session cache
     const cached = sessionStorage.getItem('eval_result');
-    if (cached) { buildFromCache(cached, evalId); return; }
+    if (cached) {
+        try {
+            renderReport(normaliseEv(JSON.parse(cached)), evalId);
+            return;
+        } catch (e) {
+            console.error('Cache parse error:', e);
+        }
+    }
 
     document.getElementById('app').innerHTML = `<div class="state-wrap"><div class="state-icon" style="color:var(--red)"><i class="fas fa-times-circle"></i></div><div class="state-title">Could not load report</div><div class="state-sub">Evaluation not found or still processing.</div><a href="upload.html" style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;background:var(--navy);color:white;border-radius:8px;text-decoration:none;font-weight:600;font-size:0.875rem"><i class="fas fa-redo"></i> Try again</a></div>`;
 })();

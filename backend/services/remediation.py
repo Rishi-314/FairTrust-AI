@@ -378,7 +378,7 @@ def generate_remediation_plan(
         "deployment_message": (
             "🔴 DEPLOYMENT BLOCKED — Critical fairness issues must be resolved first."
             if (ethical_score < 0.60 or critical_count > 0)
-            else "🟡 CONDITIONAL DEPLOYMENT — Remediation recommended before production." 
+            else "🟡 CONDITIONAL DEPLOYMENT — Remediation recommended before production."
             if ethical_score < 0.80
             else "✅ APPROVED — All dimensions pass ethical thresholds."
         ),
@@ -394,10 +394,11 @@ def generate_counterfactual_examples(
 ) -> List[Dict[str, Any]]:
     """
     Find concrete counterfactual pairs from the dataset.
-    Pairs where similar people get different outcomes,
-    differing mainly on a sensitive attribute.
-    
-    No model access needed — uses existing predictions.
+    Shows examples for EVERY sensitive attribute passed in.
+    Fixes:
+      1. Iterates ALL sensitive attrs (not just first 2)
+      2. Deduplicates pairs globally so same pair never appears twice
+      3. Serializes profile values to plain primitives (no [object Object])
     """
     import pandas as pd
 
@@ -415,62 +416,88 @@ def generate_counterfactual_examples(
     preds_series = preds_df[pred_col].reset_index(drop=True)
     df_reset = df.reset_index(drop=True)
 
-    # Get numeric columns (excluding target and sensitive)
+    # Numeric cols for similarity (exclude target and sensitive attrs)
     numeric_cols = df_reset.select_dtypes(include='number').columns.tolist()
     numeric_cols = [c for c in numeric_cols if c != target_col and c not in sensitive_attrs]
 
-    if not numeric_cols or len(df_reset) < 10:
+    # Only use attrs that actually exist in the dataframe
+    valid_attrs = [a for a in (sensitive_attrs or []) if a in df_reset.columns]
+    print(f"[counterfactual] valid_attrs={valid_attrs}")
+
+    if not valid_attrs or not numeric_cols or len(df_reset) < 10:
         return []
 
     try:
         from sklearn.preprocessing import StandardScaler
         from sklearn.neighbors import NearestNeighbors
 
-        # Scale numeric features
         scaler = StandardScaler()
-        X_num = df_reset[numeric_cols[:10]].fillna(0)  # cap at 10 features for speed
+        X_num = df_reset[numeric_cols[:10]].fillna(0)
         X_scaled = scaler.fit_transform(X_num)
 
-        # Build NN index
-        nn = NearestNeighbors(n_neighbors=6, metric='euclidean')
+        nn = NearestNeighbors(n_neighbors=10, metric='euclidean')
         nn.fit(X_scaled)
         distances, indices = nn.kneighbors(X_scaled)
 
-        for attr in sensitive_attrs[:2]:  # check first 2 sensitive attrs
-            if attr not in df_reset.columns:
-                continue
+        # Global dedup set — (attr, min_idx, max_idx) so no pair appears twice
+        seen_pairs = set()
+
+        # Distribute examples evenly across ALL valid attributes
+        n_attrs = len(valid_attrs)
+        base_per_attr = n_examples // n_attrs
+        remainder = n_examples % n_attrs
+
+        for attr_idx, attr in enumerate(valid_attrs):
+            # First attrs get one extra if remainder exists
+            target_count = base_per_attr + (1 if attr_idx < remainder else 0)
+            print(f"[counterfactual] seeking {target_count} examples for attr='{attr}'")
 
             found = 0
-            for i in range(min(len(df_reset), 2000)):
-                if found >= n_examples:
+            for i in range(min(len(df_reset), 3000)):
+                if found >= target_count:
                     break
+
                 pred_i = float(preds_series.iloc[i])
+                outcome_i = int(pred_i >= 0.5)
+                val_i = str(df_reset[attr].iloc[i])
 
                 for j_idx, j in enumerate(indices[i][1:], 1):
                     if j >= len(df_reset):
                         continue
-                    pred_j = float(preds_series.iloc[j])
 
-                    # Different outcomes
-                    outcome_i = int(pred_i >= 0.5)
+                    pred_j = float(preds_series.iloc[j])
                     outcome_j = int(pred_j >= 0.5)
+
+                    # Must have different outcomes
                     if outcome_i == outcome_j:
                         continue
 
-                    # Different sensitive attribute value
-                    val_i = str(df_reset[attr].iloc[i])
+                    # Must differ on this sensitive attribute
                     val_j = str(df_reset[attr].iloc[j])
                     if val_i == val_j:
                         continue
 
-                    # Similar distance (nearby)
+                    # Must be nearby neighbors
                     dist = float(distances[i][j_idx])
-                    if dist > 2.5:
+                    if dist > 3.0:
                         continue
 
-                    # Build example
-                    profile_i = {c: df_reset[c].iloc[i] for c in numeric_cols[:5]}
-                    profile_j = {c: df_reset[c].iloc[j] for c in numeric_cols[:5]}
+                    # Deduplicate — order-independent pair key per attribute
+                    pair_key = (attr, min(i, j), max(i, j))
+                    if pair_key in seen_pairs:
+                        continue
+                    seen_pairs.add(pair_key)
+
+                    # Serialize profile to plain Python primitives (no numpy types)
+                    def make_profile(row_idx: int) -> dict:
+                        result = {}
+                        for c in numeric_cols[:5]:
+                            v = df_reset[c].iloc[row_idx]
+                            try:
+                                result[c] = round(float(v), 2)
+                            except Exception:
+                                result[c] = str(v)
+                        return result
 
                     examples.append({
                         "attribute":     attr,
@@ -479,30 +506,33 @@ def generate_counterfactual_examples(
                             "sensitive_val": val_i,
                             "prediction":    round(pred_i, 4),
                             "outcome":       "APPROVED" if outcome_i else "REJECTED",
-                            "profile":       {k: round(float(v), 2) if isinstance(v, (int, float, np.floating)) else str(v) for k, v in profile_i.items()},
+                            "profile":       make_profile(i),
                         },
                         "person_b": {
                             "index":         int(j),
                             "sensitive_val": val_j,
                             "prediction":    round(pred_j, 4),
                             "outcome":       "APPROVED" if outcome_j else "REJECTED",
-                            "profile":       {k: round(float(v), 2) if isinstance(v, (int, float, np.floating)) else str(v) for k, v in profile_j.items()},
+                            "profile":       make_profile(j),
                         },
                         "similarity_distance": round(dist, 4),
                         "prediction_gap":      round(abs(pred_i - pred_j), 4),
                         "plain_english": (
-                            f"Person A ({attr}={val_i}) was {('APPROVED' if outcome_i else 'REJECTED')} "
+                            f"Person A ({attr}={val_i}) was "
+                            f"{'APPROVED' if outcome_i else 'REJECTED'} "
                             f"with {round(pred_i*100,1)}% confidence. "
-                            f"Person B ({attr}={val_j}) with a nearly identical profile was "
-                            f"{('APPROVED' if outcome_j else 'REJECTED')} "
+                            f"Person B ({attr}={val_j}) with a nearly identical "
+                            f"profile was {'APPROVED' if outcome_j else 'REJECTED'} "
                             f"with {round(pred_j*100,1)}% confidence. "
                             f"The only notable difference is their {attr}."
                         ),
                     })
                     found += 1
-                    break
+                    break  # move to next i once we found a pair
 
     except Exception as e:
         print(f"[counterfactual_examples] Error: {e}")
+        import traceback
+        traceback.print_exc()
 
     return examples[:n_examples]

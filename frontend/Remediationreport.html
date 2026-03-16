@@ -708,63 +708,66 @@ function renderReport(ev, evalId, fixes, cfExamples) {
     </div>` : '';
 
     // ── Counterfactual examples ───────────────────────────────────────────────
-    const cfHtml = cfExamples.length ? `
-    <div class="section">
-        <div class="section-head">
-            <div class="section-title"><i class="fas fa-not-equal"></i> Bias Evidence — Real Examples from the Dataset</div>
-            <span style="font-size:0.8125rem;color:var(--muted)">Identical profiles, different outcomes</span>
-        </div>
-        <div class="section-body">
-            <div class="info-box">
-                <i class="fas fa-info-circle"></i>
-                <span><strong style="color:var(--navy)">What is a counterfactual example?</strong> It is a pair of real records from your dataset where two applicants have identical qualifications, but differ only in a protected attribute (gender, caste, age). If the model gives them different outcomes, that is direct evidence of bias.</span>
-            </div>
-            <div class="cf-list">
-                ${cfExamples.map((cf, i) => {
-                    const pA = cf.person_a || {};
-                    const pB = cf.person_b || {};
-                    const allKeys = [...new Set([...Object.keys(pA), ...Object.keys(pB)].filter(k => k !== 'outcome'))];
-                    return `
-                    <div class="cf-card">
-                        <div class="cf-header">
-                            <div class="cf-header-title"><i class="fas fa-exchange-alt"></i> Counterfactual Example ${i+1}</div>
-                            <span class="cf-header-attr">Differs on: ${cf.sensitive_attribute || 'protected attribute'}</span>
-                        </div>
-                        <div class="cf-body">
-                            <div class="cf-compare">
-                                <div class="cf-person">
-                                    <div class="cf-person-head approved">Person A</div>
-                                    <div class="cf-person-outcome approved"><i class="fas fa-check"></i> ${pA.outcome || 'Approved'}</div>
-                                    ${allKeys.map(k => `
-                                    <div class="cf-attr-row">
-                                        <span class="cf-attr-key">${k.replace(/_/g,' ')}</span>
-                                        <span class="cf-attr-val ${k===cf.diff_attr||k===cf.sensitive_attribute?'diff':''}">${pA[k]||'—'}</span>
-                                    </div>`).join('')}
-                                </div>
-                                <div class="cf-arrow">
-                                    <i class="fas fa-not-equal"></i>
-                                    <div class="cf-arrow-label">Bias</div>
-                                </div>
-                                <div class="cf-person">
-                                    <div class="cf-person-head rejected">Person B</div>
-                                    <div class="cf-person-outcome rejected"><i class="fas fa-times"></i> ${pB.outcome || 'Rejected'}</div>
-                                    ${allKeys.map(k => `
-                                    <div class="cf-attr-row">
-                                        <span class="cf-attr-key">${k.replace(/_/g,' ')}</span>
-                                        <span class="cf-attr-val ${k===cf.diff_attr||k===cf.sensitive_attribute?'diff':''}">${pB[k]||'—'}</span>
-                                    </div>`).join('')}
-                                </div>
-                            </div>
-                            <div class="cf-explanation">
-                                <div class="cf-explanation-lbl">What this means in plain language</div>
-                                <div class="cf-explanation-text">${cf.plain_english || 'Two applicants with identical profiles received different outcomes based solely on a protected attribute.'}</div>
-                            </div>
-                        </div>
-                    </div>`;
-                }).join('')}
-            </div>
-        </div>
-    </div>` : '';
+        function renderProfileRows(person, diffAttr, sensitiveAttr) {
+        const profile = person.profile || {};
+        const rows = [];
+        // Show index and prediction
+        rows.push('<div class="cf-attr-row"><span class="cf-attr-key">index</span><span class="cf-attr-val">' + (person.index ?? '—') + '</span></div>');
+        rows.push('<div class="cf-attr-row"><span class="cf-attr-key">prediction</span><span class="cf-attr-val">' + (person.prediction ?? '—') + '</span></div>');
+        // Show profile fields
+        Object.keys(profile).forEach(function(key) {
+            var val = profile[key];
+            var displayVal = (val === null || val === undefined) ? '—' : (typeof val === 'object' ? JSON.stringify(val) : String(val));
+            rows.push('<div class="cf-attr-row"><span class="cf-attr-key">' + key.replace(/_/g,' ') + '</span><span class="cf-attr-val">' + displayVal + '</span></div>');
+        });
+        // Show sensitive value — highlighted
+        rows.push('<div class="cf-attr-row"><span class="cf-attr-key">sensitive val</span><span class="cf-attr-val diff"><strong>' + (person.sensitive_val ?? '—') + '</strong></span></div>');
+        return rows.join('');
+    }
+    
+    const cfHtml = cfExamples.length ? (function() {
+        var sectionOpen = '<div class="section"><div class="section-head"><div class="section-title"><i class="fas fa-not-equal"></i> Bias Evidence \u2014 Real Examples from the Dataset</div><span style="font-size:0.8125rem;color:var(--muted)">Identical profiles, different outcomes</span></div><div class="section-body"><div class="info-box"><i class="fas fa-info-circle"></i><span><strong style="color:var(--navy)">What is a counterfactual example?</strong> It is a pair of real records from your dataset where two applicants have identical qualifications, but differ only in a protected attribute (gender, caste, age). If the model gives them different outcomes, that is direct evidence of bias.</span></div><div class="cf-list">';
+    
+        var cards = cfExamples.map(function(cf, i) {
+            var pA = cf.person_a || {};
+            var pB = cf.person_b || {};
+            var attr = cf.attribute || cf.sensitive_attribute || 'protected attribute';
+            var outcomeA = (pA.outcome || 'REJECTED').toLowerCase();
+            var outcomeB = (pB.outcome || 'REJECTED').toLowerCase();
+            var iconA = outcomeA === 'approved' ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>';
+            var iconB = outcomeB === 'approved' ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>';
+    
+            return '<div class="cf-card">' +
+                '<div class="cf-header">' +
+                    '<div class="cf-header-title"><i class="fas fa-exchange-alt"></i> Counterfactual Example ' + (i+1) + '</div>' +
+                    '<span class="cf-header-attr">DIFFERS ON: ' + attr.toUpperCase() + '</span>' +
+                '</div>' +
+                '<div class="cf-body">' +
+                    '<div class="cf-compare">' +
+                        '<div class="cf-person">' +
+                            '<div class="cf-person-head ' + outcomeA + '">PERSON A</div>' +
+                            '<div class="cf-person-outcome ' + outcomeA + '">' + iconA + ' ' + (pA.outcome || 'REJECTED') + '</div>' +
+                            renderProfileRows(pA, cf.diff_attr, attr) +
+                        '</div>' +
+                        '<div class="cf-arrow"><i class="fas fa-not-equal"></i><div class="cf-arrow-label">BIAS</div></div>' +
+                        '<div class="cf-person">' +
+                            '<div class="cf-person-head ' + outcomeB + '">PERSON B</div>' +
+                            '<div class="cf-person-outcome ' + outcomeB + '">' + iconB + ' ' + (pB.outcome || 'REJECTED') + '</div>' +
+                            renderProfileRows(pB, cf.diff_attr, attr) +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="cf-explanation">' +
+                        '<div class="cf-explanation-lbl">WHAT THIS MEANS IN PLAIN LANGUAGE</div>' +
+                        '<div class="cf-explanation-text">' + (cf.plain_english || 'Two applicants with identical profiles received different outcomes based solely on a protected attribute.') + '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+    
+        var sectionClose = '</div></div></div>';
+        return sectionOpen + cards + sectionClose;
+    })() : '';
+ 
 
     document.getElementById('app').innerHTML = heroHtml + gateBannerHtml + checksHtml + fixesHtml + quickWinsHtml + cfHtml;
 }
