@@ -49,7 +49,7 @@
             top: 0;
             width: 100%;
             background: rgba(255,255,255,0.97);
-            padding: 0 5%;
+            padding: 0 2.5rem;
             height: 64px;
             display: flex;
             align-items: center;
@@ -115,9 +115,9 @@
         /* ================= GLOBAL ERROR ================= */
         .global-error { 
             display: none; 
-            max-width: 960px; 
+            max-width: 1280px; 
             margin: 0 auto 1rem; 
-            padding: 0 5%; 
+            padding: 0 2.5rem; 
         }
 
         .global-error-inner { 
@@ -137,9 +137,9 @@
 
         /* ================= PAGE LAYOUT ================= */
         .upload-page { 
-            max-width: 960px; 
+            max-width: 1280px; 
             margin: 0 auto; 
-            padding: 2.5rem 5% 5rem; 
+            padding: 2.5rem 2.5rem 5rem; 
         }
 
         /* ================= PAGE HEADER ================= */
@@ -880,8 +880,8 @@
             .ranking-item { grid-template-columns: 36px 1fr 52px; }
             .ranking-item .weight-bar, .ranking-item .weight-slider { display: none; }
             .report-toggle { grid-template-columns: 1fr; }
-            .navbar { padding: 0 4%; }
-            .upload-page { padding: 1.5rem 4% 3rem; }
+            .navbar { padding: 0 1.5rem; }
+            .upload-page { padding: 1.5rem 1.5rem 3rem; }
         }
 
         @media (max-width: 560px) {
@@ -974,17 +974,9 @@
                 <span class="card-title">Model Configuration</span>
             </div>
 
-            <div class="field-group" style="margin-top:0;">
-                <label for="predictionVariableText">Prediction Variable <span class="optional">(optional)</span></label>
-                <input type="text" id="predictionVariableText" placeholder="e.g. prediction_score, score, pred">
-                <div class="field-hint">
-                    <i class="fas fa-info-circle"></i>
-                    Leave blank — predictions are generated automatically by the AI model. Or specify a column name to override.
-                </div>
-            </div>
-            <div class="field-group" id="predictionDropdownSection" style="display:none;">
-                <label for="predictionVariableSelect">Or select from detected columns</label>
-                <select id="predictionVariableSelect" onchange="onPredictionSelect()">
+            <input type="hidden" id="predictionVariableText">
+            <div id="predictionDropdownSection" style="display:none;">
+                <select id="predictionVariableSelect" onchange="onPredictionSelect()" style="display:none;">
                     <option value="">— select a column —</option>
                 </select>
             </div>
@@ -1007,7 +999,7 @@
 
             <div id="columnInfoBanner" class="info-banner" style="display:none;">
                 <i class="fas fa-lightbulb"></i>
-                <strong>Tip:</strong> Upload a dataset first, then use the dropdowns to pick your target and prediction columns.
+                <strong>Tip:</strong> Upload a dataset first, then use the dropdown to pick your target column.
             </div>
         </div>
 
@@ -1418,11 +1410,44 @@ function getWeights() {
 
 function normalizeWeights() {
     const sls   = Array.from(document.querySelectorAll('.weight-slider'));
-    const total = sls.reduce((s, sl) => s + parseInt(sl.value), 0);
+    const raw   = sls.map(sl => parseInt(sl.value));
+    const total = raw.reduce((s, v) => s + v, 0);
     if (!total) return;
-    sls.forEach(sl => { sl.value = Math.max(5, Math.round(parseInt(sl.value) / total * 100)); });
+
+    // Step 1: proportional allocation, floored (not rounded) — rounding causes overshoot
+    const proportional = raw.map(v => Math.max(5, Math.floor(v / total * 100)));
+
+    // Step 2: how far are we from 100 after flooring?
+    const flooredSum = proportional.reduce((s, v) => s + v, 0);
+    let   remainder  = 100 - flooredSum;
+
+    // Step 3: if sum > 100 (can happen when min-5 floors push values up),
+    // reduce largest items first; if sum < 100, add to items with the
+    // largest fractional parts (standard largest-remainder method).
+    if (remainder < 0) {
+        const order = proportional
+            .map((v, i) => ({ i, v }))
+            .sort((a, b) => b.v - a.v);
+        for (const { i } of order) {
+            if (remainder === 0) break;
+            const canReduce = proportional[i] - 5;
+            const reduce    = Math.min(canReduce, -remainder);
+            proportional[i] -= reduce;
+            remainder       += reduce;
+        }
+    } else if (remainder > 0) {
+        const fractions = raw
+            .map((v, i) => ({ i, frac: (v / total * 100) - Math.floor(v / total * 100) }))
+            .sort((a, b) => b.frac - a.frac);
+        for (let k = 0; k < remainder; k++) {
+            proportional[fractions[k % fractions.length].i]++;
+        }
+    }
+
+    // Step 4: apply — sum is now guaranteed to be exactly 100
+    sls.forEach((sl, i) => { sl.value = proportional[i]; });
     updateWeights();
-    toast('Weights normalized', 'info');
+    toast('Weights normalized to 100%', 'info');
 }
 
 const DEFAULTS = [25,20,15,12,10,10,8];
