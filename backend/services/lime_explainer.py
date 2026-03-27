@@ -53,10 +53,10 @@ def compute_lime(df, target_col, n_samples=5):
 
 def _lime_official(df, target_col, n_samples):
     import lime.lime_tabular
-    from services.model_loader import get_model, preprocess
+    from services.model_loader import get_model, preprocess_for_inference
 
     model, _, _, _ = get_model()
-    X = preprocess(df.drop(columns=[target_col], errors="ignore"))
+    X = preprocess_for_inference(df.drop(columns=[target_col], errors="ignore"))
 
     explainer = lime.lime_tabular.LimeTabularExplainer(
         X.values,
@@ -108,10 +108,10 @@ def _per_instance_shap(df, target_col, n_samples):
     original dataframe row number. Must use the loop counter i, not original_idx.
     """
     import shap
-    from services.model_loader import get_model, preprocess
+    from services.model_loader import get_model, preprocess_for_inference
 
     model, _, _, _ = get_model()
-    X = preprocess(df.drop(columns=[target_col], errors="ignore"))
+    X = preprocess_for_inference(df.drop(columns=[target_col], errors="ignore"))
     feature_names = X.columns.tolist()
 
     # Select n diverse rows spread across the prediction range

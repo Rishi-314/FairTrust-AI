@@ -12,7 +12,7 @@ def compute_shap(df: pd.DataFrame, target_col: str = "approved") -> dict:
             f"Available: {list(df.columns)}"
         )
 
-    from services.model_loader import get_model, preprocess
+    from services.model_loader import get_model, preprocess_for_inference
 
     model  = None
     X      = None
@@ -20,7 +20,7 @@ def compute_shap(df: pd.DataFrame, target_col: str = "approved") -> dict:
     # ── Attempt 1: Use pre-trained model + preprocessed features ─────────
     try:
         model, _, _, _ = get_model()
-        X = preprocess(df.drop(columns=[target_col]))
+        X = preprocess_for_inference(df.drop(columns=[target_col]))
 
         # Test that SHAP can actually load this model — XGBoost + old SHAP
         # versions fail here with "could not convert string to float: '[8.22E-1]'"

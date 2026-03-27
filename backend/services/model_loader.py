@@ -39,27 +39,62 @@ def get_model():
         load_artifacts()
     return _model, _scaler, _feature_order, _numerical_cols
 
-def preprocess(df: pd.DataFrame) -> pd.DataFrame:
-    """Align a raw DataFrame to the model's expected feature order."""
+def preprocess_for_inference(df: pd.DataFrame) -> pd.DataFrame:
     _, scaler, feature_order, numerical_cols = get_model()
 
     df = df.copy()
+    df.fillna(0, inplace=True)
 
-    # Encode categoricals
-    for col in df.select_dtypes(include=["object", "category"]).columns:
-        le = LabelEncoder()
-        df[col] = le.fit_transform(df[col].astype(str))
+    # =====================================
+    # 🔥 STEP 1: MAP YOUR DATASET → MODEL SCHEMA
+    # =====================================
 
-    # One-hot encode to match training (e.g. gender_Male, race_OBC)
+    # Required base columns
+    if 'hours_per_week' not in df.columns:
+        df['hours_per_week'] = df.get('years_experience', 0) * 2
+
+    if 'occupation' not in df.columns:
+        df['occupation'] = "Tech"   # default
+
+    if 'race' not in df.columns:
+        df['race'] = "General"
+
+    if 'caste_proxy' not in df.columns:
+        df['caste_proxy'] = "General"
+
+    if 'gender' not in df.columns:
+        df['gender'] = "Male"
+
+    if 'education_num' not in df.columns:
+        df['education_num'] = 2
+
+
+    df['employment_years'] = (df['age'] - 18) * 0.7
+    df['dependents'] = 2
+
+    df['income_score'] = df['education_num'] * 10 + df['hours_per_week'] * 0.5
+    df['dependents_per_income'] = df['dependents'] / (df['income_score'] + 1e-6)
+
+    occ_map = {'Tech':3, 'Management':4, 'Sales':2, 'Admin':2, 'Other':1}
+    df['occupation_seniority'] = df['occupation'].map(occ_map).fillna(1)
+
+    # Polynomial features
+    df['age_squared'] = df['age'] ** 2
+    df['education_squared'] = df['education_num'] ** 2
+    df['hours_squared'] = df['hours_per_week'] ** 2
+
+    df['age_education_interaction'] = df['age'] * df['education_num']
+    df['age_hours_interaction'] = df['age'] * df['hours_per_week']
+    df['education_hours_interaction'] = df['education_num'] * df['hours_per_week']
+
     df = pd.get_dummies(df)
-
-    # Add missing columns with 0, drop extra columns, enforce order
+    
     for col in feature_order:
         if col not in df.columns:
             df[col] = 0
+
     df = df[feature_order]
 
-    # Apply scaler to numerical columns if scaler was saved
     if scaler is not None and numerical_cols:
         cols_present = [c for c in numerical_cols if c in df.columns]
         if cols_present:

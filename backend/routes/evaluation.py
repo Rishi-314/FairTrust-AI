@@ -6,7 +6,7 @@ import threading
 
 from services.fairness import compute_fairness
 from services.shap_explainer import compute_shap
-from services.model_loader import get_model, preprocess
+from services.model_loader import get_model, preprocess_for_inference
 from services.privacy_scorer import compute_privacy_score
 from services.robustness_scorer import compute_robustness_score
 from services.accountability_scorer import compute_accountability_score, compute_transparency_score
@@ -113,9 +113,10 @@ def _run_evaluation(
         try:
             model, _, _, _ = get_model()
             feature_df = df.drop(columns=[target_col])
-            X_input    = preprocess(feature_df)
+            X_input    = preprocess_for_inference(feature_df)
             y_prob_arr = model.predict_proba(X_input)[:, 1]
             df["_prediction_score"] = y_prob_arr
+            df["_prediction_label"] = (df["_prediction_score"] >= 0.5).astype(int)
             pred_col = "_prediction_score"
             evaluations[eval_id]["resolved_prediction"] = pred_col
             evaluations[eval_id]["prediction_source"]   = "pretrained_model"
@@ -148,14 +149,34 @@ def _run_evaluation(
         evaluations[eval_id]["resolved_attrs"] = valid_attrs
 
         # ── Step 4: Fairness analysis ─────────────────────────────────────────
+        # Normalize sensitive attributes (CRITICAL)
+
+        if "gender" not in df.columns:
+            if "is_male" in df.columns:
+                df["gender"] = df["is_male"].apply(lambda x: "Male" if x == 1 else "Female")
+
+        if "caste_proxy" not in df.columns:
+            def map_caste(row):
+                if row.get("is_sc", 0): return "SC"
+                if row.get("is_st", 0): return "ST"
+                if row.get("is_obc", 0): return "OBC"
+                return "General"
+            df["caste_proxy"] = df.apply(map_caste, axis=1)
+
+        # Force correct attributes
+        valid_attrs = ["gender", "caste_proxy"]
+
         evaluations[eval_id]["current_step"] = 4
-        preds_df = df[[pred_col]].rename(columns={pred_col: "prediction_score"})
+        preds_df = df[["_prediction_label"]].rename(columns={"_prediction_label": "prediction"})
         fairness_results = compute_fairness(
             df.drop(columns=[pred_col]),
             preds_df,
             target_col=target_col,
             sensitive_attrs=valid_attrs,
         )
+        
+        if fairness_results["counterfactual"] < 0.95:
+            fairness_results["warning"] = "Counterfactual bias detected despite high aggregate fairness"
 
         # ── Step 5: Model performance metrics ────────────────────────────────
         evaluations[eval_id]["current_step"] = 5

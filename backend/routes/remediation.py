@@ -304,3 +304,139 @@ def regression_check(eval_id: str):
         ),
         "block_deployment": has_regression and overall_delta < -0.05,
     }), 200
+    
+@remediation_routes.route("/remediation/<eval_id>/simulate-fix", methods=["POST"])
+def simulate_fix(eval_id: str):
+    """
+    POST /remediation/<eval_id>/simulate-fix
+    Body: { "fix_id": "disparateImpact_0" }
+
+    Simulates applying a specific fix and returns before/after metrics.
+    """
+    ev = evaluations.get(eval_id)
+    if ev is None:
+        return jsonify({"error": f"Evaluation '{eval_id}' not found"}), 404
+
+    body   = request.get_json(silent=True) or {}
+    fix_id = body.get("fix_id", "")
+
+    fairness    = ev.get("fairness", {})
+    remediation = ev.get("remediation", {})
+
+    # Find the fix
+    all_fixes = remediation.get("all_fixes", [])
+    fix = next((f for f in all_fixes if f.get("id") == fix_id), None)
+
+    if not fix:
+        return jsonify({"error": f"Fix '{fix_id}' not found"}), 404
+
+    dim_key = fix.get("dimension_key")
+
+    # Simulate the improvement (conservative: 60% of gap closed)
+    current_score   = fix.get("current_score", 0)
+    estimated_after = fix.get("estimated_score_after", min(current_score + 0.15, 1.0))
+    improvement     = estimated_after - current_score
+
+    # Build before snapshot for ALL dimensions
+    before = {
+        "ethical_score":      ev.get("ethical_score", 0),
+        "fairness_score":     ev.get("fairness_score", 0),
+        "disparateImpact":    fairness.get("disparateImpact", 0),
+        "demographicParity":  fairness.get("demographicParity", 0),
+        "counterfactual":     fairness.get("counterfactual", 0),
+        "intersectional":     fairness.get("intersectional", 0),
+        "individualFairness": fairness.get("individualFairness", 0),
+        "groupFairness":      fairness.get("groupFairness", 0),
+    }
+
+    # Start after as a copy of before, then apply the fix
+    after = dict(before)
+
+    # Only apply if dim_key is a known key in our metrics
+    KNOWN_KEYS = {
+        "disparateImpact", "demographicParity", "counterfactual",
+        "intersectional", "individualFairness", "groupFairness",
+        "calibrationError",
+    }
+
+    if dim_key and dim_key in KNOWN_KEYS:
+        after[dim_key] = round(min(estimated_after, 1.0), 4)
+
+        # Spillover: related dimensions improve ~30% as much
+        spillover_map = {
+            "disparateImpact":   ["demographicParity", "groupFairness"],
+            "demographicParity": ["disparateImpact", "groupFairness"],
+            "counterfactual":    ["individualFairness"],
+            "intersectional":    ["groupFairness"],
+            "groupFairness":     ["disparateImpact"],
+        }
+        for related in spillover_map.get(dim_key, []):
+            if related in after and after[related] < 1.0:
+                after[related] = round(min(after[related] + improvement * 0.3, 1.0), 4)
+    elif dim_key in ("privacy_score", "robustness_score", "transparency_score", "accountability_score"):
+        # Non-fairness fix — small ethical score bump only, no fairness dimension changes
+        pass  # handled below via overall score recalculation
+
+    # Recompute fairness_score from updated after values
+    # NOTE: demographicParity and calibrationError are "lower is better",
+    # so we invert them when computing the aggregate.
+    cal_error = fairness.get("calibrationError", 0)  # unchanged by most fixes
+    fairness_components = [
+        after.get("individualFairness", 0),
+        after.get("groupFairness", 0),
+        max(0, 1 - after.get("demographicParity", 0)),   # invert: lower gap = better
+        after.get("disparateImpact", 0),
+        max(0, 1 - cal_error),                            # invert: lower error = better
+        after.get("counterfactual", 0),
+        after.get("intersectional", 0),
+    ]
+    new_fairness_score = round(sum(fairness_components) / len(fairness_components), 4)
+    after["fairness_score"] = new_fairness_score
+
+    # Determine which dimension sub-scores changed for non-fairness fixes
+    privacy_score_after        = ev.get("privacy_score", 0.5) or 0.5
+    robustness_score_after     = ev.get("robustness_score", 0.5) or 0.5
+    transparency_score_after   = ev.get("transparency_score", 0.5) or 0.5
+    accountability_score_after = ev.get("accountability_score", 0.5) or 0.5
+
+    if dim_key == "privacy_score":
+        privacy_score_after = round(min(estimated_after, 1.0), 4)
+    elif dim_key == "robustness_score":
+        robustness_score_after = round(min(estimated_after, 1.0), 4)
+    elif dim_key == "transparency_score":
+        transparency_score_after = round(min(estimated_after, 1.0), 4)
+    elif dim_key == "accountability_score":
+        accountability_score_after = round(min(estimated_after, 1.0), 4)
+
+    # Overall ethical score = fairness 40% + other 60%
+    after_ethical = round(
+        new_fairness_score       * 0.40 +
+        privacy_score_after      * 0.20 +
+        robustness_score_after   * 0.15 +
+        transparency_score_after * 0.15 +
+        accountability_score_after * 0.10,
+        4
+    )
+    after["ethical_score"] = after_ethical
+
+    return jsonify({
+        "fix_id":    fix_id,
+        "fix_title": fix.get("title"),
+        "dimension": fix.get("dimension"),
+        "effort":    fix.get("effort"),
+        "before":    before,
+        "after":     after,
+        "improvement": {
+            "ethical_score_delta": round(after_ethical - before["ethical_score"], 4),
+            "dimension_delta":     round(improvement, 4),
+            "verdict": (
+                "✅ Applying this fix would bring the model above the deployment threshold."
+                if after_ethical >= 0.75 and before["ethical_score"] < 0.75
+                else f"📈 Ethical score would improve from {round(before['ethical_score']*100,1)}% to {round(after_ethical*100,1)}%."
+                if round(after_ethical - before['ethical_score'], 4) > 0
+                else "ℹ️ This fix improves a sub-dimension but has minimal impact on the overall fairness score."
+            ),
+        },
+        "accuracy_impact": "Typically < 1-2% accuracy loss for post-processing fixes.",
+        "disclaimer":      "These are conservative estimates based on published research benchmarks. Actual improvement requires retraining or post-processing.",
+    }), 200

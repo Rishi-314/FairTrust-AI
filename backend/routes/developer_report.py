@@ -306,6 +306,10 @@ def get_developer_report(eval_id: str):
 
     fairness = ev.get("fairness", {})
     shap     = ev.get("shap", {})
+    
+    # 🔥 Detect real bias using counterfactual
+    counterfactual_score = fairness.get("counterfactual", 1.0)
+    bias_detected = fairness.get("counterfactual", 1.0) < 0.95
 
     dimensions = [
         _build_individual_fairness(fairness),
@@ -351,6 +355,7 @@ def get_developer_report(eval_id: str):
             "counterfactual":     fairness.get("counterfactual"),
             "intersectional":     fairness.get("intersectional"),
         },
+        "bias_detected": bias_detected,
     }
 
     return jsonify(payload), 200

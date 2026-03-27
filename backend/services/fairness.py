@@ -81,6 +81,9 @@ def compute_fairness(
 
     # ── Filter valid sensitive attributes ────────────────────────────────
     valid_attrs = [a for a in sensitive_attrs if a in df_trim.columns]
+    
+    if len(valid_attrs) == 0:
+        raise ValueError("No valid sensitive attributes found for fairness computation")
 
     # ── Per-attribute metrics ────────────────────────────────────────────
     per_attribute = {}
@@ -231,7 +234,12 @@ def compute_fairness(
     ]
     # Clamp all to [0, 1]
     metrics_clamped = [max(0.0, min(1.0, m)) for m in metrics_list]
-    fairness_score  = float(round(np.mean(metrics_clamped), 4))
+    cf_penalty = 0.0
+
+    if counterfactual < 0.95:   # threshold
+        cf_penalty = (0.95 - counterfactual)
+
+    fairness_score = float(round(max(0.0, np.mean(metrics_clamped) - cf_penalty), 4))
 
     return {
         # ── 7 fields mapping to FairnessMetrics schema ──────────────────
